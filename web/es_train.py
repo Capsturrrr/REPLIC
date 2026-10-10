@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vt, vt_random
 from concurrent.futures import ThreadPoolExecutor
 
+MU = float(os.environ.get("ES_MU", "3.0"))      # weight of the fairness penalty max(0, share - 0.5) on paths that carry an AIMD competitor
 LAMBDA = float(os.environ.get("ES_LAMBDA", "1.5")); SIGMA = float(os.environ.get("ES_SIGMA", "0.15")); LR = float(os.environ.get("ES_LR", "0.03"))
 POP = int(os.environ.get("ES_POP", "12")); BATCH = int(os.environ.get("ES_BATCH", "14"))
 out = sys.argv[1]; gens = int(sys.argv[2]) if len(sys.argv) > 2 else 100; start = sys.argv[3] if len(sys.argv) > 3 else vt.DFILE
@@ -26,15 +27,17 @@ _ref = {}
 def ref_time(pi, kind, paths):
     k = (kind, pi)
     if k not in _ref:
-        pa, n = paths[pi]; _ref[k] = vt.run("aimd_128", pa, 100 + pi, npk=n)["time"]
+        pa, n = paths[pi]; _ref[k] = vt.run("aimd_128", pa, 100 + pi, npk=n, extra="--vcomp 1" if pi % 2 else "")["time"]
     return _ref[k]
 
 def score(th, idxs, paths, kind, tag, serial=False):
     f = f"{tmp}/{tag}.txt"; save(th, f)
     def one(pi):
-        pa, n = paths[pi]; r = vt.run("deep", pa, 100 + pi, npk=n, dfile=f)
+        pa, n = paths[pi]; comp = pi % 2 == 1          # odd-numbered paths carry an AIMD competitor, even ones are single-flow
+        r = vt.run("deep", pa, 100 + pi, npk=n, dfile=f, extra="--vcomp 1" if comp else "")
         if not r: return 3.0
-        return math.log(r["time"] / ref_time(pi, kind, paths)) + LAMBDA * r["retx"] / n
+        pen = MU * max(0.0, r["share"] - 0.5) if comp and r.get("share") is not None else 0.0
+        return math.log(r["time"] / ref_time(pi, kind, paths)) + LAMBDA * r["retx"] / n + pen
     s = [one(pi) for pi in idxs] if serial else list(ex.map(one, idxs)); os.remove(f)
     return sum(s) / len(s)
 

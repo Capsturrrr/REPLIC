@@ -1,0 +1,12 @@
+Fairness-aware evolution-strategy training (negative result)
+Setup: web/es_train.py with a simulated backlogged AIMD competitor on the same bottleneck (smart_client --vcomp 1). Odd-numbered training
+paths carry the competitor; fitness = mean(log(time / tuned AIMD time in the same situation)) + 1.5 retx/pkt + MU * max(0, share - 0.5).
+Run 1: MU=3, 60 generations -> weights dqn_fair.txt. Run 2: MU=12, learning rate 0.05, 150 generations -> dqn_fair2.txt.
+Held-out test (40 random paths, seed 424242, virtual time), share of the link taken against the AIMD competitor:
+  original weights                0.59 (18 of 40 paths above 0.6)   time ratio alone 0.540, with competitor 0.550
+  run 1 (MU=3)                    0.60 (19 of 40)                    0.525 / 0.523   (faster, not fairer)
+  run 2 (MU=12)                   0.60 (21 of 40)                    0.558 / 0.528   (not fairer)
+  AIMD against the competitor     0.47
+Conclusion: training against the simulated competitor did not make the agent share more evenly; the hand-made --polite rule is what worked on real sockets
+(share 70% -> 52%). In the simulator --polite also barely moves the share (0.59 -> 0.58), so the simulated competitor does not reproduce the real
+two-flow behaviour (the real AIMD sender loses more to the agent than the simulated one does). Original weights are kept.

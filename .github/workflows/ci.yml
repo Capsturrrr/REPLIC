@@ -14,3 +14,5 @@ jobs:
         run: make test
       - name: Parser fuzzing with ASan + UBSan
         run: make fuzz
+      - name: Reproduce headline result (virtual time)
+        run: NOTEST=1 SEEDS=30 ./repro.sh

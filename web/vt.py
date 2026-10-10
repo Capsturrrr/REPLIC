@@ -28,10 +28,12 @@ def run(arm, path, seed, npk=None, dfile=None, extra="", env=None):
     if dfile: a = a.replace(DFILE, dfile)
     cmd = [BIN, "--vt", "1", *a.split(), *pargs.split(), *extra.split(), "--packets", str(npk or n), "--seed", str(seed)]
     out = subprocess.run(cmd, capture_output=True, text=True, env=dict(os.environ, **env) if env else None).stdout
+    share = None
     for line in out.splitlines():
+        if line.startswith("VTSHARE"): share = float(line.split(",")[3])
         if line.startswith("RESULT"):
             f = line.split(",")
-            return dict(time=float(f[3]) / 1000, sent=int(f[5]), retx=int(f[6]), timeouts=int(f[7]), fast=int(f[8]), rtt=float(f[9]))
+            return dict(time=float(f[3]) / 1000, sent=int(f[5]), retx=int(f[6]), timeouts=int(f[7]), fast=int(f[8]), rtt=float(f[9]), share=share)
     return None
 
 def sweep(arm, path, seeds, **kw):

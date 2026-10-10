@@ -77,7 +77,7 @@ static int queue_cap = 50;
 static int emu = 1, reorder = 0;
 static double last_depart = 0, last_arrive_f = 0, last_arrive_r = 0;
 static double depart_q[QCAP]; static int dq_h = 0, dq_t = 0;
-static long drops_random = 0, drops_queue = 0;
+static long drops_random = 0, drops_queue = 0, comp_ok = 0, ours_ok = 0;
 
 static double jit(void) { return jitter_ms > 0 ? (urand() * 2 - 1) * jitter_ms : 0; }
 
@@ -93,6 +93,7 @@ static double fwd_path(double now) {
         depart = (last_depart > now ? last_depart : now) + svc;
         last_depart = depart; depart_q[dq_t++ % QCAP] = depart;
     }
+    ours_ok++;
     double arr = depart + delay_ms + jit();
     if (!reorder && arr < last_arrive_f) arr = last_arrive_f;      /* keep path in-order unless --reorder 1 */
     last_arrive_f = arr; return arr;
@@ -102,6 +103,33 @@ static double rev_path(double now) {
     double arr = now + delay_ms + jit();
     if (arr < last_arrive_r) arr = last_arrive_r;
     last_arrive_r = arr; return arr;
+}
+
+
+/* ---- --vcomp 1 (virtual time only): an infinitely backlogged AIMD competitor (cap 128) shares the same bottleneck, so
+   fairness can be measured and trained against. Packet-level: its own window, loss detection one round trip after a drop. ---- */
+static double comp_to = 0.0;   /* fraction of loss events the competitor treats as a timeout (window to 1), calibrated so AIMD against it splits the link about evenly */
+static int comp_on = 0; static double comp_cwnd = 10, comp_ssth = 128, comp_cut_until = 0; 
+typedef struct { double t; int lost; } cinfl_t; static cinfl_t comp_q[1024]; static int comp_h = 0, comp_t = 0;
+static void comp_step(double now) {
+    while (comp_h < comp_t && comp_q[comp_h % 1024].t <= now) {
+        cinfl_t e = comp_q[comp_h++ % 1024];
+        if (e.lost) { if (now >= comp_cut_until) { comp_ssth = comp_cwnd / 2 < 2 ? 2 : comp_cwnd / 2; comp_cwnd = urand() < comp_to ? 1.0 : comp_ssth; comp_cut_until = now + 2 * delay_ms + (last_depart > now ? last_depart - now : 0); } }
+        else comp_cwnd += comp_cwnd < comp_ssth ? 1.0 : 1.0 / comp_cwnd;
+        if (comp_cwnd > 128) comp_cwnd = 128;
+    }
+    while (comp_t - comp_h < (int)comp_cwnd && comp_t - comp_h < 1000) {
+        int lost = 0; double depart = now;
+        if (loss_pct > 0 && urand() * 100.0 < loss_pct) lost = 1;
+        else if (rate_pps > 0) {
+            while (dq_h < dq_t && depart_q[dq_h % QCAP] <= now) dq_h++;
+            if (dq_t - dq_h >= queue_cap) lost = 1;
+            else { depart = (last_depart > now ? last_depart : now) + 1000.0 / rate_pps; last_depart = depart; depart_q[dq_t++ % QCAP] = depart; }
+        }
+        double t = lost ? now + 2 * delay_ms + (last_depart > now ? last_depart - now : 0) : depart + 2 * delay_ms;
+        if (!lost) comp_ok++;
+        comp_q[comp_t++ % 1024] = (cinfl_t){ t, lost };
+    }
 }
 
 /* ---- in-process receiver for --vt 1: same behaviour as server.c (256-packet Selective Repeat window + 32-byte bitmap,
@@ -145,6 +173,8 @@ int main(int argc, char **argv) {
         else if (ARG("--eps")) eps = atof(argv[++i]);
         else if (ARG("--trace")) trace = argv[++i];
         else if (ARG("--emu")) emu = atoi(argv[++i]);
+        else if (ARG("--vcomp")) comp_on = atoi(argv[++i]);
+        else if (ARG("--vcomp-to")) comp_to = atof(argv[++i]);   /* virtual time: add a backlogged AIMD competitor on the same bottleneck */
         else if (ARG("--scenario")) scenario = argv[++i];
         else if (ARG("--maxcwnd")) { maxcwnd = atof(argv[++i]); cap_set = 1; }
         else if (ARG("--pcap")) pcapp = argv[++i];
@@ -265,6 +295,7 @@ int main(int argc, char **argv) {
 
     while (base < npk) {
         double now = now_ms();
+        if (vt && comp_on) comp_step(now);
         /* 1. release forward packets whose arrival time has come */
         pend_t *p;
         while ((p = rfront(&fwd)) && p->t <= now) {
@@ -445,6 +476,7 @@ int main(int argc, char **argv) {
     recvfrom(sockfd, buf, sizeof buf, 0, NULL, NULL); }
 
     if (use_rl && train && qfile) rl_save(&ag, qfile);
+    if (vt && comp_on) printf("VTSHARE,%ld,%ld,%.4f\n", ours_ok, comp_ok, ours_ok + comp_ok ? (double)ours_ok / (ours_ok + comp_ok) : 0.0);
     printf("RESULT,%s,%s,%.1f,%d,%ld,%ld,%ld,%ld,%.2f,%.2f,%.1f,%.2f,%.4f\n",
            scenario, mode, done, npk, tx_total, retx, timeouts, fast_retx,
            rtt_n ? rtt_sum / rtt_n : 0.0, min_rtt < 1e8 ? min_rtt : 0.0,

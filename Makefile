@@ -69,3 +69,8 @@ $(BIN_DIR)/impair: $(SRC_DIR)/impair.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) -O2 -o $@ $< -lm
 impair: $(BIN_DIR)/impair
 .PHONY: impair
+
+# Reproduce the headline result in virtual time (SEEDS=100 by default; NOTEST=1 skips the test suite)
+repro:
+	./repro.sh
+.PHONY: repro

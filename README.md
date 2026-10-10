@@ -38,6 +38,7 @@ same timers, paired seeds, 95% intervals. Details and caveats in `docs/RUDP_Fina
 make all smart chat            # build (gcc, make; Python 3 + numpy for the tools)
 make test                      # unit, end-to-end, handshake, file integrity, chat interop, simulator
 make fuzz                      # packet parser under AddressSanitizer + UBSan
+make repro                     # reproduce the headline table in virtual time, about 30 seconds (SEEDS=100 paired seeds)
 
 ./filetransfer_demo.sh 2 lossy # send a 2 MB random file over an impaired path with three policies, verify byte-identical
 ./bench_loopback.sh            # raw sender speed on loopback
