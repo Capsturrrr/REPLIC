@@ -66,6 +66,6 @@ fuzz:
 
 # User-space UDP impairment proxy (delay / jitter / loss / bottleneck rate + drop-tail queue) for tests over real sockets
 $(BIN_DIR)/impair: $(SRC_DIR)/impair.c | $(BIN_DIR)
-	$(CC) $(CFLAGS) -O2 -o $@ $<
+	$(CC) $(CFLAGS) -O2 -o $@ $< -lm
 impair: $(BIN_DIR)/impair
 .PHONY: impair

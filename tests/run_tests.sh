@@ -33,6 +33,8 @@ head -c 400000 /dev/urandom > /tmp/t_in.bin
 RUDP_OUT=/tmp/t_out.bin RUDP_QUIET=1 ./bin/server_t2 >/tmp/t_srv2.log 2>&1 & SP=$!; ./bin/impair 9932 9931 --delay 25 --jitter 5 --loss 5 --rate 2000 --queue 60 2>/dev/null & PX=$!; sleep 0.4
 timeout 120 ./bin/smart_client --mode deep --init 10 --dfile results/dqn_chat.txt --emu 0 --port 9932 --file /tmp/t_in.bin >/tmp/t_cli.log 2>&1; sleep 0.4; kill $PX $SP 2>/dev/null; wait 2>/dev/null
 cmp -s /tmp/t_in.bin /tmp/t_out.bin && echo "ok:   400 kB received intact through 5% loss ($(grep -c . /tmp/t_cli.log) lines of client output)" || { echo "FAIL: file transfer corrupted or incomplete"; fail=1; }
+step "two clients at the same time on one server (separate sessions, both files byte-identical)"
+bash tests/test_multiclient.sh || fail=1
 step "web gateway <-> terminal chat interop (256-packet SR window, 32-byte bitmap, CRC-16), 20% loss both ways"; bash tests/chat_interop.sh || fail=1
 step "simulator and controllers"; python3 tests/test_sim.py || fail=1
 echo; [ $fail = 0 ] && echo "ALL TESTS PASSED" || echo "SOME TESTS FAILED"; exit $fail

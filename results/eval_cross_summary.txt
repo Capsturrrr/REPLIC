@@ -1,0 +1,6 @@
+Completion time (s), 2500 packets, bursty cross traffic on the bottleneck, real sockets; mean +- 95% CI, ratio to tuned AIMD (paired)
+aimd_32    n=8   6.73 +- 0.38   ratio vs tuned AIMD 1.178
+aimd_128   n=8   5.73 +- 0.51   ratio vs tuned AIMD 1.000
+cubic_128  n=8   4.55 +- 0.60   ratio vs tuned AIMD 0.789
+deep       n=8   4.87 +- 0.37   ratio vs tuned AIMD 0.851
+polite     n=8   4.92 +- 0.54   ratio vs tuned AIMD 0.856

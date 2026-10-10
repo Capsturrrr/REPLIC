@@ -1,8 +1,10 @@
-Neural agent vs tuned AIMD (cap 128) sharing one bottleneck, real sockets, 2500 packets each
-default (no --polite)        n=4 neural share 69%  Jain 0.871  neural 4.7s  tuned AIMD 8.2s
---polite 1.3 (first version) n=4 neural share 50%  Jain 0.988  neural 5.3s  tuned AIMD 5.5s
---polite 1.3 (jitter-aware)  n=4 neural share 45%  Jain 0.932  neural 5.4s  tuned AIMD 5.0s
+Neural agent vs tuned AIMD (cap 128) sharing one bottleneck, real sockets, 2500 packets each, 8 runs per setting
+default (no --polite)        n=8 neural share 70%  Jain 0.860  neural 4.7s  tuned AIMD 7.8s
+--polite 1.2                 n=8 neural share 49%  Jain 0.945  neural 5.3s  tuned AIMD 5.4s
+--polite 1.3 (recommended)   n=8 neural share 52%  Jain 0.936  neural 5.1s  tuned AIMD 5.8s
+--polite 1.4                 n=8 neural share 58%  Jain 0.889  neural 4.8s  tuned AIMD 6.7s
+--polite 1.5                 n=8 neural share 59%  Jain 0.896  neural 5.1s  tuned AIMD 7.1s
 
 Single flow, 100 random held-out paths (virtual time), ratio to tuned AIMD:
 default 0.534 (faster on 89, none >20% slower, worst 1.13)
---polite 1.3 jitter-aware 0.576 (faster on 89, 3 >20% slower, worst 2.95)
+--polite 1.3 (jitter-aware, window floor) 0.576 (faster on 89, 3 >20% slower, worst 2.95)

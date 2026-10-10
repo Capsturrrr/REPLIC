@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <math.h>
 #include <poll.h>
 #include <unistd.h>
 #include <signal.h>
@@ -35,9 +36,11 @@ static double urand(void) { return rand() / (RAND_MAX + 1.0); }
 
 int main(int argc, char **argv) {
     flow_t fl[MAXF]; int nf = 0, queue = 50; double delay = 10, jitter = 0, loss = 0, rate = 0; unsigned seed = 1;
+    double x_on = 0, x_off = 0, x_pps = 0;   /* --cross ON_MS:OFF_MS:PPS bursty cross traffic that shares the bottleneck (exponential on/off periods) */
     int pend_num = -1;
     for (int i = 1; i < argc; i++) {
-        if (!strncmp(argv[i], "--", 2) && i + 1 < argc) {
+        if (!strcmp(argv[i], "--cross") && i + 1 < argc) { sscanf(argv[++i], "%lf:%lf:%lf", &x_on, &x_off, &x_pps); }
+        else if (!strncmp(argv[i], "--", 2) && i + 1 < argc) {
             double v = atof(argv[++i]);
             if (!strcmp(argv[i - 1], "--delay")) delay = v; else if (!strcmp(argv[i - 1], "--jitter")) jitter = v;
             else if (!strcmp(argv[i - 1], "--loss")) loss = v; else if (!strcmp(argv[i - 1], "--rate")) rate = v;
@@ -63,10 +66,16 @@ int main(int argc, char **argv) {
     }
     lane_t fw = { calloc(RING, sizeof(item_t)), 0, 0, 0 }; double last_dep = 0, last_due_f = 0;
     long drops_rand = 0, drops_queue = 0; int shown = 0;
+    double x_phase_end = now_ms() + (x_off > 0 ? -x_off * log(1 - urand()) : 0), x_next = 0; int x_is_on = 0; long x_sent = 0;
     while (!stop) {
         double now = now_ms(), next = now + 50;
         if (fw.h < fw.t && fw.q[fw.h % RING].due < next) next = fw.q[fw.h % RING].due;
         for (int f = 0; f < nf; f++) if (fl[f].rv.h < fl[f].rv.t && fl[f].rv.q[fl[f].rv.h % RING].due < next) next = fl[f].rv.q[fl[f].rv.h % RING].due;
+        if (x_pps > 0) {
+            while (now >= x_phase_end) { x_is_on = !x_is_on; x_phase_end = now + -(x_is_on ? x_on : x_off) * log(1 - urand()); x_next = now; }
+            if (x_is_on) { while (x_next <= now) { if (rate > 0) { if (last_dep - now <= queue * 1000.0 / rate) { last_dep = (last_dep > now ? last_dep : now) + 1000.0 / rate; x_sent++; } } x_next += 1000.0 / x_pps; } if (x_next < next) next = x_next; }
+            else if (x_phase_end < next) next = x_phase_end;
+        }
         int to = (int)(next - now); if (to < 0) to = 0;
         if (poll(p, (nfds_t)(2 * nf), to) > 0) {
             for (int k = 0; k < 2 * nf; k++) if (p[k].revents & POLLIN) {
