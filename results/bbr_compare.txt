@@ -2,14 +2,14 @@
 A. named scenarios (completion time, 3000 packets)
 5g         aimd:   2.78s ±0.17  cubic:   7.14s ±0.96  bbr:   2.26s ±0.02  deep:   2.21s ±0.03
 lossy      aimd:  19.79s ±0.82  cubic:  53.25s ±1.70  bbr:   8.18s ±0.69  deep:   9.76s ±0.58
-sat        aimd:  32.76s ±3.03  cubic:  26.62s ±3.21  bbr:  16.76s ±0.45  deep:  11.18s ±0.45
+sat        aimd:  32.76s ±3.03  cubic:  26.62s ±3.21  bbr:  16.78s ±0.44  deep:  11.18s ±0.45
 fast       aimd:   7.83s ±1.42  cubic:  12.45s ±1.77  bbr:   6.23s ±0.06  deep:   3.72s ±0.07
-bad        aimd:  94.73s ±7.57  cubic: 208.81s ±11.09  bbr:  95.38s ±5.46  deep:  99.38s ±10.78
+bad        aimd:  94.73s ±7.57  cubic: 208.81s ±11.09  bbr:  92.29s ±5.47  deep:  99.38s ±10.78
 B. random-loss sweep (1000 pkt/s, 40 ms one-way, queue 100)
 loss 0.1%  aimd:   5.46s ±0.89  cubic:  11.16s ±1.35  bbr:   4.36s ±0.05  deep:   3.63s ±0.09
 loss 0.5%  aimd:  11.53s ±1.08  cubic:  25.00s ±2.68  bbr:   4.81s ±0.11  deep:   4.41s ±0.11
 loss 1%    aimd:  18.61s ±1.00  cubic:  40.12s ±2.61  bbr:   5.70s ±0.33  deep:   5.38s ±0.26
 loss 2%    aimd:  28.41s ±1.19  cubic:  66.03s ±3.26  bbr:   9.52s ±1.40  deep:   8.34s ±0.44
-loss 3%    aimd:  35.07s ±0.96  cubic:  82.96s ±2.36  bbr:  17.67s ±2.48  deep:  12.90s ±1.29
-loss 5%    aimd:  47.61s ±1.15  cubic: 101.85s ±3.12  bbr:  35.88s ±3.09  deep:  27.89s ±2.50
-loss 10%   aimd:  93.72s ±5.03  cubic: 209.86s ±11.09  bbr:  97.28s ±6.68  deep:  93.81s ±7.71
+loss 3%    aimd:  35.07s ±0.96  cubic:  82.96s ±2.36  bbr:  17.72s ±2.51  deep:  12.90s ±1.29
+loss 5%    aimd:  47.61s ±1.15  cubic: 101.85s ±3.12  bbr:  35.40s ±1.79  deep:  27.89s ±2.50
+loss 10%   aimd:  93.72s ±5.03  cubic: 209.86s ±11.09  bbr: 100.13s ±6.30  deep:  93.81s ±7.71

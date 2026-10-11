@@ -329,7 +329,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     /* BBR state: delivery-rate history, windowed max filter, STARTUP -> DRAIN -> PROBE_BW (ProbeRTT omitted: transfers are short) */
     double bb_t[64] = {0}; long bb_d[64] = {0}; int bb_n = 0; long bb_deliv = 0;
     double bw_t[32] = {0}, bw_v[32] = {0}; int bw_n = 0; double bbr_bw = 0, bbr_gain = 2.885, bbr_full_bw = 0; int bbr_state = 0, bbr_full_cnt = 0, bbr_phase = 0;
-    long bbr_round_end = 0; double bbr_phase_start = 0;
+    long bbr_round_end = 0; double bbr_phase_start = 0, bbr_rt = 1e9, bbr_rt_t = 0;   /* bbr_rt: min RTT over the last 10 s (BBR's RTprop filter; ProbeRTT is replaced by this expiry) */
     long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0;
     double timer_start = 0; int timer_on = 0;
     /* RL interval stats */
@@ -384,6 +384,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                 if (!retx_flag[nb - 1]) {
                     double rtt = now - sent_at[nb - 1];
                     if (rtt < min_rtt) min_rtt = rtt;
+                    if (rtt <= bbr_rt || now - bbr_rt_t > 10000) { bbr_rt = rtt; bbr_rt_t = now; }
                     rtt_sum += rtt; rtt_n++; iv_rtt_sum += rtt; iv_rtt_n++;
                     if (srtt < 0) { srtt = rtt; rttvar = rtt / 2; }
                     else { rttvar = 0.75 * rttvar + 0.25 * fabs(srtt - rtt); srtt = 0.875 * srtt + 0.125 * rtt; }
@@ -405,7 +406,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                 }
                 if (use_bbr) {
                     bb_deliv += newly; bb_t[bb_n % 64] = now; bb_d[bb_n % 64] = bb_deliv; bb_n++;
-                    double win = min_rtt < 1e8 ? (min_rtt < 5 ? 5 : min_rtt) : 20;
+                    double win = bbr_rt < 1e8 ? (bbr_rt < 5 ? 5 : bbr_rt) : 20;
                     for (int q = bb_n - 2; q >= 0 && q >= bb_n - 64; q--) {          /* oldest sample still within one min-RTT window */
                         if (now - bb_t[q % 64] >= win) {
                             if (now - bb_t[q % 64] > 4 * win) break;   /* stale baseline after an ACK gap: rate would be meaninglessly low */
@@ -413,16 +414,16 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                             bw_t[bw_n % 32] = now; bw_v[bw_n % 32] = sm; bw_n++; break;
                         }
                     }
-                    double mx = 0; for (int q = 0; q < 32 && q < bw_n; q++) if (now - bw_t[q] <= 10 * (min_rtt < 1e8 ? min_rtt : 50) && bw_v[q] > mx) mx = bw_v[q];
+                    double mx = 0; for (int q = 0; q < 32 && q < bw_n; q++) if (now - bw_t[q] <= 10 * (bbr_rt < 1e8 ? bbr_rt : 50) && bw_v[q] > mx) mx = bw_v[q];
                     if (mx > 0) bbr_bw = mx;
-                    if (bbr_bw > 0 && min_rtt < 1e8) {
+                    if (bbr_bw > 0 && bbr_rt < 1e8) {
                         if (bb_deliv >= bbr_round_end) {                                /* one packet-timed round elapsed */
                             bbr_round_end = bb_deliv + (long)(next - base > 1 ? next - base : 1);
                             if (bbr_state == 0) { if (bbr_bw >= bbr_full_bw * 1.25) { bbr_full_bw = bbr_bw; bbr_full_cnt = 0; } else if (++bbr_full_cnt >= 3) { bbr_state = 1; bbr_gain = 1.0 / 2.885; } }
                         }
-                        double bdp = bbr_bw * min_rtt / 1000.0;
+                        double bdp = bbr_bw * bbr_rt / 1000.0;
                         if (bbr_state == 1 && (next - base) <= bdp) { bbr_state = 2; bbr_phase = 0; bbr_phase_start = now; bbr_gain = 1.0; }
-                        if (bbr_state == 2 && now - bbr_phase_start >= min_rtt) {
+                        if (bbr_state == 2 && now - bbr_phase_start >= bbr_rt) {
                             static const double pg[8] = { 1.25, 0.75, 1, 1, 1, 1, 1, 1 };
                             bbr_phase = (bbr_phase + 1) % 8; bbr_phase_start = now; bbr_gain = pg[bbr_phase];
                         }

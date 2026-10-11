@@ -30,7 +30,7 @@ same timers, paired seeds, 95% intervals. Details and caveats in `docs/RUDP_Fina
 * An alternative weight file trained with cross traffic in the loop (`results/dqn_cross.txt`, `--dfile`): small consistent gain in simulation, not significant on real sockets, so not the default (`results/es_fair/SUMMARY_cross.txt`). Virtual-time options: `--vcross ON:OFF:PPS` (bursty cross traffic) and `--vcomp 1` (an AIMD competitor).
 * The server handles up to 16 clients at once (`tests/test_multiclient.sh`).
 * Honest limits: on a shared bottleneck it takes 68% of the link against tuned AIMD (not a polite neighbour); no gain on the 10% loss path;
-  no kernel netem or multi-machine test yet (`netem_baselines.sh` is provided). Earlier, larger margins were inflated by a timer defect that hurt
+  kernel TCP is still 1.5x to 3.2x faster than the neural agent on a netem path (see "Kernel check"), and no multi-machine test yet. Earlier, larger margins were inflated by a timer defect that hurt
   the baseline more; it is fixed and every number above is re-measured.
 
 ## Quick start
@@ -233,6 +233,18 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 ## Kernel check (tc/netem)
 
 `sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 61% faster (lossy), 70% (5G-like) and 83% (satellite), all significant, and 33% faster with reordering (not significant). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 3.2x.** Raw numbers, and an account of three mistakes in the first runs, are in `results/netem_summary.txt`.
+
+## Research-gap tests (all in virtual time unless noted; paired seeds, 95% intervals)
+
+| Question | Command | Result |
+|---|---|---|
+| Does it cope when bandwidth or delay changes mid-transfer? | `python3 tools/dyn_eval.py 20 aimd,cubic,bbr,deep` (`--dyn "T_MS:RATE_PPS:DELAY_MS;..."`) | Neural fastest in 4 of 4 cases (bandwidth drop 12.7 s vs 13.6 s AIMD; rise 4.3 s vs 9.2 s; delay jump 19.8 s vs 33.3 s; hand-over pattern 8.2 s vs 12.8 s), but with 1% to 6% retransmissions (`results/dynamic_path.txt`) |
+| Against a model-based baseline? | `python3 tools/bbr_eval.py 20` (`--mode bbr`, a simplified BBR) | BBR-style beats tuned AIMD on 4 of 5 paths and is **fastest on the 2% lossy path** (8.2 s vs 9.8 s); the neural agent wins on satellite-like and fast paths (`results/bbr_compare.txt`) |
+| Fair between two neural flows with different RTTs? | `./eval_fair_rtt.sh 6` (real sockets) | Jain 0.84 at +150 ms RTT, against 0.64 for AIMD; still favours the short-RTT flow (`results/eval_fair_rtt_summary.txt`) |
+| What does the network do? Can it be trusted? | `python3 tools/interpret.py`, `python3 tools/interp_eval.py` | Depth-5 tree agrees on 79% of decisions yet matches the transfer time on 4 of 5 paths; input noise 0.2 costs at most 12%; formal interval-bound certification only works at +-0.001 (43% of states) and fails at +-0.03 (`results/interp/`) |
+| Does it starve kernel TCP? | `sudo bash netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | **Not measured yet**: the script is written and checked for mechanics only |
+
+The BBR-style policy is a simplification (no ProbeRTT, no BBRv3 loss response), so no claim is made about the Linux BBR. Earlier versions of it stalled at 10% loss and took 163 s after a delay jump; both defects are fixed and described in the report (Section 8.19).
 
 ## RUDP Drop: an application built on the library
 
