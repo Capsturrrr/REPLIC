@@ -56,3 +56,15 @@ Observation: tuned AIMD retransmits 60-75 of 500 packets on sat vs 1-3 for untun
 METHOD CORRECTION 2026-10-11: runs 1-3 used `netem ... rate R limit 60`. In netem the limit counts packets sitting in the delay line, so on the satellite path (about 200 packets in flight) any window above ~60 overflowed the qdisc. That explains the 60-100 retransmissions per transfer (13-20%) for the tuned AIMD and neural senders, which my first guess blamed on reordering. Runs 1-3 therefore overstate loss for large windows on high-delay paths, and the satellite result (and TCP comparison) is not representative of the simulated 'sat' path.
 netem_full.sh now puts delay/jitter/loss/reorder in netem (limit 100000) and the bottleneck in a separate tbf stage with a drop-tail queue of 50-100 packets, matching the simulator. Re-run needed.
 Simulator fix: the virtual-time queue delivered strictly in send order, so --reorder 1 had no effect; it now delivers by arrival time. Default (in-order) results unchanged: make repro geo-mean 0.534, faster on 89/100.
+
+FINAL KERNEL-NETEM RESULT (run 4, 2026-10-11 20:44, corrected path: netem delay/jitter/loss stage + tbf drop-tail bottleneck, lo MTU 1500, 512-byte payloads for every protocol), 5 reps, mean ms:
+path     TCP(median)  AIMD0   AIMD(tuned)  AIMD+IW10  neural  neural/tuned AIMD  Welch p   neural vs TCP
+lossy    582 (500)    4707    4683         4437       1849    0.39               0.0013    TCP 3.2x faster
+5g       226 (220)    1264    1255         1315        380    0.30               0.0001    TCP 1.7x faster
+sat     2100 (1840)  18308   18848        17902       3156    0.17               <0.0001   TCP 1.5x faster
+reorder 1034 (890)    5056    2675         5441       1782    0.67               0.24 n.s. TCP 1.7x faster
+Raw neural ms: lossy 2855.8 1193.1 2913.8 1275.1 1006.0 | 5g 187.1 469.4 278.3 469.7 494.3 | sat 4159.5 2987.4 2677.0 2623.0 3335.6 | reorder 1725.1 1007.2 1867.8 2353.8 1954.3
+Raw tuned AIMD ms: lossy 4325.9 4853.3 4327.1 5241.7 4665.9 | 5g 1121.8 1121.4 1142.8 1559.7 1328.7 | sat 17491.5 19597.2 16022.8 21053.0 20074.1 | reorder 3476.6 1156.8 1122.5 4050.6 3569.4
+Raw TCP s: lossy .72 .74 .50 .48 .47 | 5g .22 .21 .21 .27 .22 | sat 1.84 1.83 1.83 3.16 1.84 | reorder .89 1.25 1.51 .70 .82
+Plain UDP delivered 26-36% of packets in every scenario.
+Reading: with a realistic bounded bottleneck the neural agent beats tuned AIMD by 61%/70%/83% (lossy/5g/sat, all significant) and by 33% on reorder (not significant: tuned AIMD is bimodal there). Kernel TCP is still faster than the neural agent on every path (1.5x-3.2x). Under the corrected simulator (--reorder 1) AIMD collapses on the satellite path as it does on real netem (10-15 s), which the old in-order simulator could not reproduce.
