@@ -74,3 +74,8 @@ impair: $(BIN_DIR)/impair
 repro:
 	./repro.sh
 .PHONY: repro
+
+# Regenerate headline figures into figures/ (about a minute)
+figures:
+	python3 web/make_figures.py
+.PHONY: figures
