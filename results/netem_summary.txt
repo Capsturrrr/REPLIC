@@ -43,3 +43,12 @@ reorder  712   4457           6271   2473    0.55         0.004
 Raw neural ms: lossy 1228.9 1388.9 1324.2 1653.3 1286.6 | 5g 532.0 526.6 413.2 440.6 903.2 | sat 8017.4 11473.6 5793.9 8514.9 6621.8 | reorder 2630.4 2168.8 2299.0 1778.1 3487.9
 Raw AIMD ms: lossy 3324.0 3361.6 3849.1 3807.7 4134.9 | 5g 852.8 584.6 575.2 676.4 701.4 | sat 7428.5 9082.6 7407.5 7482.1 7758.7 | reorder 4676.2 4983.4 5341.2 4224.6 3058.4
 Run-to-run variation is large (neural lossy 2.14 s in run 1, 1.38 s in run 2; sat 6.95 s vs 8.08 s). Under real netem the neural agent does NOT beat untuned AIMD on satellite and is 1.9-3.5x slower than kernel TCP on every path.
+
+RUN 3 (2026-10-11 20:26, netem_full.sh with all four RUDP variants), 5 reps, mean ms. aimd0 = untuned AIMD, aimd = TUNED AIMD (cap 128, ssthresh 128; the report's baseline), aimd10 = tuned + initial window 10. TCP = pooled fair 512-byte runs (n=10).
+path     TCP   aimd0  aimd   aimd10  neural  neural/aimd  p      neural/aimd10  p
+lossy    664   3820   3871   3533    1428    0.37         0.001  0.40           0.011
+5g       303    655    539    443     409    0.76         0.006  0.92           0.40 (n.s.)
+sat     2331   8722   7368   6137    6865    0.93         0.61   1.12           0.54 (n.s.)
+reorder  739   5332   3656   3464    2355    0.64         0.18   0.68           0.012
+Neural pooled over 3 runs (n=15): lossy 1648, 5g 477, sat 7300, reorder 2323.
+Observation: tuned AIMD retransmits 60-75 of 500 packets on sat vs 1-3 for untuned AIMD (spurious retransmissions caused by jitter-induced reordering). Kernel TCP is 1.4x (5g) to 3.2x faster than the neural agent.
