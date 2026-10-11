@@ -9,6 +9,11 @@ for f in bin/smart_client results/dqn_chat.txt web/tcp_send.py; do [ -e $f ] || 
 OUT=results/multihost_$LABEL.txt; : > $OUT; log() { echo "$@" | tee -a $OUT; }
 head -c $((PK*512)) /dev/urandom > /tmp/mh_payload.bin
 log "multi-machine run: client $(hostname) -> server $HOST, $PK x 512 B, $REPS reps, $(date -u +%FT%TZ)"
+if ! python3 -c "import socket,sys; socket.create_connection((sys.argv[1],9871),5).close()" $HOST 2>/dev/null; then
+  echo "CANNOT REACH $HOST:9871 (TCP). Check: (1) 'bash multihost_server.sh' is running on the server, (2) $HOST is the server's real address"
+  echo "(WSL 172.x addresses do NOT work from another machine; use Tailscale 100.x or a LAN IP), (3) firewall / captive-portal Wi-Fi / client isolation."
+  exit 2
+fi
 log "ping: $(ping -c 10 -q $HOST 2>&1 | tail -2 | tr '\n' ' ')"
 for i in $(seq $REPS); do
   t=$(python3 web/tcp_send.py $HOST 9871 $((PK*512)) 2>&1); log "rep $i TCP seconds: $t"
