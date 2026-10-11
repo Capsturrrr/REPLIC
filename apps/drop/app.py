@@ -4,7 +4,7 @@
 Everything runs locally with the real C code: bin/server (receiver), bin/impair (delay / jitter / loss / bottleneck proxy)
 and bin/smart_client (sender, linked against librudp). Python only starts the processes and serves the page.
 
-    make smart impair && python3 apps/drop/app.py          then open http://localhost:8800
+    python3 apps/drop/app.py          then open http://localhost:8800   (needs python3 and gcc; nothing else)
 """
 import hashlib, json, os, re, subprocess, sys, tempfile, threading, time, uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -30,13 +30,24 @@ ARMS = {
 jobs, lock, busy = {}, threading.Lock(), [False]
 
 def build():
-    os.makedirs(os.path.join(ROOT, "bin"), exist_ok=True)
-    srv = os.path.join(ROOT, "bin", "server_drop")
-    subprocess.check_call(["gcc", "-O2", "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-DSERVER_PORT=%d" % SRV_PORT, "-o", srv,
-                           os.path.join(ROOT, "src/server.c"), os.path.join(ROOT, "src/common.c")], cwd=ROOT)
-    for b in ("smart_client", "impair"):
-        if not os.path.exists(os.path.join(ROOT, "bin", b)):
-            subprocess.check_call(["make", "smart", "impair"], cwd=ROOT, stdout=subprocess.DEVNULL); break
+    """Compile the three C programs with gcc if they are missing or older than their sources (no make needed)."""
+    bindir = os.path.join(ROOT, "bin"); os.makedirs(bindir, exist_ok=True)
+    src = lambda *n: [os.path.join(ROOT, "src", x) for x in n]
+    cflags = ["-O2", "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-D_GNU_SOURCE", "-w"]
+    targets = {
+        "server_drop":  (src("server.c", "common.c"), ["-DSERVER_PORT=%d" % SRV_PORT], []),
+        "smart_client": (src("smart_client.c", "rudp_sender.c", "common.c"), [], ["-lm"]),
+        "impair":       (src("impair.c"), [], ["-lm"]),
+    }
+    for name, (files, defs, libs) in targets.items():
+        out = os.path.join(bindir, name)
+        deps = files + src("common.h", "rudp.h", "rl_cc.h", "deep_cc.h")
+        if os.path.exists(out) and all(os.path.getmtime(out) >= os.path.getmtime(f) for f in deps if os.path.exists(f)): continue
+        print("compiling", name, flush=True)
+        try: subprocess.check_call(["gcc"] + cflags + defs + ["-o", out] + files + libs, cwd=ROOT)
+        except (OSError, subprocess.CalledProcessError) as e:
+            sys.exit("Could not compile %s (%s). Install a C compiler: sudo apt install build-essential" % (name, e))
+    if not os.path.exists(os.path.join(ROOT, "results", "dqn_chat.txt")): sys.exit("results/dqn_chat.txt (neural weights) is missing")
 
 def sha(path):
     h = hashlib.sha256()
@@ -149,4 +160,7 @@ class H(BaseHTTPRequestHandler):
 if __name__ == "__main__":
     build()
     print("RUDP Drop on http://localhost:%d  (work dir %s)" % (WEB_PORT, WORK))
-    ThreadingHTTPServer(("127.0.0.1", WEB_PORT), H).serve_forever()
+    host = os.environ.get("HOST", "127.0.0.1")
+    if host != "127.0.0.1": print("WARNING: listening on %s; anyone who can reach this port can upload files and start transfers" % host)
+    try: ThreadingHTTPServer((host, WEB_PORT), H).serve_forever()
+    except OSError as e: sys.exit("Cannot listen on port %d (%s). Set PORT=8801 to use another." % (WEB_PORT, e))
