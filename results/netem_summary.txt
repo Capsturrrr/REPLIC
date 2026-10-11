@@ -26,3 +26,10 @@ sat     2.33 2.32 2.34 2.32 2.34  mean 2.33
 reorder 0.84 0.89 0.79 0.56 0.75  mean 0.766
 Neural RUDP (mean s): lossy 2.14, 5g 0.46, sat 6.95, reorder 2.04-2.09  => kernel TCP is 1.5x (5g) to 3.2x (lossy) faster than our best.
 The earlier 1024-byte TCP numbers in this file are superseded by this block.
+
+CAVEAT FOUND 2026-10-11: the netem runs above used UNTUNED AIMD (init cwnd 1, ssthresh 16), not the tuned AIMD (cap 128, ssthresh 128) used in the report's headline.
+Virtual-time check (5 seeds, mean ms) reproduces the netem AIMD numbers (sat 8.7 s vs netem 8.8 s) and shows tuned AIMD is much closer to the neural agent:
+sat: AIMD untuned 8.6k | tuned 3.9k | tuned+IW10 3.0k | neural 2.8k
+lossy: 3.9k | 3.5k | 2.9k | 1.7k
+5g: 609 | 505 | 432 | 405
+netem_full.sh now runs aimd0 (untuned), aimd (tuned), aimd10 (tuned+IW10) and neural.
