@@ -16,6 +16,7 @@ cd "$(dirname "$0")"
 for f in bin/server bin/smart_client results/dqn_chat.txt web/tcp_bulk.py; do [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }; done
 # RUDP must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
 PL=/tmp/rudp_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
+pkill -f web/tcp_bulk.py 2>/dev/null; pkill -x server 2>/dev/null; pkill -x smart_client 2>/dev/null; sleep 0.5   # clear leftovers from an interrupted earlier run
 OUT=results/netem_coexist_$sc.txt; : > $OUT
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536); SP=""; TP=""; TP2=""
 cleanup() { for p in $SP $TP $TP2; do kill $p 2>/dev/null; done; [ -n "$NO_TC" ] || { tc qdisc del dev lo root 2>/dev/null; ip link set dev lo mtu $OLDMTU 2>/dev/null; }; }
