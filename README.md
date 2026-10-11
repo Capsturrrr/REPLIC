@@ -230,6 +230,10 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
   script uses plain `sed`/`grep` instead for portability.
 
 
+## Kernel check (tc/netem)
+
+`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 61% faster (lossy), 70% (5G-like) and 83% (satellite), all significant, and 33% faster with reordering (not significant). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 3.2x.** Raw numbers, and an account of three mistakes in the first runs, are in `results/netem_summary.txt`.
+
 ## RUDP Drop: an application built on the library
 
 `make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent). Each transfer runs through the real C stack (librudp sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time, with a download link for the verified copy. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.
