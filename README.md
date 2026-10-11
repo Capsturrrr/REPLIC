@@ -232,6 +232,8 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 
 ## Kernel check (tc/netem)
 
+> **Correction (11 Oct 2026):** the first kernel runs below sent RUDP's *synthetic 40-byte* packets (no `--file`), while TCP and UDP sent 512-byte payloads, so the byte counts were not equal and the table is superseded. `netem_full.sh` and `netem_coexist.sh` now send a real 512-byte-per-packet file; re-run them to get the corrected numbers.
+
 `sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 61% faster (lossy), 70% (5G-like) and 83% (satellite), all significant, and 33% faster with reordering (not significant). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 3.2x.** Raw numbers, and an account of three mistakes in the first runs, are in `results/netem_summary.txt`.
 
 ## Research-gap tests (all in virtual time unless noted; paired seeds, 95% intervals)

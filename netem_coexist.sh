@@ -14,6 +14,8 @@ esac
 [ -n "$NO_TC" ] || [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
 cd "$(dirname "$0")"
 for f in bin/server bin/smart_client results/dqn_chat.txt web/tcp_bulk.py; do [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }; done
+# RUDP must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
+PL=/tmp/rudp_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
 OUT=results/netem_coexist_$sc.txt; : > $OUT
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536); SP=""; TP=""; TP2=""
 cleanup() { for p in $SP $TP $TP2; do kill $p 2>/dev/null; done; [ -n "$NO_TC" ] || { tc qdisc del dev lo root 2>/dev/null; ip link set dev lo mtu $OLDMTU 2>/dev/null; }; }
@@ -48,7 +50,7 @@ run_pair() { # ARM-ARGS or "tcp" -> prints "tcp_mbps other_mbps"
     b2=$(tcp_bytes /tmp/coex_tcp2.log $T0 $T1); kill $TP2 2>/dev/null; TP2=""; ms=$(python3 -c "print(($T1-$T0)*1000)")
     pk=$((b2/512))
   else
-    R=$(./bin/smart_client $1 --emu 0 --scenario coex --packets $PKTS 2>&1 | grep RESULT); T1=$(date +%s.%N)
+    R=$(./bin/smart_client $1 --emu 0 --scenario coex --file $PL 2>&1 | grep RESULT); T1=$(date +%s.%N)
     ms=$(echo "$R" | cut -d, -f4); pk=$PKTS
   fi
   b1=$(tcp_bytes /tmp/coex_tcp.log $T0 $T1); kill $TP 2>/dev/null; wait $TP 2>/dev/null; TP=""
@@ -59,7 +61,7 @@ rm -f /tmp/coex_tcp.log; python3 web/tcp_bulk.py 9861 /tmp/coex_tcp.log 512 & TP
 log "TCP alone: $(python3 -c "print(f'{$(tcp_bytes /tmp/coex_tcp.log $T0 $T1)*8/($T1-$T0)/1e6:.2f}')") Mbit/s"; kill $TP; wait $TP 2>/dev/null; TP=""
 for m in aimd deep; do
   case $m in aimd) a="--mode aimd --maxcwnd 128 --ssthresh 128" ;; deep) a="--mode deep --dfile results/dqn_chat.txt" ;; esac
-  R=$(./bin/smart_client $a --emu 0 --scenario coex --packets $PKTS 2>&1 | grep RESULT); ms=$(echo "$R" | cut -d, -f4)
+  R=$(./bin/smart_client $a --emu 0 --scenario coex --file $PL 2>&1 | grep RESULT); ms=$(echo "$R" | cut -d, -f4)
   log "RUDP $m alone: $(python3 -c "print(f'{$PKTS*512*8/($ms/1000)/1e6:.2f}')") Mbit/s"
 done
 log "== together (columns: TCP Mbit/s, other flow Mbit/s, other flow's share of the sum) =="

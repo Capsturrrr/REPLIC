@@ -16,6 +16,8 @@ cd "$(dirname "$0")"
 for f in bin/server bin/smart_client results/dqn_chat.txt web/real_baselines.py; do
   [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }
 done
+# RUDP must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
+PL=/tmp/rudp_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
 OUT=results/netem_$sc.txt; : > $OUT
 SP=""
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536)
@@ -46,7 +48,7 @@ for i in $(seq $REPS); do
       deep)   a="--mode deep --dfile results/dqn_chat.txt" ;;
     esac
     echo -n "$m " | tee -a $OUT
-    ./bin/smart_client $a --emu 0 --scenario lossy --packets $PKTS 2>&1 | grep RESULT | tee -a $OUT
+    ./bin/smart_client $a --emu 0 --scenario lossy --file $PL 2>&1 | grep RESULT | tee -a $OUT
   done
 done
 log "== done: send results/netem_$sc.txt back =="
