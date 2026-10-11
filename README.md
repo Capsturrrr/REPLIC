@@ -30,7 +30,7 @@ same timers, paired seeds, 95% intervals. Details and caveats in `docs/RUDP_Fina
 * An alternative weight file trained with cross traffic in the loop (`results/dqn_cross.txt`, `--dfile`): small consistent gain in simulation, not significant on real sockets, so not the default (`results/es_fair/SUMMARY_cross.txt`). Virtual-time options: `--vcross ON:OFF:PPS` (bursty cross traffic) and `--vcomp 1` (an AIMD competitor).
 * The server handles up to 16 clients at once (`tests/test_multiclient.sh`).
 * Honest limits: on a shared bottleneck it takes 68% of the link against tuned AIMD (not a polite neighbour); no gain on the 10% loss path;
-  kernel TCP is still 1.5x to 3.2x faster than the neural agent on a netem path (see "Kernel check"), and no multi-machine test yet. Earlier, larger margins were inflated by a timer defect that hurt
+  kernel TCP is still 1.5x to 1.7x faster than the neural agent on a netem path (see "Kernel check"), and no multi-machine test yet. Earlier, larger margins were inflated by a timer defect that hurt
   the baseline more; it is fixed and every number above is re-measured.
 
 ## Quick start
@@ -232,9 +232,9 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 
 ## Kernel check (tc/netem)
 
-> **Correction (11 Oct 2026):** the first kernel runs below sent RUDP's *synthetic 40-byte* packets (no `--file`), while TCP and UDP sent 512-byte payloads, so the byte counts were not equal and the table is superseded. `netem_full.sh` and `netem_coexist.sh` now send a real 512-byte-per-packet file; re-run them to get the corrected numbers.
+> **Correction (12 Oct 2026):** the first kernel runs sent RUDP's *synthetic 40-byte* packets while TCP and UDP sent 512-byte payloads. The scripts now send a real 512-byte-per-packet file and every kernel run was repeated; the text below uses the corrected numbers (`results/netem_corrected.txt`, `results/netem_coexist_summary.txt`).
 
-`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 61% faster (lossy), 70% (5G-like) and 83% (satellite), all significant, and 33% faster with reordering (not significant). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 3.2x.** Raw numbers, and an account of three mistakes in the first runs, are in `results/netem_summary.txt`.
+`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 71% faster (lossy), 65% (5G-like) and 83% (satellite), all significant, and 60% faster with reordering (not significant, p=0.09). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 1.7x.** `sudo bash netem_coexist.sh 5g|lossy|sat` puts a kernel TCP flow and one RUDP transfer on the same bottleneck: **the neural agent does not starve TCP** (it takes 24% to 34% of the link; tuned AIMD only 5% to 17%), 3 runs per cell. Raw numbers, and an account of four mistakes in the first runs, are in `results/netem_summary.txt`.
 
 ## Research-gap tests (all in virtual time unless noted; paired seeds, 95% intervals)
 
@@ -244,7 +244,7 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 | Against a model-based baseline? | `python3 tools/bbr_eval.py 20` (`--mode bbr`, a simplified BBR) | BBR-style beats tuned AIMD on 4 of 5 paths and is **fastest on the 2% lossy path** (8.2 s vs 9.8 s); the neural agent wins on satellite-like and fast paths (`results/bbr_compare.txt`) |
 | Fair between two neural flows with different RTTs? | `./eval_fair_rtt.sh 6` (real sockets) | Jain 0.84 at +150 ms RTT, against 0.64 for AIMD; still favours the short-RTT flow (`results/eval_fair_rtt_summary.txt`) |
 | What does the network do? Can it be trusted? | `python3 tools/interpret.py`, `python3 tools/interp_eval.py` | Depth-5 tree agrees on 79% of decisions yet matches the transfer time on 4 of 5 paths; input noise 0.2 costs at most 12%; formal interval-bound certification only works at +-0.001 (43% of states) and fails at +-0.03 (`results/interp/`) |
-| Does it starve kernel TCP? | `sudo bash netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | **Not measured yet**: the script is written and checked for mechanics only |
+| Does it starve kernel TCP? | `sudo bash netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | No: neural takes 24-34% of the link, AIMD 5-17% (3 runs per cell, `results/netem_coexist_summary.txt`) |
 
 The BBR-style policy is a simplification (no ProbeRTT, no BBRv3 loss response), so no claim is made about the Linux BBR. Earlier versions of it stalled at 10% loss and took 163 s after a delay jump; both defects are fixed and described in the report (Section 8.19).
 

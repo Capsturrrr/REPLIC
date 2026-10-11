@@ -68,3 +68,8 @@ Raw tuned AIMD ms: lossy 4325.9 4853.3 4327.1 5241.7 4665.9 | 5g 1121.8 1121.4 1
 Raw TCP s: lossy .72 .74 .50 .48 .47 | 5g .22 .21 .21 .27 .22 | sat 1.84 1.83 1.83 3.16 1.84 | reorder .89 1.25 1.51 .70 .82
 Plain UDP delivered 26-36% of packets in every scenario.
 Reading: with a realistic bounded bottleneck the neural agent beats tuned AIMD by 61%/70%/83% (lossy/5g/sat, all significant) and by 33% on reorder (not significant: tuned AIMD is bimodal there). Kernel TCP is still faster than the neural agent on every path (1.5x-3.2x). Under the corrected simulator (--reorder 1) AIMD collapses on the satellite path as it does on real netem (10-15 s), which the old in-order simulator could not reproduce.
+
+=== CORRECTION (11-12 Oct 2026): fourth mistake in the runs above ===
+Without --file, smart_client sends synthetic 40-byte packets, while TCP/UDP sent 512-byte payloads. All runs above therefore under-loaded RUDP.
+netem_full.sh and netem_coexist.sh now send a real 512-byte-per-packet file. The corrected runs are in results/netem_corrected.txt
+(neural vs tuned AIMD: lossy -71%, 5g -65%, sat -83%, reorder -60% n.s.; kernel TCP 1.5x-1.7x faster than the neural agent).
