@@ -18,14 +18,17 @@ for f in bin/server bin/smart_client results/dqn_chat.txt web/real_baselines.py;
 done
 OUT=results/netem_$sc.txt; : > $OUT
 SP=""
-cleanup() { [ -n "$SP" ] && kill $SP 2>/dev/null; tc qdisc del dev lo root 2>/dev/null; }
+OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536)
+cleanup() { [ -n "$SP" ] && kill $SP 2>/dev/null; tc qdisc del dev lo root 2>/dev/null; ip link set dev lo mtu $OLDMTU 2>/dev/null; }
 trap cleanup EXIT
 log() { echo "$@" | tee -a $OUT; }
 tc qdisc del dev lo root 2>/dev/null
+# loopback normally has a 64 KB MTU; the token bucket cannot pass packets larger than its burst, so use an Ethernet-sized MTU for the test
+ip link set dev lo mtu 1500 || { echo "could not set lo mtu"; exit 1; }
 # Delay, jitter, loss and reordering in netem (large limit so packets in flight are never dropped); the bottleneck is a separate
 # token-bucket stage with a drop-tail queue of Q packets (about 600 bytes each), like the emulated path in the simulator.
 tc qdisc add dev lo root handle 1: netem delay ${D}ms ${J}ms $X loss ${L}% limit 100000 || { echo "tc netem failed (WSL2 needs the netem kernel module)"; exit 1; }
-tc qdisc add dev lo parent 1:1 handle 10: tbf rate $R burst 32kb limit $((Q*600)) || { echo "tc tbf failed"; exit 1; }
+tc qdisc add dev lo parent 1:1 handle 10: tbf rate $R burst 16kb limit $((Q*600+16000)) || { echo "tc tbf failed"; exit 1; }
 log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R queue=${Q}pkts (netem + tbf bottleneck) packets=$PKTS reps=$REPS"
 [ -n "$RUDP_ONLY" ] || { log "== kernel TCP and plain UDP =="
 for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 512 2>&1 | tee -a $OUT; done; }
