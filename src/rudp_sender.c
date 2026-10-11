@@ -48,7 +48,15 @@ static double urand(void) { return rand() / (RAND_MAX + 1.0); }
 static void rpush(ring_t *r, double t, const uint8_t *b, int len) {
     pend_t *p = &r->a[r->tail % QCAP]; p->t = t; p->len = len; memcpy(p->buf, b, (size_t)len); r->tail++;
 }
-static pend_t *rfront(ring_t *r) { return r->head < r->tail ? &r->a[r->head % QCAP] : NULL; }
+/* Earliest-arriving packet first. With an in-order path (the default) this is the head of the queue; with --reorder 1 a packet
+   delayed by jitter is overtaken by later ones, as on a real netem path. */
+static pend_t *rfront(ring_t *r) {
+    if (r->head >= r->tail) return NULL;
+    int bi = r->head;
+    for (int i = r->head + 1; i < r->tail; i++) if (r->a[i % QCAP].t < r->a[bi % QCAP].t) bi = i;
+    if (bi != r->head) { pend_t tmp = r->a[bi % QCAP]; r->a[bi % QCAP] = r->a[r->head % QCAP]; r->a[r->head % QCAP] = tmp; }
+    return &r->a[r->head % QCAP];
+}
 
 
 /* ---- optional pcap export (raw-IP linktype 101): what a capture at the receiver would see ---- */
@@ -105,7 +113,7 @@ static double fwd_path(double now) {
 static double rev_path(double now) {
     if (!emu) return now;
     double arr = now + delay_ms + jit();
-    if (arr < last_arrive_r) arr = last_arrive_r;
+    if (!reorder && arr < last_arrive_r) arr = last_arrive_r;
     last_arrive_r = arr; return arr;
 }
 

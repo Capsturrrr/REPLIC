@@ -52,3 +52,7 @@ sat     2331   8722   7368   6137    6865    0.93         0.61   1.12           
 reorder  739   5332   3656   3464    2355    0.64         0.18   0.68           0.012
 Neural pooled over 3 runs (n=15): lossy 1648, 5g 477, sat 7300, reorder 2323.
 Observation: tuned AIMD retransmits 60-75 of 500 packets on sat vs 1-3 for untuned AIMD (spurious retransmissions caused by jitter-induced reordering). Kernel TCP is 1.4x (5g) to 3.2x faster than the neural agent.
+
+METHOD CORRECTION 2026-10-11: runs 1-3 used `netem ... rate R limit 60`. In netem the limit counts packets sitting in the delay line, so on the satellite path (about 200 packets in flight) any window above ~60 overflowed the qdisc. That explains the 60-100 retransmissions per transfer (13-20%) for the tuned AIMD and neural senders, which my first guess blamed on reordering. Runs 1-3 therefore overstate loss for large windows on high-delay paths, and the satellite result (and TCP comparison) is not representative of the simulated 'sat' path.
+netem_full.sh now puts delay/jitter/loss/reorder in netem (limit 100000) and the bottleneck in a separate tbf stage with a drop-tail queue of 50-100 packets, matching the simulator. Re-run needed.
+Simulator fix: the virtual-time queue delivered strictly in send order, so --reorder 1 had no effect; it now delivers by arrival time. Default (in-order) results unchanged: make repro geo-mean 0.534, faster on 89/100.

@@ -5,10 +5,10 @@
 # Writes results/netem_<scenario>.txt (also printed). Removes the netem rule on exit.
 sc=${1:-lossy}; REPS=${2:-5}; PKTS=500
 case $sc in
-  5g)      D=10;  J=3;  L=0.2; R=12mbit; X="" ;;
-  lossy)   D=25;  J=10; L=2;   R=6mbit;  X="" ;;
-  sat)     D=150; J=10; L=0.3; R=3mbit;  X="" ;;
-  reorder) D=50;  J=0;  L=1;   R=6mbit;  X="reorder 25% 50%" ;;
+  5g)      D=10;  J=3;  L=0.2; R=12mbit; Q=60;  X="" ;;
+  lossy)   D=25;  J=10; L=2;   R=6mbit;  Q=50;  X="" ;;
+  sat)     D=150; J=10; L=0.3; R=3mbit;  Q=100; X="" ;;
+  reorder) D=50;  J=0;  L=1;   R=6mbit;  Q=50;  X="reorder 25% 50%" ;;
   *) echo "scenario must be lossy|5g|sat|reorder"; exit 1 ;;
 esac
 [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
@@ -22,8 +22,11 @@ cleanup() { [ -n "$SP" ] && kill $SP 2>/dev/null; tc qdisc del dev lo root 2>/de
 trap cleanup EXIT
 log() { echo "$@" | tee -a $OUT; }
 tc qdisc del dev lo root 2>/dev/null
-tc qdisc add dev lo root netem delay ${D}ms ${J}ms $X loss ${L}% rate $R limit 60 || { echo "tc failed (WSL2 needs the netem kernel module)"; exit 1; }
-log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R packets=$PKTS reps=$REPS"
+# Delay, jitter, loss and reordering in netem (large limit so packets in flight are never dropped); the bottleneck is a separate
+# token-bucket stage with a drop-tail queue of Q packets (about 600 bytes each), like the emulated path in the simulator.
+tc qdisc add dev lo root handle 1: netem delay ${D}ms ${J}ms $X loss ${L}% limit 100000 || { echo "tc netem failed (WSL2 needs the netem kernel module)"; exit 1; }
+tc qdisc add dev lo parent 1:1 handle 10: tbf rate $R burst 32kb limit $((Q*600)) || { echo "tc tbf failed"; exit 1; }
+log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R queue=${Q}pkts (netem + tbf bottleneck) packets=$PKTS reps=$REPS"
 [ -n "$RUDP_ONLY" ] || { log "== kernel TCP and plain UDP =="
 for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 512 2>&1 | tee -a $OUT; done; }
 [ -n "$TCP_ONLY" ] && { log "== done (TCP_ONLY) =="; exit 0; }
