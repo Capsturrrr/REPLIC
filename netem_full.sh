@@ -27,7 +27,7 @@ log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R packets=$PKTS re
 log "== kernel TCP and plain UDP =="
 for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 512 2>&1 | tee -a $OUT; done
 [ -n "$TCP_ONLY" ] && { log "== done (TCP_ONLY) =="; exit 0; }
-./bin/server >/dev/null 2>&1 \& SP=$!
+./bin/server >/dev/null 2>&1 & SP=$!
 sleep 0.5
 log "== RUDP (RESULT: scenario,mode,ms,packets,sent,retx,timeouts,fast,avg_rtt,min_rtt,pps,cwnd,reward) =="
 for i in $(seq $REPS); do
