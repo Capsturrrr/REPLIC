@@ -52,6 +52,7 @@ typedef struct {
     const char *pcap_file;       /* write a receiver-side pcap */
     int virtual_time;            /* 1 = simulated clock and in-process receiver (no network); used by the evaluation scripts */
     double vstep_ms;             /* virtual-time step (default 0.35) */
+    const char *dyn;             /* virtual time: time-varying path "T_MS:RATE_PPS:DELAY_MS;..." */
     int vcomp; double vcomp_timeout; double vcross_on, vcross_off, vcross_pps;   /* virtual-time competitors */
     int train; double eps; double tcut; double ref_rate;                    /* Q-learning training and legacy options */
 } rudp_options_t;

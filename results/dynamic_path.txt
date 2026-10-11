@@ -1,0 +1,6 @@
+# dynamic path, 20 paired seeds (test seed 424242+)
+# base: --vt 1 --delay 30 --jitter 3 --loss 0.2 --rate 1500 --queue 60 --packets 4000
+bw_drop         aimd:  13.58s ±0.25 (retx    18)  cubic:  17.74s ±1.37 (retx    10)  deep:  12.72s ±0.18 (retx   128)
+bw_rise         aimd:   9.21s ±0.88 (retx    57)  cubic:  15.10s ±1.51 (retx     8)  deep:   4.32s ±0.15 (retx    50)
+rtt_jump        aimd:  33.32s ±2.67 (retx    48)  cubic:  27.54s ±3.11 (retx    46)  deep:  19.80s ±0.62 (retx   127)
+leo_handover    aimd:  12.84s ±0.60 (retx    78)  cubic:  21.40s ±1.51 (retx    27)  deep:   8.18s ±0.42 (retx   241)

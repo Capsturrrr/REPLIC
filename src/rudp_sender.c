@@ -91,11 +91,32 @@ static double last_depart = 0, last_arrive_f = 0, last_arrive_r = 0;
 static double depart_q[QCAP]; static int dq_h = 0, dq_t = 0;
 static long drops_random = 0, drops_queue = 0, comp_ok = 0, ours_ok = 0;
 
+/* --dyn "T:RATE:DELAY;T:RATE:DELAY;..." : time-varying path. From T ms (transfer clock) on, the bottleneck rate (pkt/s) and one-way delay (ms)
+   take the given values; RATE or DELAY of 0 or less keeps the current one. Used to test bandwidth drops, RTT jumps and satellite hand-overs. */
+#define DYN_MAX 128
+static struct { double t, rate, delay; } dyn[DYN_MAX]; static int dyn_n = 0, dyn_i = 0;
+static void dyn_parse(const char *s) {
+    dyn_n = dyn_i = 0;
+    while (s && *s && dyn_n < DYN_MAX) {
+        double t, r, d; int used = 0;
+        if (sscanf(s, "%lf:%lf:%lf%n", &t, &r, &d, &used) < 3) break;
+        dyn[dyn_n].t = t; dyn[dyn_n].rate = r; dyn[dyn_n].delay = d; dyn_n++;
+        s += used; if (*s == ';') s++;
+    }
+}
+static void dyn_apply(double now) {
+    while (dyn_i < dyn_n && dyn[dyn_i].t <= now) {
+        if (dyn[dyn_i].rate > 0) rate_pps = dyn[dyn_i].rate;
+        if (dyn[dyn_i].delay > 0) delay_ms = dyn[dyn_i].delay;
+        dyn_i++;
+    }
+}
 static double jit(void) { return jitter_ms > 0 ? (urand() * 2 - 1) * jitter_ms : 0; }
 
 /* Returns arrival time at the server, or -1 if the path drops the packet. */
 static double fwd_path(double now) {
     if (!emu) return now;
+    if (dyn_n) dyn_apply(now);
     if (loss_pct > 0 && urand() * 100.0 < loss_pct) { drops_random++; return -1; }
     double depart = now;
     if (rate_pps > 0) {
@@ -111,6 +132,7 @@ static double fwd_path(double now) {
     last_arrive_f = arr; return arr;
 }
 static double rev_path(double now) {
+    if (dyn_n) dyn_apply(now);
     if (!emu) return now;
     double arr = now + delay_ms + jit();
     if (!reorder && arr < last_arrive_r) arr = last_arrive_r;
@@ -190,6 +212,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     last_depart = last_arrive_f = last_arrive_r = 0; dq_h = dq_t = 0; drops_random = drops_queue = comp_ok = ours_ok = 0;
     comp_on = o->vcomp; comp_to = o->vcomp_timeout; comp_cwnd = 10; comp_ssth = 128; comp_cut_until = 0; comp_h = comp_t = 0;
     xv_on = o->vcross_on; xv_off = o->vcross_off; xv_pps = o->vcross_pps; xv_end = -1; xv_next = 0; xv_is_on = 0;
+    dyn_parse(o->dyn);
     v_exp = 0; memset(v_have, 0, sizeof v_have); pcapf = NULL;
     int use_cubic = !strcmp(mode, "cubic");   /* CUBIC window growth (Ha, Rhee, Xu 2008), loss response x0.7 */
     int use_rl = !strcmp(mode, "rl");
