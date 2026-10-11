@@ -1,0 +1,7 @@
+pair        extra RTT(B)  share A  share B  Jain  n   (flow B has xd ms extra RTT on top of the ~66 ms base; flow A is the short-RTT flow)
+aimd_128         xd0      45%     55%  0.964  6
+deep             xd0      48%     52%  0.964  6
+aimd_128        xd60      74%     26%  0.804  6
+deep            xd60      67%     33%  0.885  6
+aimd_128       xd150      88%     12%  0.641  6
+deep           xd150      71%     29%  0.840  6

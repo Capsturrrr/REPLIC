@@ -83,6 +83,24 @@ static void pcap_write(double t_ms, int to_server, int port, const uint8_t *pl, 
     fwrite(&sec,4,1,pcapf); fwrite(&us,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(pk, 1, (size_t)tot, pcapf);
 }
 
+/* ---- interpretability hooks (environment variables, off by default) ----
+   RUDP_STATELOG=file : append every neural decision "x0..x4,lo,act" for the distillation study
+   RUDP_NOISE=sigma   : add Gaussian noise N(0,sigma) to the four measured inputs (robustness test)
+   RUDP_TREE=file     : replace the network by a distilled decision tree ("S feat thr left right" / "L action" lines) */
+typedef struct { int feat, left, right, act; double thr; } tnode_t;
+static tnode_t tree[512]; static int tree_n = 0;
+static int tree_load(const char *path) {
+    FILE *f = fopen(path, "r"); if (!f) return -1; char t; tree_n = 0;
+    while (tree_n < 512 && fscanf(f, " %c", &t) == 1) {
+        tnode_t *n = &tree[tree_n++]; memset(n, 0, sizeof *n);
+        if (t == 'S') { if (fscanf(f, "%d %lf %d %d", &n->feat, &n->thr, &n->left, &n->right) != 4) { fclose(f); return -1; } n->act = -1; }
+        else if (fscanf(f, "%d", &n->act) != 1) { fclose(f); return -1; }
+    }
+    fclose(f); return tree_n > 0 ? 0 : -1;
+}
+static int tree_predict(const double *x) { int i = 0; while (tree[i].act < 0) i = x[tree[i].feat] <= tree[i].thr ? tree[i].left : tree[i].right; return tree[i].act; }
+static double gauss(void) { double u = urand(), v = urand(); if (u < 1e-12) u = 1e-12; return sqrt(-2 * log(u)) * cos(6.283185307179586 * v); }
+
 /* ---- emulated path parameters ---- */
 static double delay_ms = 10, jitter_ms = 0, loss_pct = 0, rate_pps = 0;
 static int queue_cap = 50;
@@ -216,6 +234,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     v_exp = 0; memset(v_have, 0, sizeof v_have); pcapf = NULL;
     int use_cubic = !strcmp(mode, "cubic");   /* CUBIC window growth (Ha, Rhee, Xu 2008), loss response x0.7 */
     int use_rl = !strcmp(mode, "rl");
+    int use_bbr = !strcmp(mode, "bbr");   /* simplified BBRv1 (Cardwell et al. 2016): model-based, ignores loss; see results/bbr_*.txt */
     int use_deep = !strcmp(mode, "deep"), use_rl2 = !strcmp(mode, "rl2"), chat = use_deep || use_rl2;
     if (use_rl2 && !cap_set && maxcwnd > 32) maxcwnd = 32;   /* the table agent expects a cap of 32 */
     int classic = getenv("RUDP_CLASSIC") != NULL;               /* RUDP_CLASSIC=1: the original agent settings (cap 32, no hand-over) used by the older evaluation scripts */
@@ -307,6 +326,10 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     int ss_phase = 0;   /* deep agent: classic slow start until the first congestion signal, then the policy takes over */
     double rto_mult = getenv("RUDP_RTOMULT") ? atof(getenv("RUDP_RTOMULT")) : 1.3; double wmax = 0, kcub = 0, epoch = -1; double cwnd = init_cwnd, ssthresh = ss0, srtt = -1, rttvar = 0, rto = 1000;
     double min_rtt = 1e9, rtt_sum = 0, dev_floor = 1e9; long rtt_n = 0;
+    /* BBR state: delivery-rate history, windowed max filter, STARTUP -> DRAIN -> PROBE_BW (ProbeRTT omitted: transfers are short) */
+    double bb_t[64] = {0}; long bb_d[64] = {0}; int bb_n = 0; long bb_deliv = 0;
+    double bw_t[32] = {0}, bw_v[32] = {0}; int bw_n = 0; double bbr_bw = 0, bbr_gain = 2.885, bbr_full_bw = 0; int bbr_state = 0, bbr_full_cnt = 0, bbr_phase = 0;
+    long bbr_round_end = 0; double bbr_phase_start = 0;
     long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0;
     double timer_start = 0; int timer_on = 0;
     /* RL interval stats */
@@ -368,7 +391,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     rto = srtt + 4 * rttvar; if (rto < srtt * rto_mult) rto = srtt * rto_mult; if (rto < 60) rto = 60; if (rto > 3000) rto = 3000;
                 }
                 iv_acked += newly; base = nb; dup = 0; last_ack = a;
-                if ((!use_rl && !chat) || guard > 0 || ss_phase) {
+                if ((!use_rl && !chat && !use_bbr) || guard > 0 || ss_phase) {
                     for (int k = 0; k < newly; k++) {
                         if (cwnd < ssthresh) cwnd += 1.0;
                         else if (use_cubic) {
@@ -380,13 +403,40 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     if (cwnd > maxcwnd) cwnd = maxcwnd;
                     if (ss_phase && cwnd >= ssdeep) ss_phase = 0;
                 }
+                if (use_bbr) {
+                    bb_deliv += newly; bb_t[bb_n % 64] = now; bb_d[bb_n % 64] = bb_deliv; bb_n++;
+                    double win = min_rtt < 1e8 ? (min_rtt < 5 ? 5 : min_rtt) : 20;
+                    for (int q = bb_n - 2; q >= 0 && q >= bb_n - 64; q--) {          /* oldest sample still within one min-RTT window */
+                        if (now - bb_t[q % 64] >= win) {
+                            if (now - bb_t[q % 64] > 4 * win) break;   /* stale baseline after an ACK gap: rate would be meaninglessly low */
+                            double sm = (bb_deliv - bb_d[q % 64]) * 1000.0 / (now - bb_t[q % 64]);
+                            bw_t[bw_n % 32] = now; bw_v[bw_n % 32] = sm; bw_n++; break;
+                        }
+                    }
+                    double mx = 0; for (int q = 0; q < 32 && q < bw_n; q++) if (now - bw_t[q] <= 10 * (min_rtt < 1e8 ? min_rtt : 50) && bw_v[q] > mx) mx = bw_v[q];
+                    if (mx > 0) bbr_bw = mx;
+                    if (bbr_bw > 0 && min_rtt < 1e8) {
+                        if (bb_deliv >= bbr_round_end) {                                /* one packet-timed round elapsed */
+                            bbr_round_end = bb_deliv + (long)(next - base > 1 ? next - base : 1);
+                            if (bbr_state == 0) { if (bbr_bw >= bbr_full_bw * 1.25) { bbr_full_bw = bbr_bw; bbr_full_cnt = 0; } else if (++bbr_full_cnt >= 3) { bbr_state = 1; bbr_gain = 1.0 / 2.885; } }
+                        }
+                        double bdp = bbr_bw * min_rtt / 1000.0;
+                        if (bbr_state == 1 && (next - base) <= bdp) { bbr_state = 2; bbr_phase = 0; bbr_phase_start = now; bbr_gain = 1.0; }
+                        if (bbr_state == 2 && now - bbr_phase_start >= min_rtt) {
+                            static const double pg[8] = { 1.25, 0.75, 1, 1, 1, 1, 1, 1 };
+                            bbr_phase = (bbr_phase + 1) % 8; bbr_phase_start = now; bbr_gain = pg[bbr_phase];
+                        }
+                        cwnd = 2.0 * bdp; if (cwnd < 4) cwnd = 4; if (bbr_state == 0 && cwnd < 10) cwnd = 10;
+                    }
+                    if (cwnd > maxcwnd) cwnd = maxcwnd;
+                }
                 timer_on = base < npk; timer_start = now;
                 if (tr) fprintf(tr, "%.1f,ACK,%.2f,%.1f\n", now - t0, cwnd, srtt);
             } else if (a == last_ack && a == pk[base].seq_num) {
                 dup++;
                 if (dup >= DUP_ACK_THRESHOLD && base > recover) {
                     recover = next - 1; fast_retx++; iv_lossev++; ss_phase = 0;
-                    if ((!use_rl && !chat) || guard > 0) {
+                    if ((!use_rl && !chat && !use_bbr) || guard > 0) {
                         if (use_cubic) { wmax = cwnd; ssthresh = cwnd * 0.7; if (ssthresh < 2) ssthresh = 2; cwnd = ssthresh; kcub = cbrt(wmax * 0.3 / 0.4); epoch = now; }
                         else { ssthresh = cwnd / 2; if (ssthresh < 1) ssthresh = 1; cwnd = ssthresh; }
                     }
@@ -410,7 +460,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                 timeouts++; iv_lossev++; ss_phase = 0;
                 if (use_cubic) { wmax = cwnd; ssthresh = cwnd * 0.7; kcub = cbrt(wmax * 0.3 / 0.4); epoch = now; } else ssthresh = cwnd / 2;
                 if (ssthresh < 2) ssthresh = 2;
-                if (chat && guard > 0) { cwnd = 1.0; /* hybrid: AIMD is in control */ } else if (chat) { /* the chat-style agents leave the window to the policy; --tcut X adds an AIMD-style safety net: window x X on a timeout */ if (tcut > 0) { cwnd *= tcut; if (cwnd < 2) cwnd = 2; } } else if (use_rl) { cwnd = cwnd / 2 < 2 ? 2 : cwnd / 2; } else { cwnd = 1.0; }
+                if (chat && guard > 0) { cwnd = 1.0; /* hybrid: AIMD is in control */ } else if (chat) { /* the chat-style agents leave the window to the policy; --tcut X adds an AIMD-style safety net: window x X on a timeout */ if (tcut > 0) { cwnd *= tcut; if (cwnd < 2) cwnd = 2; } } else if (use_rl) { cwnd = cwnd / 2 < 2 ? 2 : cwnd / 2; } else if (use_bbr) { /* BBR does not react to loss */ } else { cwnd = 1.0; }
                 rto = rto * 2 > 3000 ? 3000 : rto * 2;
                 recover = next - 1;
             }
@@ -443,7 +493,14 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     else if (ss_phase) { if (ratio >= ss_ratio || lossf > 0) ss_phase = 0; }
                     else if (use_deep) {
                         double x[DN_IN] = { (ratio - 1.0 > 3.0 ? 3.0 : ratio - 1.0) / 3.0, (lossf > 0.3 ? 0.3 : lossf) / 0.3, cwnd / 32.0, thr, RL_MULT[last_act] - 1.0 }, q[DN_OUT];
-                        deep_forward(&dnet, x, q); act = lo; for (int k = lo + 1; k < RL_NA; k++) if (q[k] > q[act]) act = k;
+                        { static double nz = -1; static int tr_ok = -1; static FILE *slog = NULL; static int slog_t = 0;
+                          if (nz < 0) { nz = getenv("RUDP_NOISE") ? atof(getenv("RUDP_NOISE")) : 0; }
+                          if (tr_ok < 0) { tr_ok = getenv("RUDP_TREE") ? (tree_load(getenv("RUDP_TREE")) == 0) : 0; }
+                          if (!slog_t) { slog_t = 1; if (getenv("RUDP_STATELOG")) slog = fopen(getenv("RUDP_STATELOG"), "a"); }
+                          if (nz > 0) for (int k = 0; k < 4; k++) x[k] += nz * gauss();
+                          if (tr_ok) { act = tree_predict(x); if (act < lo) act = lo; }
+                          else { deep_forward(&dnet, x, q); act = lo; for (int k = lo + 1; k < RL_NA; k++) if (q[k] > q[act]) act = k; }
+                          if (slog) fprintf(slog, "%.5f,%.5f,%.5f,%.5f,%.5f,%d,%d\n", x[0], x[1], x[2], x[3], x[4], lo, act); }
                         if (polite > 0 && ratio >= polite && (avg_rtt - base_r) > 2.0 * rttvar && cwnd > 12 && act > 1) act = 1;
                     } else {
                         int s2 = rl_state(ratio, lossf, cwnd); act = lo; for (int k = lo + 1; k < RL_NA; k++) if (ag.q[s2][k] > ag.q[s2][act]) act = k;
@@ -484,7 +541,11 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
         }
         /* 6. send within window */
         while (next < npk && next < base + (int)cwnd) {
-            if (pace > 0 && srtt > 0) {                  /* --pace G: spread new packets over the round trip at G x cwnd/srtt (like fq pacing) */
+            if (use_bbr && bbr_bw > 0) {                 /* BBR paces at gain x estimated bottleneck bandwidth */
+                if (pace_next < now - 2.0) pace_next = now - 2.0;
+                if (pace_next > now) break;
+                pace_next += 1000.0 / (bbr_gain * bbr_bw);
+            } else if (pace > 0 && srtt > 0) {                  /* --pace G: spread new packets over the round trip at G x cwnd/srtt (like fq pacing) */
                 if (pace_next < now - 2.0) pace_next = now - 2.0;   /* at most ~2 ms of accumulated credit */
                 if (pace_next > now) break;
                 pace_next += srtt / (cwnd * pace);

@@ -1,0 +1,127 @@
+states: train 5536, test 5466 (visited by the agent on the five named paths, 20 seeds each, disjoint seeds)
+python re-implementation reproduces the C agent's decision on 99.98% of test states
+
+Action mix (0=x0.5 1=x0.85 2=hold 3=x1.15 4=x1.5): 0:17%, 1:9%, 2:10%, 3:0%, 4:63%
+
+1. Input sensitivity on visited test states
+   permutation: share of decisions that change when ONE input is shuffled across states; delta: share that change when the input moves by +-0.1
+   input             permute   +0.1   -0.1
+   RTT growth         40.9%   23.7%  18.3%
+   loss fraction      21.4%   37.1%  24.5%
+   window/32          41.3%    9.5%   9.5%
+   throughput share   44.5%   15.6%  18.9%
+   last action        15.5%    5.4%   7.0%
+
+2. Distillation into a decision tree (fidelity = agreement with the network on held-out states)
+   depth leaves  fidelity(test)  fidelity(train)
+       1      2      67.76%       67.11%
+       2      4      72.74%       72.90%
+       3      8      76.80%       77.10%
+       4     16      77.31%       77.53%
+       5     32      79.49%       79.99%
+       6     60      82.55%       83.31%
+       8    165      86.86%       89.76%
+
+   Depth-5 tree as rules:
+   |--- loss <= 0.04
+   |   |--- rtt_growth <= 0.25
+   |   |   |--- thr <= 0.11
+   |   |   |   |--- rtt_growth <= 0.17
+   |   |   |   |   |--- cwnd32 <= 0.94
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- cwnd32 >  0.94
+   |   |   |   |   |   |--- class: 2
+   |   |   |   |--- rtt_growth >  0.17
+   |   |   |   |   |--- cwnd32 <= 1.04
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- cwnd32 >  1.04
+   |   |   |   |   |   |--- class: 0
+   |   |   |--- thr >  0.11
+   |   |   |   |--- rtt_growth <= 0.18
+   |   |   |   |   |--- rtt_growth <= 0.11
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- rtt_growth >  0.11
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |--- rtt_growth >  0.18
+   |   |   |   |   |--- cwnd32 <= 1.99
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- cwnd32 >  1.99
+   |   |   |   |   |   |--- class: 0
+   |   |--- rtt_growth >  0.25
+   |   |   |--- cwnd32 <= 1.75
+   |   |   |   |--- thr <= 0.23
+   |   |   |   |   |--- rtt_growth <= 0.46
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- rtt_growth >  0.46
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |--- thr >  0.23
+   |   |   |   |   |--- last_act <= 0.25
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- last_act >  0.25
+   |   |   |   |   |   |--- class: 4
+   |   |   |--- cwnd32 >  1.75
+   |   |   |   |--- cwnd32 <= 2.46
+   |   |   |   |   |--- rtt_growth <= 0.92
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |   |--- rtt_growth >  0.92
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |--- cwnd32 >  2.46
+   |   |   |   |   |--- thr <= 0.89
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |   |--- thr >  0.89
+   |   |   |   |   |   |--- class: 0
+   |--- loss >  0.04
+   |   |--- cwnd32 <= 0.88
+   |   |   |--- rtt_growth <= 0.57
+   |   |   |   |--- last_act <= -0.33
+   |   |   |   |   |--- cwnd32 <= 0.50
+   |   |   |   |   |   |--- class: 1
+   |   |   |   |   |--- cwnd32 >  0.50
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |--- last_act >  -0.33
+   |   |   |   |   |--- cwnd32 <= 0.41
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- cwnd32 >  0.41
+   |   |   |   |   |   |--- class: 1
+   |   |   |--- rtt_growth >  0.57
+   |   |   |   |--- thr <= 0.32
+   |   |   |   |   |--- loss <= 0.29
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- loss >  0.29
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |--- thr >  0.32
+   |   |   |   |   |--- cwnd32 <= 0.58
+   |   |   |   |   |   |--- class: 1
+   |   |   |   |   |--- cwnd32 >  0.58
+   |   |   |   |   |   |--- class: 0
+   |   |--- cwnd32 >  0.88
+   |   |   |--- thr <= 0.88
+   |   |   |   |--- thr <= 0.26
+   |   |   |   |   |--- rtt_growth <= 0.70
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |   |--- rtt_growth >  0.70
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |--- thr >  0.26
+   |   |   |   |   |--- cwnd32 <= 1.72
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |   |--- cwnd32 >  1.72
+   |   |   |   |   |   |--- class: 0
+   |   |   |--- thr >  0.88
+   |   |   |   |--- rtt_growth <= 0.33
+   |   |   |   |   |--- loss <= 0.18
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- loss >  0.18
+   |   |   |   |   |   |--- class: 0
+   |   |   |   |--- rtt_growth >  0.33
+   |   |   |   |   |--- thr <= 0.96
+   |   |   |   |   |   |--- class: 4
+   |   |   |   |   |--- thr >  0.96
+   |   |   |   |   |   |--- class: 0
+
+3. Certification by interval bound propagation (IBP): is the chosen action provably unchanged for ANY input within +-eps (L-inf, all five inputs)?
+   eps     IBP-certified   empirically stable (200 random points in the ball)
+   0.001       42.9%            98.7%
+   0.003        7.7%            96.3%
+   0.010        0.2%            83.0%
+   0.030        0.0%            61.0%
+   0.100        0.0%            18.0%
