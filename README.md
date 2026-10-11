@@ -228,3 +228,8 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
   always `tc qdisc show dev lo` to check before assuming a test result is "real."
 - **`grep -oP`** (PCRE regex) isn't reliably available in all WSL setups — the benchmark
   script uses plain `sed`/`grep` instead for portability.
+
+
+## RUDP Drop: an application built on the library
+
+`make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent). Each transfer runs through the real C stack (librudp sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time, with a download link for the verified copy. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.

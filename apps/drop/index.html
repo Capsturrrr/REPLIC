@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RUDP Drop</title>
+<style>
+:root{--bg:#0d1117;--panel:#161b22;--line:#2a313c;--text:#e6edf3;--mute:#8b949e;--acc:#58a6ff;--good:#3fb950;--bad:#f85149;--warn:#d29922;--c1:#8b949e;--c2:#d29922;--c3:#58a6ff}
+@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--panel:#fff;--line:#d0d7de;--text:#1f2328;--mute:#656d76;--acc:#0969da;--good:#1a7f37;--bad:#cf222e;--warn:#9a6700;--c1:#6e7781;--c2:#9a6700;--c3:#0969da}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:920px;margin:0 auto;padding:28px 16px 60px}
+h1{font-size:26px;margin:0 0 4px;letter-spacing:-.3px}.sub{color:var(--mute);margin:0 0 24px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:26px 0 10px;font-weight:600}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:26px;text-align:center;background:var(--panel);cursor:pointer;transition:.15s}
+.drop.over,.drop:hover{border-color:var(--acc)}.drop b{display:block;font-size:16px}.drop span{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;transition:.12s;user-select:none}
+.card:hover{border-color:var(--mute)}.card.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
+.card b{display:block}.card small{color:var(--mute);font-size:12.5px;line-height:1.35;display:block;margin-top:2px}
+button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:11px 22px;font:600 15px system-ui;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:22px}
+#msg{color:var(--bad);font-size:14px}
+.arm{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
+.arm .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.arm .name{font-weight:650}.badge{font-size:12px;border-radius:99px;padding:2px 9px;border:1px solid var(--line);color:var(--mute)}
+.badge.win{color:var(--good);border-color:var(--good)}.badge.run{color:var(--acc);border-color:var(--acc)}
+.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 8px}.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.stats{display:flex;gap:22px;flex-wrap:wrap;font-size:13.5px;color:var(--mute)}.stats b{color:var(--text);font-variant-numeric:tabular-nums}
+canvas{width:100%;height:70px;display:block;margin-top:10px}
+.ok{color:var(--good)}.no{color:var(--bad)}a{color:var(--acc)}
+.sum{background:var(--panel);border:1px solid var(--good);border-radius:12px;padding:14px 16px;margin:6px 0 16px}
+footer{color:var(--mute);font-size:12.5px;margin-top:30px;line-height:1.5}
+</style></head><body><main>
+<h1>RUDP Drop</h1>
+<p class="sub">Send a file over our own reliable-UDP protocol across a simulated bad network, and watch the congestion-control policies race. The receiver checks every byte.</p>
+
+<h2>1 · File</h2>
+<div class="drop" id="drop"><b id="fname">Drop a file here, or click to choose</b><span id="fsize">up to 12 MB &middot; 1 MB races in about 30 s on a lossy link, larger files take longer</span></div>
+<input type="file" id="file" hidden>
+
+<h2>2 · Network</h2><div class="grid" id="profiles"></div>
+<h2>3 · Policies to race</h2><div class="grid" id="arms"></div>
+<div class="row"><button id="go" disabled>Send it</button><span id="msg"></span></div>
+
+<div id="results"></div>
+<footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Transfers run one after another so they do not disturb each other.
+Kernel TCP is not in this race because it cannot run through a UDP proxy; see the netem results in the report for that comparison.</footer>
+</main>
+<script>
+const $=s=>document.querySelector(s);let cfg,file=null,sel={profile:'lossy',arms:new Set(['aimd32','aimd128','deep'])},poll=null;
+const fmt=b=>b>1e6?(b/1e6).toFixed(2)+' MB':(b/1e3).toFixed(0)+' kB';
+fetch('/api/config').then(r=>r.json()).then(c=>{cfg=c;
+ $('#profiles').innerHTML=Object.entries(c.profiles).map(([k,p])=>`<div class="card ${k===sel.profile?'on':''}" data-p="${k}"><b>${p.label}</b><small>${p.note}</small></div>`).join('');
+ $('#arms').innerHTML=Object.entries(c.arms).map(([k,l])=>`<div class="card ${sel.arms.has(k)?'on':''}" data-a="${k}"><b>${l}</b></div>`).join('');
+ document.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{sel.profile=e.dataset.p;document.querySelectorAll('[data-p]').forEach(x=>x.classList.toggle('on',x===e))});
+ document.querySelectorAll('[data-a]').forEach(e=>e.onclick=()=>{const k=e.dataset.a;sel.arms.has(k)?sel.arms.delete(k):sel.arms.add(k);e.classList.toggle('on');upd()});});
+function setFile(f){if(!f)return;file=f;$('#fname').textContent=f.name;$('#fsize').textContent=fmt(f.size);upd()}
+function upd(){$('#go').disabled=!(file&&sel.arms.size&&file.size>0)}
+const d=$('#drop');d.onclick=()=>$('#file').click();$('#file').onchange=e=>setFile(e.target.files[0]);
+d.ondragover=e=>{e.preventDefault();d.classList.add('over')};d.ondragleave=()=>d.classList.remove('over');
+d.ondrop=e=>{e.preventDefault();d.classList.remove('over');setFile(e.dataTransfer.files[0])};
+$('#go').onclick=async()=>{$('#msg').textContent='';if(file.size>cfg.max_bytes){$('#msg').textContent='File too large';return}
+ $('#go').disabled=true;const r=await fetch('/api/start',{method:'POST',body:file,headers:{'X-Filename':file.name,'X-Profile':sel.profile,'X-Arms':[...sel.arms].join(',')}});
+ const j=await r.json();if(!r.ok){$('#msg').textContent=j.error;upd();return}
+ $('#results').innerHTML='<h2>Race</h2><div id="sum"></div><div id="armlist"></div>';clearInterval(poll);poll=setInterval(()=>tick(j.id),250);tick(j.id)};
+function spark(cv,pts,color){const c=cv.getContext('2d'),W=cv.width=cv.clientWidth*devicePixelRatio,H=cv.height=cv.clientHeight*devicePixelRatio;c.clearRect(0,0,W,H);if(pts.length<2)return;
+ const mx=Math.max(...pts.map(p=>p[1]),4),tx=pts[pts.length-1][0]||1;c.strokeStyle=color;c.lineWidth=2*devicePixelRatio;c.beginPath();
+ pts.forEach((p,i)=>{const x=p[0]/tx*W,y=H-p[1]/mx*(H-6)-3;i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
+ c.fillStyle=getComputedStyle(document.body).color;c.globalAlpha=.55;c.font=`${11*devicePixelRatio}px system-ui`;c.fillText('window (packets), peak '+mx.toFixed(0),4,12*devicePixelRatio);c.globalAlpha=1}
+const cols={aimd32:'--c1',aimd128:'--c2',deep:'--c3'};
+async function tick(id){const j=await (await fetch('/api/job/'+id)).json();let h='';
+ for(const a of j.arms){const s=j.state[a],pct=Math.min(100,100*(s.received||0)/j.size);
+  const badge=s.status==='running'?'<span class="badge run">sending</span>':s.status==='queued'?'<span class="badge">waiting</span>':s.status==='done'?'<span class="badge" id="b_'+a+'">done</span>':'<span class="badge no">'+s.status+'</span>';
+  h+=`<div class="arm" id="arm_${a}"><div class="top"><span class="name">${cfg.arms[a]}</span>${badge}</div><div class="bar"><i style="width:${s.status==='done'?100:pct}%"></i></div>
+  <div class="stats"><span>time <b>${s.status==='done'?(s.ms/1000).toFixed(2):(s.elapsed||0).toFixed(1)} s</b></span>`+
+  (s.status==='done'?`<span>goodput <b>${s.goodput_mb_s.toFixed(2)} MB/s</b></span><span>retransmitted <b>${s.retx}</b> of ${s.sent} sent</span><span>avg RTT <b>${s.avg_rtt.toFixed(0)} ms</b></span><span class="ok">&#10003; byte-identical (SHA-256) &middot; <a href="/download/${j.id}/${a}">download</a></span>`:'')+
+  (s.error?`<span class="no">${s.error}</span>`:'')+`</div><canvas></canvas></div>`}
+ $('#armlist').innerHTML=h;
+ const done=j.arms.filter(a=>j.state[a].status==='done');
+ j.arms.forEach(a=>{const s=j.state[a];if(s.trace)spark(document.querySelector('#arm_'+a+' canvas'),s.trace,getComputedStyle(document.documentElement).getPropertyValue(cols[a]))});
+ if(done.length){const best=done.reduce((x,y)=>j.state[x].ms<j.state[y].ms?x:y);const b=document.querySelector('#b_'+best);if(b&&j.finished){b.className='badge win';b.textContent='fastest'}
+  if(j.finished&&done.length>1){const o=done.filter(a=>a!==best).map(a=>`${cfg.arms[a]} ${(j.state[a].ms/j.state[best].ms).toFixed(2)}×`).join(', ');
+   $('#sum').innerHTML=`<div class="sum"><b>${cfg.arms[best]}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s. Others took: ${o}. One run per policy, so treat small gaps as noise.</div>`}}
+ if(j.finished){clearInterval(poll);upd()}}
+</script></body></html>

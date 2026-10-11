@@ -71,6 +71,9 @@ impair: $(BIN_DIR)/impair
 .PHONY: impair
 
 # Reproduce the headline result in virtual time (SEEDS=100 by default; NOTEST=1 skips the test suite)
+drop: smart impair
+	python3 apps/drop/app.py
+
 repro:
 	./repro.sh
 .PHONY: repro
