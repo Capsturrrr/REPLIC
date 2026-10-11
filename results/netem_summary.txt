@@ -33,3 +33,13 @@ sat: AIMD untuned 8.6k | tuned 3.9k | tuned+IW10 3.0k | neural 2.8k
 lossy: 3.9k | 3.5k | 2.9k | 1.7k
 5g: 609 | 505 | 432 | 405
 netem_full.sh now runs aimd0 (untuned), aimd (tuned), aimd10 (tuned+IW10) and neural.
+
+REPLICATE 2 (2026-10-11 20:17, old 3-mode script: UNTUNED aimd, cubic, neural; TCP at 512 B), 5 reps, mean ms:
+path     TCP   AIMD(untuned)  CUBIC  neural  neural/AIMD  Welch p
+lossy    660   3695           5908   1376    0.37         <0.001
+5g       302    678            955    563    0.83         0.30 (n.s.)
+sat     2332   7832           9480   8084    1.03         0.82 (n.s.)
+reorder  712   4457           6271   2473    0.55         0.004
+Raw neural ms: lossy 1228.9 1388.9 1324.2 1653.3 1286.6 | 5g 532.0 526.6 413.2 440.6 903.2 | sat 8017.4 11473.6 5793.9 8514.9 6621.8 | reorder 2630.4 2168.8 2299.0 1778.1 3487.9
+Raw AIMD ms: lossy 3324.0 3361.6 3849.1 3807.7 4134.9 | 5g 852.8 584.6 575.2 676.4 701.4 | sat 7428.5 9082.6 7407.5 7482.1 7758.7 | reorder 4676.2 4983.4 5341.2 4224.6 3058.4
+Run-to-run variation is large (neural lossy 2.14 s in run 1, 1.38 s in run 2; sat 6.95 s vs 8.08 s). Under real netem the neural agent does NOT beat untuned AIMD on satellite and is 1.9-3.5x slower than kernel TCP on every path.
