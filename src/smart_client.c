@@ -46,6 +46,7 @@ int main(int argc, char **argv) {
         else if (ARG("--maxcwnd")) o.max_cwnd = atof(argv[++i]);
         else if (ARG("--pcap")) o.pcap_file = argv[++i];
         else if (ARG("--ref")) o.ref_rate = atof(argv[++i]);
+        else if (ARG("--host")) o.host = argv[++i];   /* server address for a real multi-machine run (default 127.0.0.1) */
         else if (ARG("--dyn")) o.dyn = argv[++i];
         else if (ARG("--reorder")) o.reorder = atoi(argv[++i]);
         else if (ARG("--sack")) use_sack = atoi(argv[++i]);
