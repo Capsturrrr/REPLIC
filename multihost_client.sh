@@ -24,8 +24,8 @@ for i in $(seq $REPS); do
       bbr)   a="--mode bbr" ;;
       deep)  a="--mode deep --dfile results/dqn_chat.txt" ;;
     esac
-    r=$(timeout 300 ./bin/smart_client $a --emu 0 --host $HOST --scenario mh --file /tmp/mh_payload.bin 2>&1 | grep RESULT)
-    log "rep $i RUDP $m: $r"
+    r=$(timeout 180 ./bin/smart_client $a --emu 0 --host $HOST --scenario mh --file /tmp/mh_payload.bin 2>&1 | grep RESULT)
+    log "rep $i RUDP $m: ${r:-NO_RESULT(timeout/fail)}"
   done
 done
 log "== done: send results/multihost_$LABEL.txt back =="
