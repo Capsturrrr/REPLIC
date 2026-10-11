@@ -1,6 +1,7 @@
 #!/bin/bash
 # Kernel-netem evaluation: TCP, plain UDP and RUDP (AIMD, CUBIC, neural) on the same path.
-#   sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]      (build first: make smart)
+#   sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]   (TCP_ONLY=1 sudo -E ... skips RUDP)
+# TCP/UDP use 512-byte payloads, the same as RUDP, so every protocol moves the same bytes.      (build first: make smart)
 # Writes results/netem_<scenario>.txt (also printed). Removes the netem rule on exit.
 sc=${1:-lossy}; REPS=${2:-5}; PKTS=500
 case $sc in
@@ -24,8 +25,9 @@ tc qdisc del dev lo root 2>/dev/null
 tc qdisc add dev lo root netem delay ${D}ms ${J}ms $X loss ${L}% rate $R limit 60 || { echo "tc failed (WSL2 needs the netem kernel module)"; exit 1; }
 log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R packets=$PKTS reps=$REPS"
 log "== kernel TCP and plain UDP =="
-for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 2>&1 | tee -a $OUT; done
-./bin/server >/dev/null 2>&1 & SP=$!
+for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 512 2>&1 | tee -a $OUT; done
+[ -n "$TCP_ONLY" ] && { log "== done (TCP_ONLY) =="; exit 0; }
+./bin/server >/dev/null 2>&1 \& SP=$!
 sleep 0.5
 log "== RUDP (RESULT: scenario,mode,ms,packets,sent,retx,timeouts,fast,avg_rtt,min_rtt,pps,cwnd,reward) =="
 for i in $(seq $REPS); do
