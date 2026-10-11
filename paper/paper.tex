@@ -1,0 +1,87 @@
+\documentclass[10pt,twocolumn]{article}
+\usepackage[a4paper,margin=18mm]{geometry}
+\usepackage{booktabs,graphicx,amsmath,hyperref,microtype}
+
+\setlength{\columnsep}{7mm}
+\title{\vspace{-6mm}\textbf{Tuned Baselines Shrink the Gains:\\ An Honest Evaluation of a Small Learned Congestion Controller\\ in a User-Space Reliable UDP Transport}}
+\author{Harshavardhan Mallela, Rohit Arya, Shloak Sinha\\ \small Vellore Institute of Technology, Vellore, India\\ \small Code and data: \url{https://github.com/Capsturrrr/rudp}}
+\date{}
+\begin{document}\maketitle
+\begin{abstract}
+We built RUDP, a reliable transport over UDP in C (Selective Repeat, adaptive timers, pluggable congestion control), and asked whether a 5--32--32--5 neural network that picks window multipliers can beat classical control. Against \emph{untuned} AIMD the margin looked large; against \emph{tuned} AIMD (window cap and slow-start threshold raised, same timer floor for every policy) it fell to 15--48\% on four of five emulated paths and vanished on a 10\%-loss path. We report a methodology (paired seeds, held-out random paths, a virtual-time build of the real sender calibrated against the real clock) and four extra tests motivated by recent literature: paths that change mid-transfer, a BBR-style baseline, fairness with unequal RTTs and against kernel TCP, and interpretability/certification of the network. A simplified BBR beats the agent on one path. On a Linux kernel (tc/netem) the agent is 65--83\% faster than tuned AIMD but kernel TCP remains 1.5--1.7$\times$ faster. Formal interval-bound certification succeeds only for tiny input perturbations. We also document four measurement mistakes of our own that changed or could have changed conclusions. All results are reproducible with one command.
+\end{abstract}
+
+\section{Introduction}
+Learned congestion control is often reported with large gains over human-designed algorithms, yet recent experimental work finds that the picture is more nuanced~\cite{mazilu}. Gains are sensitive to how the baseline is configured, to path dynamics, to fairness, and to whether the controller can be trusted. We study a deliberately small controller in a transport we control end to end, so that every layer can be inspected.
+
+\textbf{Contributions.} (1) An open, tested user-space reliable transport with a library API and a virtual-time mode that runs the \emph{same C sender} against a simulated path. (2) An evaluation recipe in which baselines are tuned before comparison; we show that tuning removes most of the apparent advantage of the learned policy. (3) Tests of dynamic paths, a model-based baseline, fairness (equal and unequal RTT, kernel TCP), robustness to input noise, distillation into a decision tree, and interval-bound certification. (4) Negative results and a log of our own measurement errors.
+
+\section{System}
+\textbf{Transport.} Packets carry a 13-byte header (sequence, ack, flags, CRC-16, length) and up to 512 payload bytes. The default is Selective Repeat: a 256-packet window, ACKs with a 32-byte selective bitmap, per-packet timers, and an adaptive retransmission timeout shared by all policies. A fuzzer fed $10^6$ corrupted packets to the parser with none accepted (a first byte-sum checksum let about 2\% through, hence CRC-16).
+
+\textbf{Policies.} AIMD (tuned: cap 128, threshold 128), CUBIC~\cite{cubic}, a tabular Q-learner, a BBR-style model-based policy~\cite{bbr}, and the neural agent. The agent is a 5--32--32--5 ReLU network (1,413 weights) that every $\mathrm{clamp}(\mathrm{srtt},100,500)$ ms scores five window factors $\{0.5,0.85,1,1.15,1.5\}$ from RTT growth, loss fraction, window, throughput share and last action. Deployment adds slow start to 64 packets, pacing at $2\,\mathrm{cwnd}/\mathrm{srtt}$, and a hand-over to AIMD when interval loss exceeds 10\%. It was trained by Deep Q-learning in a Python simulator (cap 32) and generalises to a cap of 128.
+
+\textbf{Evaluation harness.} The sender runs against (i) an in-process emulated path, (ii) a user-space UDP proxy on real sockets, (iii) a virtual-time build (same C code, simulated clock and receiver; matched the real clock in 15 of 15 cells) and (iv) Linux tc/netem on loopback with a token-bucket bottleneck. Comparisons use paired seeds, 95\% $t$ intervals and Welch tests; the policy was selected on one seed set and scored on another.
+
+\section{Results}
+\textbf{Tuned baselines.} On five named paths (100 paired seeds, virtual time) the agent needs 15\% (5G-like), 48\% (2\% loss), 42\% (satellite-like) and 41\% (high bandwidth-delay) less time than tuned AIMD, and is not distinguishable on a 10\%-loss path ($-8\%$, n.s.). On 100 random held-out paths its geometric-mean time is $0.53\times$ AIMD's, faster on 89 paths and never more than 20\% slower; tuned CUBIC is $0.98\times$, faster on 51 and $>$20\% slower on 27. An ablation shows that the larger window cap and pacing account for most of the gain; with the agent's original settings it was only about 14\% faster than tuned AIMD.
+
+\begin{table}[t]\centering\small
+\caption{Mean completion time (s) of 3,000 packets, 20 paired seeds, virtual time.}\label{t:bbr}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Path & AIMD & CUBIC & BBR-style & Neural\\\midrule
+5G-like & 2.78 & 7.14 & 2.26 & \textbf{2.21}\\
+Lossy 2\% & 19.79 & 53.25 & \textbf{8.18} & 9.76\\
+Satellite-like & 32.76 & 26.62 & 16.78 & \textbf{11.18}\\
+Fast & 7.83 & 12.45 & 6.23 & \textbf{3.72}\\
+Hostile 10\% & 94.7 & 208.8 & \textbf{92.3} & 99.4\\\bottomrule
+\end{tabular}\end{table}
+
+\textbf{Model-based baseline.} Table~\ref{t:bbr} adds a simplified BBR (bandwidth max-filter, min-RTT, pacing-gain cycle, window $=2\,$BDP, no loss response, ProbeRTT replaced by 10 s min-RTT expiry). It beats tuned AIMD on four paths and is the fastest policy on the 2\%-loss path, so the claim ``the agent beats the established alternatives'' holds on four of five paths, not all. Two defects in our own BBR (a stall at 10\% loss after one stale bandwidth sample; 163 s after a delay jump because min-RTT never expired) were found by these tests and fixed. BBRv3 is reported to degrade above $\approx$2\% random loss; our simplified policy does not, so no claim is made about the Linux implementation.
+
+\begin{table}[t]\centering\small
+\caption{Paths that change mid-transfer: mean time (s) for 4,000 packets, 20 seeds.}\label{t:dyn}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Case & AIMD & CUBIC & BBR-style & Neural\\\midrule
+Bandwidth drop & 13.58 & 17.74 & 13.39 & \textbf{12.72}\\
+Bandwidth rise & 9.21 & 15.10 & 5.00 & \textbf{4.32}\\
+Delay jump & 33.32 & 27.54 & 25.94 & \textbf{19.80}\\
+Hand-over pattern & 12.84 & 21.40 & 10.79 & \textbf{8.18}\\\bottomrule
+\end{tabular}\end{table}
+
+\textbf{Dynamic paths.} A \texttt{--dyn} schedule changes rate and delay during a transfer (Table~\ref{t:dyn}). The agent, trained only on constant paths, is fastest in all four cases (6--53\% faster than tuned AIMD), at the price of 1--6\% retransmissions against 0.5--2\% for AIMD. The cases are hand-made, not recorded traces.
+
+\textbf{Fairness.} Two neural flows on a shared real-socket bottleneck split it evenly with equal RTT (Jain 0.97). With the second flow's RTT longer by 150 ms, two neural flows reach Jain 0.84 (short-RTT flow 71\%) against 0.64 for two AIMD flows (88\%); six pairs per cell, so only the largest gap is clear. Against tuned AIMD the agent takes about 68\% of the link. Against a kernel TCP (CUBIC) flow on the same netem bottleneck it takes 24--34\% of the link (tuned AIMD 5--17\%; three runs per cell), so it does not starve TCP, largely because it is slower than TCP when alone.
+
+\begin{table}[t]\centering\small
+\caption{Linux tc/netem, 500 packets of 512 B, mean time (s), 5 runs (3 on satellite).}\label{t:net}
+\begin{tabular}{@{}lrrrr@{}}\toprule
+Path & TCP & AIMD & Neural & Neural/AIMD\\\midrule
+Lossy (2\%) & 0.88 & 4.75 & 1.35 & 0.29\\
+5G-like & 0.28 & 1.23 & 0.43 & 0.35\\
+Satellite & 1.91 & 16.72 & 2.92 & 0.17\\
+Reordering & 0.94 & 4.06 & 1.64 & 0.40 (n.s.)\\\bottomrule
+\end{tabular}\end{table}
+
+\textbf{Real kernel.} Table~\ref{t:net} repeats the comparison on netem with a separate token-bucket bottleneck. The agent is 65--83\% faster than tuned AIMD (reordering: not significant, $p=0.09$, tuned AIMD is bimodal), but \emph{kernel TCP is 1.5--1.7$\times$ faster than the agent on every path}. We do not claim to beat TCP.
+
+\textbf{Interpretability and trust.} On about 5,500 visited test states the agent is bang-bang (factor 1.5 in 63\% of decisions, 0.5 in 17\%); shuffling any one input changes 16--45\% of decisions, so no input is redundant. A depth-5 decision tree (32 leaves) matches the network's decision on 79\% of unseen states (87\% at depth 8), yet reproduces its completion time within the intervals on four of five paths (9\% slower on the 5G-like path). Gaussian noise (s.d.\ up to 0.2) on the measured inputs changes completion time by at most 12\%. Interval bound propagation~\cite{c3} certifies the chosen action for only 43\% of states at $\pm0.001$, 8\% at $\pm0.003$, 0.2\% at $\pm0.01$ and none at $\pm0.03$, while random sampling in the same boxes finds the action stable in 99\%, 96\%, 83\% and 61\% of cases: robust in practice, not provable. Training for certification is future work.
+
+\section{Threats to Validity and Mistakes}
+Most numbers are from simulation (virtual time), calibrated against the real clock but never against a physical link; the kernel tests are loopback on one laptop with few runs. Tuned baselines are tuned by us; a different tuning could change the outcome. Fairness shares are good to $\sim$10 points. Our BBR is a simplification. We made four measurement errors, all caught and corrected: (i) netem's queue limit counted packets in flight and overflowed on satellite paths; (ii) the AIMD arm was untuned; (iii) TCP sent 1,024-byte payloads against 512 for RUDP; (iv) without a file, the sender emits synthetic 40-byte packets, so RUDP carried about 12$\times$ fewer bytes than TCP in the first kernel runs (found when a goodput exceeded link capacity). A timer defect that hurt the baseline more than the agent also inflated early margins until fixed. After re-running, the kernel ratios changed little, but we report the errors because they could have decided the result.
+
+\section{Related Work}
+Learned controllers include Remy, PCC-Vivace, Aurora and Orca; BBR~\cite{bbr} and CUBIC~\cite{cubic} are the human-designed references. An in-depth experimental comparison finds learned controllers' advantages less consistent than reported~\cite{mazilu}. Fairness generalisation of learned control is studied in Jury~\cite{jury}, and learning with formal certificates in C3~\cite{c3}. Our contribution is not a new algorithm but a small, fully reproducible case study that quantifies how much of a learned gain survives tuned baselines, dynamic paths, a model-based competitor, real-kernel validation and certification.
+
+\section{Conclusion}
+A 1,413-weight network gives a real but smaller-than-advertised gain over tuned AIMD in our transport, is beaten on one path by a BBR-style policy, is level with AIMD at 10\% loss, and does not match kernel TCP. It copes with changing paths, is a polite neighbour of kernel TCP, and tolerates input noise, but cannot yet be formally certified. The most reusable result is the methodology: tune the baselines first, test on held-out and dynamic paths, validate on a real kernel, and publish the mistakes.
+
+\small
+\begin{thebibliography}{9}
+\bibitem{cubic} S. Ha, I. Rhee, L. Xu, ``CUBIC: A New TCP-Friendly High-Speed TCP Variant,'' \emph{ACM SIGOPS OSR} 42(5), 2008.
+\bibitem{bbr} N. Cardwell et al., ``BBR: Congestion-Based Congestion Control,'' \emph{ACM Queue} 14(5), 2016.
+\bibitem{mazilu} A. Mazilu, B. Giacomoni, I. Parisis, ``Learning-Based vs Human-Derived Congestion Control: An In-Depth Experimental Study,'' arXiv:2510.25105, 2025.
+\bibitem{jury} Tian et al., fairness generalizability of learned congestion control (Jury), ACM EuroSys 2025. % TODO: verify title, authors and pages
+\bibitem{c3} Yang et al., ``C3: Learning Congestion Controllers with Formal Certificates,'' arXiv:2412.10915, 2024.
+\end{thebibliography}
+\end{document}
