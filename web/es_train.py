@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import vt, vt_random
 from concurrent.futures import ThreadPoolExecutor
 
+CROSS = os.environ.get("ES_CROSS") == "1"   # odd-numbered paths also carry bursty cross traffic (--vcross), same for the AIMD reference
 MU = float(os.environ.get("ES_MU", "3.0"))      # weight of the fairness penalty max(0, share - 0.5) on paths that carry an AIMD competitor
 LAMBDA = float(os.environ.get("ES_LAMBDA", "1.5")); SIGMA = float(os.environ.get("ES_SIGMA", "0.15")); LR = float(os.environ.get("ES_LR", "0.03"))
 POP = int(os.environ.get("ES_POP", "12")); BATCH = int(os.environ.get("ES_BATCH", "14"))
@@ -22,19 +23,25 @@ rng = random.Random(1); pool = [vt_random.draw(rng) for _ in range(300)]        
 val = [vt_random.draw(random.Random(777 + i)) for i in range(40)]                 # held-out validation (seed 777+i); test set is seed 424242
 ex = ThreadPoolExecutor(os.cpu_count() or 2)
 
+def cross_args(pa, pi):
+    """bursty cross traffic scaled to the path (deterministic per path index)"""
+    if not CROSS or pi % 2 == 0: return ""
+    r = random.Random(5000 + int(pi)); rate = float(pa.split("--rate")[1].split()[0])
+    return f"--vcross {r.uniform(100, 600):.0f}:{r.uniform(200, 1000):.0f}:{rate * r.uniform(0.3, 0.9):.0f}"
+
 def save(th, path): open(path, "w").write(" ".join(f"{x:.9g}" for x in th))
 _ref = {}
 def ref_time(pi, kind, paths):
     k = (kind, pi)
     if k not in _ref:
-        pa, n = paths[pi]; _ref[k] = vt.run("aimd_128", pa, 100 + pi, npk=n, extra="--vcomp 1" if pi % 2 else "")["time"]
+        pa, n = paths[pi]; _ref[k] = vt.run("aimd_128", pa, 100 + pi, npk=n, extra=("--vcomp 1" if (pi % 2 and not CROSS) else "") + " " + cross_args(pa, pi))["time"]
     return _ref[k]
 
 def score(th, idxs, paths, kind, tag, serial=False):
     f = f"{tmp}/{tag}.txt"; save(th, f)
     def one(pi):
-        pa, n = paths[pi]; comp = pi % 2 == 1          # odd-numbered paths carry an AIMD competitor, even ones are single-flow
-        r = vt.run("deep", pa, 100 + pi, npk=n, dfile=f, extra="--vcomp 1" if comp else "")
+        pa, n = paths[pi]; comp = pi % 2 == 1 and not CROSS          # odd-numbered paths carry an AIMD competitor, even ones are single-flow
+        r = vt.run("deep", pa, 100 + pi, npk=n, dfile=f, extra=("--vcomp 1" if comp else "") + " " + cross_args(pa, pi))
         if not r: return 3.0
         pen = MU * max(0.0, r["share"] - 0.5) if comp and r.get("share") is not None else 0.0
         return math.log(r["time"] / ref_time(pi, kind, paths)) + LAMBDA * r["retx"] / n + pen

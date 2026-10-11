@@ -1,0 +1,8 @@
+Evolution-strategy training with bursty cross traffic in the loop (smart_client --vcross, web/es_train.py with ES_CROSS=1)
+Odd-numbered training paths carry random cross traffic (on 100-600 ms, off 200-1000 ms, 30-90% of the bottleneck rate); 150 generations from the default weights.
+Held-out (virtual time, ratio to tuned AIMD in the same situation, geometric mean; default weights -> cross-trained weights):
+  60 paths seed 424242: alone 0.524 -> 0.502, with cross traffic 0.530 -> 0.502, faster on 48 -> 49 of 60
+  60 paths seed 31337 : alone 0.592 -> 0.562, with cross traffic 0.635 -> 0.619, faster on 45 -> 46 of 60
+Five named paths (60 seeds): 5G +3.2% (retx 4 -> 21), lossy -12.0%, satellite -3.4%, fast -1.3%, hostile -1.2% (n.s.)
+Real sockets, bursty cross traffic (8 paired runs): 4.87 s -> 4.53 s, paired difference -341 ms +- 706 ms (not significant); retransmissions 200 -> 218.
+Conclusion: a small, consistent gain in simulation, not significant on real sockets, slightly more retransmissions. Kept as an option (results/dqn_cross.txt), not the default.

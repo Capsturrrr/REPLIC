@@ -132,6 +132,23 @@ static void comp_step(double now) {
     }
 }
 
+
+/* ---- --vcross ON:OFF:PPS (virtual time only): bursty cross traffic on the bottleneck, same model as bin/impair --cross
+   (exponentially distributed on and off periods; during "on" packets arrive at PPS and occupy the shared queue) ---- */
+static double xv_on = 0, xv_off = 0, xv_pps = 0, xv_end = -1, xv_next = 0; static int xv_is_on = 0;
+static double xv_exp(double mean) { return -mean * log(1 - urand()); }
+static void cross_step(double now) {
+    if (xv_pps <= 0 || rate_pps <= 0) return;
+    if (xv_end < 0) xv_end = now + xv_exp(xv_off);
+    while (now >= xv_end) { xv_is_on = !xv_is_on; xv_end += xv_exp(xv_is_on ? xv_on : xv_off); xv_next = now; }
+    if (!xv_is_on) return;
+    while (xv_next <= now) {
+        while (dq_h < dq_t && depart_q[dq_h % QCAP] <= now) dq_h++;
+        if (dq_t - dq_h < queue_cap) { double dep = (last_depart > now ? last_depart : now) + 1000.0 / rate_pps; last_depart = dep; depart_q[dq_t++ % QCAP] = dep; }
+        xv_next += 1000.0 / xv_pps;
+    }
+}
+
 /* ---- in-process receiver for --vt 1: same behaviour as server.c (256-packet Selective Repeat window + 32-byte bitmap,
    or Go-Back-N when use_sack is off) ---- */
 static uint32_t v_exp = 0; static uint8_t v_have[256]; static int v_sr = 1;
@@ -174,7 +191,8 @@ int main(int argc, char **argv) {
         else if (ARG("--trace")) trace = argv[++i];
         else if (ARG("--emu")) emu = atoi(argv[++i]);
         else if (ARG("--vcomp")) comp_on = atoi(argv[++i]);
-        else if (ARG("--vcomp-to")) comp_to = atof(argv[++i]);   /* virtual time: add a backlogged AIMD competitor on the same bottleneck */
+        else if (ARG("--vcomp-to")) comp_to = atof(argv[++i]);
+        else if (ARG("--vcross")) sscanf(argv[++i], "%lf:%lf:%lf", &xv_on, &xv_off, &xv_pps);   /* virtual time: add a backlogged AIMD competitor on the same bottleneck */
         else if (ARG("--scenario")) scenario = argv[++i];
         else if (ARG("--maxcwnd")) { maxcwnd = atof(argv[++i]); cap_set = 1; }
         else if (ARG("--pcap")) pcapp = argv[++i];
@@ -296,6 +314,7 @@ int main(int argc, char **argv) {
     while (base < npk) {
         double now = now_ms();
         if (vt && comp_on) comp_step(now);
+        if (vt && xv_pps > 0) cross_step(now);
         /* 1. release forward packets whose arrival time has come */
         pend_t *p;
         while ((p = rfront(&fwd)) && p->t <= now) {
