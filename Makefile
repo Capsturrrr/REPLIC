@@ -17,13 +17,13 @@ $(BIN_DIR)/client: $(SRC_DIR)/client.c $(COMMON_SRC) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^
 
 clean:
-	rm -rf $(BIN_DIR)
+	rm -rf $(BIN_DIR) lib build
 
 .PHONY: all clean
 
 # Smart-RUDP (RL congestion control) -- needs -lm; server is built per port
-$(BIN_DIR)/smart_client: $(SRC_DIR)/smart_client.c $(SRC_DIR)/rl_cc.h $(COMMON_SRC) | $(BIN_DIR)
-	$(CC) $(CFLAGS) -D_GNU_SOURCE -o $@ $(SRC_DIR)/smart_client.c $(COMMON_SRC) -lm
+$(BIN_DIR)/smart_client: $(SRC_DIR)/smart_client.c $(SRC_DIR)/rudp_sender.c $(SRC_DIR)/rudp.h $(SRC_DIR)/rl_cc.h $(SRC_DIR)/deep_cc.h $(COMMON_SRC) | $(BIN_DIR)
+	$(CC) $(CFLAGS) -D_GNU_SOURCE -o $@ $(SRC_DIR)/smart_client.c $(SRC_DIR)/rudp_sender.c $(COMMON_SRC) -lm
 
 smart: $(BIN_DIR)/server $(BIN_DIR)/smart_client
 .PHONY: smart
@@ -79,3 +79,24 @@ repro:
 figures:
 	python3 web/make_figures.py
 .PHONY: figures
+
+# ---- librudp: the sender as a static library with a small public API (src/rudp.h) ----
+PREFIX ?= /usr/local
+lib/librudp.a: $(SRC_DIR)/rudp_sender.c $(SRC_DIR)/common.c $(SRC_DIR)/rudp.h $(SRC_DIR)/common.h $(SRC_DIR)/rl_cc.h $(SRC_DIR)/deep_cc.h
+	@mkdir -p lib build
+	$(CC) $(CFLAGS) -D_GNU_SOURCE -c -o build/rudp_sender.o $(SRC_DIR)/rudp_sender.c
+	$(CC) $(CFLAGS) -c -o build/common.o $(SRC_DIR)/common.c
+	ar rcs $@ build/rudp_sender.o build/common.o
+lib: lib/librudp.a
+$(BIN_DIR)/example_send: examples/send_buffer.c lib/librudp.a | $(BIN_DIR)
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -o $@ examples/send_buffer.c lib/librudp.a -lm
+examples: $(BIN_DIR)/example_send
+$(BIN_DIR)/test_api: tests/test_api.c lib/librudp.a | $(BIN_DIR)
+	$(CC) $(CFLAGS) -I$(SRC_DIR) -o $@ tests/test_api.c lib/librudp.a -lm
+install: lib/librudp.a $(BIN_DIR)/server $(BIN_DIR)/smart_client
+	install -d $(DESTDIR)$(PREFIX)/lib $(DESTDIR)$(PREFIX)/include $(DESTDIR)$(PREFIX)/bin
+	install -m 644 lib/librudp.a $(DESTDIR)$(PREFIX)/lib/
+	install -m 644 $(SRC_DIR)/rudp.h $(DESTDIR)$(PREFIX)/include/
+	install -m 755 $(BIN_DIR)/server $(DESTDIR)$(PREFIX)/bin/rudp-server
+	install -m 755 $(BIN_DIR)/smart_client $(DESTDIR)$(PREFIX)/bin/rudp-send
+.PHONY: lib examples install

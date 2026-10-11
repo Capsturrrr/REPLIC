@@ -60,6 +60,28 @@ python3 web/vt_ablate.py       # ablation in the real sender
 python3 web/vt_calib.py        # virtual time vs real clock
 ```
 
+## Use it as a library
+
+The sender is a C library (`lib/librudp.a`, header `src/rudp.h`); `smart_client` is just a command-line wrapper around it.
+
+```c
+#include "rudp.h"
+rudp_options_t o; rudp_options_default(&o);
+o.port = 8888; o.mode = "deep"; o.weights_file = "results/dqn_chat.txt";   // or "aimd", "cubic"
+rudp_stats_t st;
+int rc = rudp_send(&o, buf, len, &st);          // blocks until every byte is acknowledged; rudp_send_file() for a file
+if (rc != RUDP_OK) fprintf(stderr, "%s\n", rudp_strerror(rc));
+```
+
+```bash
+make lib examples                 # lib/librudp.a and bin/example_send
+RUDP_OUT=/tmp/out.bin ./bin/server &  ./bin/example_send 8888 some_file
+sudo make install                 # librudp.a, rudp.h, rudp-server, rudp-send under /usr/local
+```
+
+Limits: one transfer per call (connect, send, close), up to 32 MB, not thread-safe (process-global state), IPv4 only. The refactor from the old
+single program was checked by comparing 34 deterministic virtual-time results before and after: byte-for-byte identical (`tests/test_api.sh` covers the API).
+
 ## Layout
 
 See `docs/ARCHITECTURE.md` for the design. In short: `src/` (C: wire format, server, senders, agents, impairment proxy, chat), `web/` (Python:

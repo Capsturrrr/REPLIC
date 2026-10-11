@@ -8,3 +8,4 @@ logs/*.csv
 *.swp
 .DS_Store
 *.vgcore
+lib/

@@ -35,6 +35,8 @@ timeout 120 ./bin/smart_client --mode deep --init 10 --dfile results/dqn_chat.tx
 cmp -s /tmp/t_in.bin /tmp/t_out.bin && echo "ok:   400 kB received intact through 5% loss ($(grep -c . /tmp/t_cli.log) lines of client output)" || { echo "FAIL: file transfer corrupted or incomplete"; fail=1; }
 step "two clients at the same time on one server (separate sessions, both files byte-identical)"
 bash tests/test_multiclient.sh || fail=1
+step "librudp public API (buffer transfers, argument checks, state reset between calls)"
+bash tests/test_api.sh || fail=1
 step "web gateway <-> terminal chat interop (256-packet SR window, 32-byte bitmap, CRC-16), 20% loss both ways"; bash tests/chat_interop.sh || fail=1
 step "simulator and controllers"; python3 tests/test_sim.py || fail=1
 echo; [ $fail = 0 ] && echo "ALL TESTS PASSED" || echo "SOME TESTS FAILED"; exit $fail
