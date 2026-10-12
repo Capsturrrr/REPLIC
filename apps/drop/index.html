@@ -65,7 +65,7 @@ function spark(cv,pts,color,mx,tx){const c=cv.getContext('2d'),d=devicePixelRati
  c.font=`${10*d}px system-ui`;c.fillStyle=fg;c.strokeStyle=fg;c.lineWidth=d;
  c.globalAlpha=.25;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke()}
  c.globalAlpha=.7;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.fillText(String(Math.round(mx*k/4)),2*d,y+3*d)}
- for(let k=0;k<=4;k++){const x=L+pw*k/4;c.fillText((tx*k/4).toFixed(tx<10?1:0)+'s',x-8*d,H-3*d)}
+ for(let k=0;k<=4;k++){const x=L+pw*k/4;c.fillText((tx*k/4000).toFixed(tx<10000?1:0)+'s',x-8*d,H-3*d)}
  c.fillText('window (packets) vs time (s); same scale on every arm',L,10*d);c.globalAlpha=1;
  c.strokeStyle=color;c.lineWidth=2*d;c.beginPath();
  pts.forEach((p,i)=>{const x=L+p[0]/tx*pw,y=T+ph*(1-p[1]/mx);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
