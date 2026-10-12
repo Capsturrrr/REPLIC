@@ -23,7 +23,7 @@ button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:12px;align-
 .badge.win{color:var(--good);border-color:var(--good)}.badge.run{color:var(--acc);border-color:var(--acc)}
 .bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 8px}.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
 .stats{display:flex;gap:22px;flex-wrap:wrap;font-size:13.5px;color:var(--mute)}.stats b{color:var(--text);font-variant-numeric:tabular-nums}
-canvas{width:100%;height:70px;display:block;margin-top:10px}
+canvas{width:100%;height:120px;display:block;margin-top:10px}
 .ok{color:var(--good)}.no{color:var(--bad)}a{color:var(--acc)}
 .sum{background:var(--panel);border:1px solid var(--good);border-radius:12px;padding:14px 16px;margin:6px 0 16px}
 footer{color:var(--mute);font-size:12.5px;margin-top:30px;line-height:1.5}
@@ -60,10 +60,15 @@ $('#go').onclick=async()=>{$('#msg').textContent='';if(file.size>cfg.max_bytes){
  $('#go').disabled=true;const r=await fetch('/api/start',{method:'POST',body:file,headers:{'X-Filename':file.name,'X-Profile':sel.profile,'X-Arms':[...sel.arms].join(',')}});
  const j=await r.json();if(!r.ok){$('#msg').textContent=j.error;upd();return}
  $('#results').innerHTML='<h2>Race</h2><div id="sum"></div><div id="armlist"></div>';clearInterval(poll);poll=setInterval(()=>tick(j.id),250);tick(j.id)};
-function spark(cv,pts,color){const c=cv.getContext('2d'),W=cv.width=cv.clientWidth*devicePixelRatio,H=cv.height=cv.clientHeight*devicePixelRatio;c.clearRect(0,0,W,H);if(pts.length<2)return;
- const mx=Math.max(...pts.map(p=>p[1]),4),tx=pts[pts.length-1][0]||1;c.strokeStyle=color;c.lineWidth=2*devicePixelRatio;c.beginPath();
- pts.forEach((p,i)=>{const x=p[0]/tx*W,y=H-p[1]/mx*(H-6)-3;i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();
- c.fillStyle=getComputedStyle(document.body).color;c.globalAlpha=.55;c.font=`${11*devicePixelRatio}px system-ui`;c.fillText('window (packets), peak '+mx.toFixed(0),4,12*devicePixelRatio);c.globalAlpha=1}
+function spark(cv,pts,color,mx,tx){const c=cv.getContext('2d'),d=devicePixelRatio,W=cv.width=cv.clientWidth*d,H=cv.height=cv.clientHeight*d;c.clearRect(0,0,W,H);if(pts.length<2)return;
+ const L=34*d,R=6*d,T=16*d,B=16*d,pw=W-L-R,ph=H-T-B,fg=getComputedStyle(document.body).color;
+ c.font=`${10*d}px system-ui`;c.fillStyle=fg;c.strokeStyle=fg;c.lineWidth=d;
+ c.globalAlpha=.25;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke()}
+ c.globalAlpha=.7;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.fillText(String(Math.round(mx*k/4)),2*d,y+3*d)}
+ for(let k=0;k<=4;k++){const x=L+pw*k/4;c.fillText((tx*k/4).toFixed(tx<10?1:0)+'s',x-8*d,H-3*d)}
+ c.fillText('window (packets) vs time (s); same scale on every arm',L,10*d);c.globalAlpha=1;
+ c.strokeStyle=color;c.lineWidth=2*d;c.beginPath();
+ pts.forEach((p,i)=>{const x=L+p[0]/tx*pw,y=T+ph*(1-p[1]/mx);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
 const cols={aimd32:'--c1',aimd128:'--c2',deep:'--c3'};
 async function tick(id){const j=await (await fetch('/api/job/'+id)).json();let h='';
  for(const a of j.arms){const s=j.state[a],pct=Math.min(100,100*(s.received||0)/j.size);
@@ -74,7 +79,8 @@ async function tick(id){const j=await (await fetch('/api/job/'+id)).json();let h
   (s.error?`<span class="no">${s.error}</span>`:'')+`</div><canvas></canvas></div>`}
  $('#armlist').innerHTML=h;
  const done=j.arms.filter(a=>j.state[a].status==='done');
- j.arms.forEach(a=>{const s=j.state[a];if(s.trace)spark(document.querySelector('#arm_'+a+' canvas'),s.trace,getComputedStyle(document.documentElement).getPropertyValue(cols[a]))});
+ const MX=Math.max(4,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[1]))),TX=Math.max(1,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[0])));
+ j.arms.forEach(a=>{const s=j.state[a];if(s.trace)spark(document.querySelector('#arm_'+a+' canvas'),s.trace,getComputedStyle(document.documentElement).getPropertyValue(cols[a]),MX,TX)});
  if(done.length){const best=done.reduce((x,y)=>j.state[x].ms<j.state[y].ms?x:y);const b=document.querySelector('#b_'+best);if(b&&j.finished){b.className='badge win';b.textContent='fastest'}
   if(j.finished&&done.length>1){const o=done.filter(a=>a!==best).map(a=>`${cfg.arms[a]} ${(j.state[a].ms/j.state[best].ms).toFixed(2)}×`).join(', ');
    $('#sum').innerHTML=`<div class="sum"><b>${cfg.arms[best]}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s. Others took: ${o}. One run per policy, so treat small gaps as noise.</div>`}}
