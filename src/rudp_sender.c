@@ -567,9 +567,20 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     fin.seq_num = base_seq + (uint32_t)npk; fin.flags = FLAG_FIN;
     int l = rudp_pack(&fin, buf, sizeof buf);
     if (!vt) {
-    sendto(sockfd, buf, (size_t)l, 0, (struct sockaddr *)&sa, sizeof sa);
-    tv.tv_sec = 0; tv.tv_usec = 200000; setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
-    recvfrom(sockfd, buf, sizeof buf, 0, NULL, NULL); }
+    /* fix: the FIN used to be sent once; if it was lost the server never closed (and never flushed its output file).
+       Retransmit it until the matching ACK arrives, at most 12 tries, 150 ms apart. */
+    uint8_t fb[BUFFER_SIZE]; memcpy(fb, buf, (size_t)l);
+    for (int tryn = 0; tryn < 12; tryn++) {
+        sendto(sockfd, fb, (size_t)l, 0, (struct sockaddr *)&sa, sizeof sa);
+        double tend = now_ms() + 150; int got = 0;
+        while (now_ms() < tend && !got) {
+            struct pollfd pf = { sockfd, POLLIN, 0 };
+            if (poll(&pf, 1, 20) <= 0) continue;
+            uint8_t rb[BUFFER_SIZE]; ssize_t rn = recvfrom(sockfd, rb, sizeof rb, 0, NULL, NULL);
+            rudp_packet_t rp; if (rn > 0 && rudp_unpack(rb, (size_t)rn, &rp) == 0 && (rp.flags & FLAG_ACK) && rp.ack_num == fin.seq_num + 1) got = 1;
+        }
+        if (got) break;
+    } }
 
     if (use_rl && train && qfile) rl_save(&ag, qfile);
     if (res) {
