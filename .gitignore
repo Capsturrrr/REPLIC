@@ -9,3 +9,11 @@ logs/*.csv
 .DS_Store
 *.vgcore
 lib/
+
+# secrets: never commit
+.env
+.env.*
+*.pem
+*.key
+secrets*
+*token*
