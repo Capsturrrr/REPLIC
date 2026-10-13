@@ -1,0 +1,49 @@
+backend: UDP impairment proxy
+seeds per cell requested: 30
+families:
+  dc_microburst: datacenter-like: sub-ms to 1 ms one-way delay, 8-12 MB/s, shallow 20-40 kB buffer, no random loss, short 1-3 ms line-rate cross-traffic bursts every 20-40 ms
+  enterprise_campus: enterprise campus: 2-8 ms one-way delay, 0-2 ms jitter, up to 0.1% loss, 2.5-5 MB/s, 60-120 kB buffer, moderate on/off cross traffic
+  cellular_highlat: high-latency cellular: 40-120 ms one-way delay, 10-40 ms jitter, 0.5-3% loss, 150-600 kB/s, 20-50 kB buffer
+
+LIMITS
+  * path families are our own parameter ranges, not measurements of real networks
+  * dc_microburst cross traffic is a synthetic on/off process in the proxy; it does not exist under netem (the netem backend keeps delay/jitter/loss/rate/buffer only)
+  * with n=30, p99 interpolates between the two largest samples; report it as a point estimate
+  * the proxy impairs the forward path (delay both ways, loss/queue forward only); netem on lo impairs both directions -- do not mix the two in one comparison
+  * a single 1 MB transfer per run: short-flow behaviour (slow start, handshake) dominates on dc_microburst
+  * confidence intervals describe the sampling error over drawn paths and run noise together, not any one real path
+
+cellular_highlat   aimd       n_ok 30/30  mean   12959.6 [11083.8,14835.4]  median   12124.3  p95   20867.1  p99   23191.0
+cellular_highlat   bbr        n_ok 30/30  mean    8028.5 [6600.7,9456.3]  median    7326.9  p95   12516.7  p99   20678.1
+cellular_highlat   cubic      n_ok 30/30  mean   13563.2 [10897.4,16229.0]  median   12129.5  p95   28763.5  p99   30546.9
+cellular_highlat   neural     n_ok 30/30  mean    7729.2 [6734.1,8724.4]  median    7266.2  p95   12476.6  p99   13960.4
+cellular_highlat   smart      n_ok 30/30  mean    6681.8 [5933.8,7429.9]  median    6627.2  p95   10099.9  p99   10226.0
+cellular_highlat   smart+fec  n_ok 30/30  mean    5185.6 [4727.5,5643.7]  median    5109.3  p95    7262.9  p99    7764.1
+dc_microburst      aimd       n_ok 30/30  mean     331.0 [295.7,366.2]  median     320.4  p95     464.4  p99     521.5
+dc_microburst      bbr        n_ok 30/30  mean     236.3 [204.2,268.4]  median     217.4  p95     370.9  p99     456.0
+dc_microburst      cubic      n_ok 30/30  mean     377.3 [306.4,448.2]  median     346.6  p95     659.3  p99     959.4
+dc_microburst      neural     n_ok 30/30  mean     486.2 [403.1,569.3]  median     427.9  p95     873.4  p99    1161.4
+dc_microburst      smart      n_ok 30/30  mean     480.6 [427.4,533.9]  median     466.8  p95     716.3  p99     884.9
+dc_microburst      smart+fec  n_ok 30/30  mean     502.6 [436.8,568.4]  median     469.8  p95     737.8  p99    1061.4
+enterprise_campus  aimd       n_ok 30/30  mean     433.3 [387.4,479.2]  median     432.3  p95     666.0  p99     703.9
+enterprise_campus  bbr        n_ok 30/30  mean     426.4 [390.0,462.9]  median     419.7  p95     583.9  p99     636.1
+enterprise_campus  cubic      n_ok 30/30  mean     423.0 [378.1,468.0]  median     406.5  p95     646.7  p99     759.2
+enterprise_campus  neural     n_ok 30/30  mean     392.4 [336.4,448.4]  median     386.4  p95     516.1  p99     898.3
+enterprise_campus  smart      n_ok 30/30  mean     365.8 [333.3,398.3]  median     356.6  p95     501.4  p99     579.8
+enterprise_campus  smart+fec  n_ok 30/30  mean     388.9 [354.7,423.0]  median     375.2  p95     524.3  p99     578.9
+
+cellular_highlat   aimd       vs cubic     ratio 1.008 [0.860,1.181] faster 12/30 p_t 0.9175 p_wilcoxon 0.5561 p_holm 0.9175
+cellular_highlat   bbr        vs cubic     ratio 0.622 [0.518,0.747] faster 24/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+cellular_highlat   neural     vs cubic     ratio 0.615 [0.512,0.738] faster 25/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+cellular_highlat   smart      vs cubic     ratio 0.536 [0.453,0.634] faster 27/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+cellular_highlat   smart+fec  vs cubic     ratio 0.423 [0.351,0.509] faster 29/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+dc_microburst      aimd       vs cubic     ratio 0.934 [0.786,1.110] faster 18/30 p_t 0.4249 p_wilcoxon 0.4645 p_holm 0.4249
+dc_microburst      bbr        vs cubic     ratio 0.655 [0.546,0.785] faster 24/30 p_t 0.0000 p_wilcoxon 0.0001 p_holm 0.0002
+dc_microburst      neural     vs cubic     ratio 1.323 [1.119,1.564] faster 9/30 p_t 0.0019 p_wilcoxon 0.0032 p_holm 0.0038
+dc_microburst      smart      vs cubic     ratio 1.356 [1.170,1.572] faster 6/30 p_t 0.0002 p_wilcoxon 0.0001 p_holm 0.0007
+dc_microburst      smart+fec  vs cubic     ratio 1.407 [1.211,1.634] faster 4/30 p_t 0.0001 p_wilcoxon 0.0000 p_holm 0.0003
+enterprise_campus  aimd       vs cubic     ratio 1.022 [0.926,1.126] faster 17/30 p_t 0.6591 p_wilcoxon 0.9838 p_holm 1.0000
+enterprise_campus  bbr        vs cubic     ratio 1.018 [0.929,1.115] faster 13/30 p_t 0.6950 p_wilcoxon 0.2894 p_holm 1.0000
+enterprise_campus  neural     vs cubic     ratio 0.913 [0.836,0.997] faster 20/30 p_t 0.0442 p_wilcoxon 0.0606 p_holm 0.1768
+enterprise_campus  smart      vs cubic     ratio 0.873 [0.811,0.939] faster 24/30 p_t 0.0007 p_wilcoxon 0.0002 p_holm 0.0036
+enterprise_campus  smart+fec  vs cubic     ratio 0.927 [0.852,1.009] faster 21/30 p_t 0.0775 p_wilcoxon 0.0879 p_holm 0.2325

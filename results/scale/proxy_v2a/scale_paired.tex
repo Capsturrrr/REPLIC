@@ -1,0 +1,15 @@
+% paired comparison, matched on the drawn path (seed); ratio < 1 means the policy finished faster than the reference
+\begin{table*}[t]\centering\footnotesize
+\caption{Paired completion-time ratio versus the reference (same seed $\Rightarrow$ same path). Geometric mean with 95\% $t$-interval on the log ratio; Holm-adjusted paired $t$ $p$-value within each family and reference. Ratio $<1$: faster than the reference.}
+\label{tab:scalepaired}\begin{tabular}{lllrrr}\toprule
+Family & Policy & vs & ratio [95\% CI] & faster in & $p_{Holm}$\\\midrule
+cellular\_highlat & aimd & cubic & 1.15 [1.00, 1.31] & 10/30 & 0.048 \\
+cellular\_highlat & aimd32 & cubic & 1.37 [1.14, 1.65] & 8/30 & 0.003 \\
+cellular\_highlat & bbr & cubic & 0.60 [0.51, 0.71] & 25/30 & $<$0.001 \\
+cellular\_highlat & smart & cubic & 0.57 [0.47, 0.68] & 25/30 & $<$0.001 \\
+cellular\_highlat & smart+fec & cubic & 0.49 [0.41, 0.58] & 28/30 & $<$0.001 \\
+enterprise\_campus & aimd & cubic & 0.96 [0.92, 1.01] & 21/30 & 0.193 \\
+enterprise\_campus & bbr & cubic & 1.10 [1.04, 1.15] & 7/30 & 0.002 \\
+enterprise\_campus & smart & cubic & 0.94 [0.90, 0.97] & 24/30 & 0.006 \\
+enterprise\_campus & smart+fec & cubic & 1.02 [0.98, 1.07] & 12/30 & 0.275 \\
+\bottomrule\end{tabular}\end{table*}

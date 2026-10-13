@@ -1,0 +1,36 @@
+backend: UDP impairment proxy (forward-path loss, uniform jitter, synthetic cross traffic)
+seeds per cell requested: 30
+families:
+  dc_microburst: datacenter-like: sub-ms to 1 ms one-way delay, 8-12 MB/s, shallow 20-40 kB buffer, no random loss, short 1-3 ms line-rate cross-traffic bursts every 20-40 ms
+  enterprise_campus: enterprise campus: 2-8 ms one-way delay, 0-2 ms jitter, up to 0.1% loss, 2.5-5 MB/s, 60-120 kB buffer, moderate on/off cross traffic
+  cellular_highlat: high-latency cellular: 40-120 ms one-way delay, 10-40 ms jitter, 0.5-3% loss, 150-600 kB/s, 20-50 kB buffer
+
+LIMITS
+  * path families are our own parameter ranges, not measurements of real networks
+  * dc_microburst cross traffic is a synthetic on/off process in the proxy; it does not exist under netem (the netem backend keeps delay/jitter/loss/rate/buffer only)
+  * with n=30, p99 interpolates between the two largest samples; report it as a point estimate
+  * the proxy impairs the forward path (delay both ways, loss/queue forward only); netem on lo impairs both directions -- do not mix the two in one comparison
+  * a single 1 MB transfer per run: short-flow behaviour (slow start, handshake) dominates on dc_microburst
+  * confidence intervals describe the sampling error over drawn paths and run noise together, not any one real path
+
+cellular_highlat   aimd       n_ok 30/30  mean   12882.9 [10924.2,14841.6]  median   12294.5  p95   20135.4  p99   26012.8
+cellular_highlat   aimd32     n_ok 30/30  mean   14936.3 [13279.5,16593.1]  median   15754.0  p95   21364.5  p99   21732.0
+cellular_highlat   bbr        n_ok 30/30  mean    6610.6 [5624.9,7596.4]  median    6462.4  p95   10351.5  p99   15492.9
+cellular_highlat   cubic      n_ok 30/30  mean   12455.3 [9408.9,15501.7]  median   10405.5  p95   29802.5  p99   34385.9
+cellular_highlat   smart      n_ok 30/30  mean    6098.9 [5500.1,6697.8]  median    5775.6  p95    8513.8  p99    8780.6
+cellular_highlat   smart+fec  n_ok 30/30  mean    5200.0 [4755.3,5644.7]  median    5016.1  p95    7045.2  p99    7935.9
+enterprise_campus  aimd       n_ok 30/30  mean     364.1 [329.8,398.5]  median     358.8  p95     496.2  p99     584.0
+enterprise_campus  bbr        n_ok 30/30  mean     412.1 [378.4,445.8]  median     409.0  p95     569.2  p99     576.7
+enterprise_campus  cubic      n_ok 30/30  mean     378.1 [343.4,412.7]  median     367.4  p95     546.0  p99     584.0
+enterprise_campus  smart      n_ok 30/30  mean     352.5 [322.1,382.8]  median     345.6  p95     505.5  p99     533.2
+enterprise_campus  smart+fec  n_ok 30/30  mean     386.2 [352.5,419.9]  median     384.0  p95     548.8  p99     577.4
+
+cellular_highlat   aimd       vs cubic     ratio 1.145 [1.002,1.309] faster 10/30 p_t 0.0475 p_wilcoxon 0.0384 p_holm 0.0475
+cellular_highlat   aimd32     vs cubic     ratio 1.373 [1.144,1.647] faster 8/30 p_t 0.0013 p_wilcoxon 0.0028 p_holm 0.0027
+cellular_highlat   bbr        vs cubic     ratio 0.599 [0.509,0.706] faster 25/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+cellular_highlat   smart      vs cubic     ratio 0.567 [0.471,0.681] faster 25/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+cellular_highlat   smart+fec  vs cubic     ratio 0.487 [0.407,0.583] faster 28/30 p_t 0.0000 p_wilcoxon 0.0000 p_holm 0.0000
+enterprise_campus  aimd       vs cubic     ratio 0.962 [0.918,1.007] faster 21/30 p_t 0.0964 p_wilcoxon 0.0185 p_holm 0.1929
+enterprise_campus  bbr        vs cubic     ratio 1.096 [1.044,1.149] faster 7/30 p_t 0.0006 p_wilcoxon 0.0005 p_holm 0.0022
+enterprise_campus  smart      vs cubic     ratio 0.935 [0.898,0.974] faster 24/30 p_t 0.0020 p_wilcoxon 0.0010 p_holm 0.0061
+enterprise_campus  smart+fec  vs cubic     ratio 1.024 [0.980,1.071] faster 12/30 p_t 0.2755 p_wilcoxon 0.3085 p_holm 0.2755

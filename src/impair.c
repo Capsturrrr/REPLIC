@@ -36,6 +36,7 @@ static double urand(void) { return rand() / (RAND_MAX + 1.0); }
 
 int main(int argc, char **argv) {
     flow_t fl[MAXF]; int nf = 0, queue = 50; double delay = 10, jitter = 0, loss = 0, rate = 0, xdelay = 0; unsigned seed = 1;   /* --xdelay ms: extra ACK-path delay for the second flow (unequal RTTs) */
+    double rloss = 0; int reorder = 0;   /* --rloss pct: loss on the ACK path; --reorder 1: independent per-packet jitter (netem-like) instead of in-order clamping */
     double x_on = 0, x_off = 0, x_pps = 0;   /* --cross ON_MS:OFF_MS:PPS bursty cross traffic that shares the bottleneck (exponential on/off periods) */
     int pend_num = -1;
     for (int i = 1; i < argc; i++) {
@@ -44,7 +45,7 @@ int main(int argc, char **argv) {
             double v = atof(argv[++i]);
             if (!strcmp(argv[i - 1], "--delay")) delay = v; else if (!strcmp(argv[i - 1], "--jitter")) jitter = v;
             else if (!strcmp(argv[i - 1], "--loss")) loss = v; else if (!strcmp(argv[i - 1], "--rate")) rate = v;
-            else if (!strcmp(argv[i - 1], "--queue")) queue = (int)v; else if (!strcmp(argv[i - 1], "--seed")) seed = (unsigned)v; else if (!strcmp(argv[i - 1], "--xdelay")) xdelay = v;
+            else if (!strcmp(argv[i - 1], "--queue")) queue = (int)v; else if (!strcmp(argv[i - 1], "--seed")) seed = (unsigned)v; else if (!strcmp(argv[i - 1], "--xdelay")) xdelay = v; else if (!strcmp(argv[i - 1], "--rloss")) rloss = v; else if (!strcmp(argv[i - 1], "--reorder")) reorder = (int)v;
         } else if (nf < MAXF) {
             int l, t;
             if (sscanf(argv[i], "%d:%d", &l, &t) == 2) { memset(&fl[nf], 0, sizeof fl[nf]); fl[nf].in = l; fl[nf].out = t; nf++; }
@@ -93,14 +94,14 @@ int main(int argc, char **argv) {
                         dep = (last_dep > t ? last_dep : t) + 1000.0 / rate; last_dep = dep;
                     }
                     double due = dep + delay + (jitter > 0 ? (urand() * 2 - 1) * jitter : 0);
-                    if (due < last_due_f) due = last_due_f;
-                    last_due_f = due;
+                    if (!reorder) { if (due < last_due_f) due = last_due_f; last_due_f = due; }
                     if (fw.t - fw.h >= RING) continue;
                     item_t *it = &fw.q[fw.t % RING]; it->due = due; it->len = n; it->flow = f; memcpy(it->d, buf, (size_t)n); fw.t++;
                     fl[f].fwd++;
                 } else {
                     lane_t *ln = &fl[f].rv;
-                    double due = t + delay + (f == 1 ? xdelay : 0) + (jitter > 0 ? (urand() * 2 - 1) * jitter : 0); if (due < ln->last_due) due = ln->last_due; ln->last_due = due;
+                    if (rloss > 0 && urand() * 100.0 < rloss) { drops_rand++; continue; }
+                    double due = t + delay + (f == 1 ? xdelay : 0) + (jitter > 0 ? (urand() * 2 - 1) * jitter : 0); if (!reorder) { if (due < ln->last_due) due = ln->last_due; ln->last_due = due; }
                     if (ln->t - ln->h >= RING) continue;
                     item_t *it = &ln->q[ln->t % RING]; it->due = due; it->len = n; it->flow = f; memcpy(it->d, buf, (size_t)n); ln->t++;
                 }

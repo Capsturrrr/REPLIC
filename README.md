@@ -9,6 +9,12 @@ tooling to test all of it honestly.
 
 **Team:** Harshavardhan Mallela (24BAI0274), Rohit Arya (24BCE0819), Shloak Sinha (24BDS0378). Computer Networks, VIT Vellore, faculty Anuradha G.
 
+## Final report and figures (v2)
+
+* `docs/FINAL_REPORT.md`: the final report (results first, then problems found, then honest limits).
+* `docs/figures_v2/`: 12 figures regenerated from the raw CSVs by `python3 make_report_figures.py`.
+* Poise vs AIMD on 30 high-latency cellular paths (paired): 0.41x the time of original AIMD (window 32) and 0.50x that of tuned AIMD (window 128), faster on 30 of 30 paths. Kernel TCP is still faster than Poise on Linux netem; see the report's section 6.
+
 ## Headline results
 
 Completion time of a transfer, neural agent against **tuned** baselines (AIMD with window cap 128, CUBIC with cap 128), same transport,
@@ -118,7 +124,7 @@ diagram `network/topology_final.png`. `network/rudp.lua` is a Wireshark dissecto
 
 ## Status
 
-Phases 0 to 7 (handshake, Go-Back-N, AIMD, netem, benchmarks), then Smart-RUDP, Selective Repeat, performance work, hardening and the real-socket and
+Phases 0 to 7 (handshake, Go-Back-N, AIMD, netem, benchmarks), then Poise-RUDP, Selective Repeat, performance work, hardening and the real-socket and
 virtual-time validation described in the report. Case study and video due 21 Oct 2026.
 
 ## Setup (one-time, per machine)

@@ -1,0 +1,46 @@
+\section{Multi-Flow Coexistence and Fairness Analysis}
+\label{sec:fairness}
+
+\subsection{The gap: a learned window controller that ignores its neighbours}
+The reward of Section~\ref{sec:mdp} scores only the agent's own delivery rate, delay and loss. Nothing in it penalises taking queue space from other flows, so a policy that is optimal for one flow can still be a \emph{bandwidth bully}. We measure this directly rather than assume it.
+
+\subsection{Fairness penalty}
+\textbf{Formulation [formulated, not trained].} Let $\rho_t=\overline{\mathrm{RTT}}_t/\mathrm{RTT}_{\min}$ and let $\delta_t=\rho_t-\rho_{t-1}$ be its gradient over one control interval. We add to the reward of Eq.~(1)
+\begin{equation}
+r'_t \;=\; r_t \;-\; \lambda\,\mathbb{1}[a_t>1]\;\max\{0,\ \rho_t-\rho_0\}\;\bigl(1+\kappa\,\max\{0,\delta_t\}\bigr),
+\end{equation}
+so that actions which inflate the window while the queue is already building (high $\rho_t$, positive $\delta_t$) are charged, and actions that hold or shrink the window are not. We have \emph{not} retrained the network with $r'_t$.
+
+\textbf{Implemented stand-in [measured].} The deployable analogue is an inference-time guard (\texttt{--polite} $\rho^\star$ in the sender). When $\rho_t\ge\rho^\star$, the RTT has risen by more than twice its deviation above the base RTT, and $w_t>12$, any growth action is replaced by the back-off $\times0.85$. This is a hard version of the penalty in Eq.~(2) with $\lambda\to\infty$ above the threshold. All results below use $\rho^\star=1.3$ and the same trained weights; only the guard differs.
+
+\subsection{Setup}
+One subject flow shares one bottleneck with $k\in\{1,2,3\}$ background flows (so $n=2$--$4$ flows). The bottleneck is the proxy of Section~\ref{sec:eval} configured as $1000$ packets/s, $60$-packet drop-tail queue, $30$\,ms one-way delay, $3$\,ms jitter and $0.1\%$ random loss. Every flow sends $3000$ packets. The background flows are \textbf{user-space CUBIC and a simplified BBR-style controller running inside the same RUDP transport}, not kernel TCP. The share of a flow is the number of its packets the bottleneck forwarded at the moment the first flow finished; this makes shares comparable inside one run but ties the measurement window to the fastest flow. We report Jain's index $J=(\sum x_i)^2/(n\sum x_i^2)$ over all $n$ flows, the subject's share divided by the fair share $1/n$ ($1.0$ is fair), and the smallest flow's share divided by $1/n$ as a starvation indicator. Each cell is $5$ runs with different seeds, so a standard deviation of $0.03$--$0.08$ on $J$ (see \texttt{results/fairness/summary.csv}) is typical and differences below about $0.06$ should not be read as real.
+
+\begin{table*}[t]
+\centering\small
+\caption{Coexistence with CUBIC and BBR-style background flows [measured, proxy backend, mean of 5 runs]. $J$ = Jain index over all flows; subj = subject share / fair share; min = smallest flow / fair share.}
+\label{tab:fair}
+\begin{tabular}{llccc|ccc|ccc}
+\toprule
+ & & \multicolumn{3}{c|}{AIMD (tuned)} & \multicolumn{3}{c|}{Neural} & \multicolumn{3}{c}{Neural + guard}\\
+bg & $k$ & $J$ & subj & min & $J$ & subj & min & $J$ & subj & min \\
+\midrule
+CUBIC & 1 & 0.902 & 0.68 & 0.68 & 0.957 & 1.20 & 0.80 & 0.911 & 0.72 & 0.72 \\
+CUBIC & 2 & 0.953 & 0.89 & 0.75 & 0.853 & 1.58 & 0.69 & 0.940 & 0.80 & 0.70 \\
+CUBIC & 3 & 0.957 & 1.26 & 0.78 & 0.827 & 1.73 & 0.57 & 0.951 & 0.75 & 0.72 \\
+BBR & 1 & 0.847 & 0.58 & 0.58 & 0.935 & 0.91 & 0.77 & 0.878 & 0.64 & 0.64 \\
+BBR & 2 & 0.881 & 0.61 & 0.61 & 0.879 & 0.92 & 0.53 & 0.830 & 0.62 & 0.55 \\
+BBR & 3 & 0.819 & 0.43 & 0.42 & 0.787 & 1.33 & 0.34 & 0.865 & 0.66 & 0.56 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Results}
+\textbf{The unmodified agent is a bully toward CUBIC.} Against CUBIC it takes $1.20\times$, $1.58\times$ and $1.73\times$ its fair share with one, two and three competitors, and $J$ falls from $0.96$ to $0.83$. Against the BBR-style flows its share is about fair for $k\le2$ and $1.33\times$ at $k=3$, where the smallest flow gets only $0.34\times$ its fair share.
+
+\textbf{The guard removes the over-share.} With the guard the subject takes $0.72$--$0.80\times$ its fair share against CUBIC and $0.62$--$0.66\times$ against BBR. Against CUBIC with two and three competitors this raises $J$ from $0.853$ to $0.940$ (Welch $p=0.005$) and from $0.827$ to $0.951$ ($p=0.001$), and the subject share falls significantly in all three CUBIC cells ($p\le0.002$). Against BBR with three competitors the smallest flow improves from $0.34\times$ to $0.56\times$ of its fair share ($p=0.012$) and $J$ from $0.787$ to $0.865$ ($p=0.060$, not significant at $0.05$).
+
+\textbf{No starvation of competitors, but not a free lunch.} With the guard, the smallest flow stays at or above $0.55\times$ its fair share in every cell, and the competitors' mean share is $1.08$--$1.36\times$ fair. The guard is conservative: it gives away throughput, so the subject itself is often the smallest flow ($0.62$--$0.80\times$ in most cells). Against a single BBR-style flow or a single CUBIC flow, $J$ is \emph{not} better with the guard ($0.878$ vs.\ $0.935$ and $0.911$ vs.\ $0.957$; $p=0.20$ and $0.29$), because the unguarded agent was already close to fair there and the guard over-corrects. We therefore claim the guard fixes over-aggressiveness against loss-based CUBIC at $k\ge2$; we do not claim it makes the agent fair in general.
+
+\subsection{Limits of this evidence}
+(i) The background flows are user-space controllers inside RUDP, not kernel CUBIC or BBR; kernel behaviour (pacing, HyStart, BBR's ProbeRTT) may differ. A kernel-TCP backend exists in \texttt{run\_fairness\_test.py} (netem on loopback, \texttt{TCP\_CONGESTION}) but was \textbf{not executed} because the development container has no \texttt{tc} or \texttt{ip}. (ii) The reward penalty of Eq.~(2) is not trained; only the inference guard is evaluated, and its threshold $\rho^\star=1.3$ was not tuned. (iii) $n=5$ runs per cell, one bottleneck configuration, equal flow sizes, and a measurement window set by the first flow to finish. (iv) The proxy never reorders packets and does not lose ACKs.

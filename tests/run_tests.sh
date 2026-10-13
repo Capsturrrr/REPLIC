@@ -1,5 +1,5 @@
 #!/bin/bash
-# Full test run: wire format, end-to-end delivery over real UDP (clean and lossy), Smart-RUDP modes, Selective Repeat (default) and Go-Back-N, simulator.
+# Full test run: wire format, end-to-end delivery over real UDP (clean and lossy), Poise-RUDP modes, Selective Repeat (default) and Go-Back-N, simulator.
 cd "$(dirname "$0")/.."; fail=0
 step() { echo; echo "== $1"; }
 step "build"; make all smart gbn chat >/dev/null 2>&1 && echo ok || { echo "build FAILED"; exit 1; }
@@ -15,7 +15,7 @@ step "end to end with the original client in Go-Back-N mode (RUDP_GBN=1, server 
 ./bin/server_gbn >/tmp/t_srv.log 2>&1 & SP=$!; sleep 0.4
 OUT=$(RUDP_GBN=1 timeout 120 ./bin/client 20 2>&1 | tail -4); kill $SP 2>/dev/null; wait $SP 2>/dev/null
 echo "$OUT" | grep -q "All 62 packets delivered" && echo "ok:   62/62 packets delivered (Go-Back-N, 20% loss)" || { echo "FAIL: GBN delivery"; fail=1; }
-step "Smart-RUDP transport modes complete all packets (lossy emulated path)"
+step "Poise-RUDP transport modes complete all packets (lossy emulated path)"
 for variant in "sr:./bin/server" "gbn:./bin/server_gbn"; do
   name=${variant%%:*}; srv=${variant##*:}; port=$((9600 + RANDOM % 300))
   gcc -DSERVER_PORT=$port $( [ $name = gbn ] && echo -DRUDP_GBN ) -o bin/server_t src/server.c src/common.c

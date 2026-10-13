@@ -1,0 +1,107 @@
+# Multi-flow coexistence (backend=proxy). J = Jain index over all n=1+k flows; subj = subject share / fair share (1.00 = fair);
+# min = smallest flow's share / fair share (starvation indicator; <0.5 means some flow gets under half its fair share)
+subject,background,k,n,J_mean,J_sd,subj_mean,subj_sd,min_mean,min_sd
+aimd,bbr,1,5,0.847,0.062,0.58,0.11,0.58,0.11
+aimd,bbr,2,5,0.881,0.063,0.61,0.16,0.61,0.16
+aimd,bbr,3,5,0.819,0.059,0.43,0.20,0.42,0.19
+aimd,cubic,1,5,0.902,0.055,0.68,0.12,0.68,0.12
+aimd,cubic,2,5,0.953,0.029,0.89,0.26,0.75,0.08
+aimd,cubic,3,5,0.957,0.023,1.26,0.16,0.78,0.07
+neural,bbr,1,5,0.935,0.059,0.91,0.28,0.77,0.16
+neural,bbr,2,5,0.879,0.070,0.92,0.28,0.53,0.19
+neural,bbr,3,5,0.787,0.060,1.33,0.17,0.34,0.10
+neural,cubic,1,5,0.957,0.043,1.20,0.10,0.80,0.10
+neural,cubic,2,5,0.853,0.037,1.58,0.09,0.69,0.06
+neural,cubic,3,5,0.827,0.042,1.73,0.16,0.57,0.12
+neural_polite,bbr,1,5,0.878,0.070,0.64,0.13,0.64,0.13
+neural_polite,bbr,2,5,0.830,0.049,0.62,0.17,0.55,0.10
+neural_polite,bbr,3,5,0.865,0.053,0.66,0.17,0.56,0.11
+neural_polite,cubic,1,5,0.911,0.077,0.72,0.18,0.72,0.18
+neural_polite,cubic,2,5,0.940,0.034,0.80,0.25,0.70,0.12
+neural_polite,cubic,3,5,0.951,0.025,0.75,0.13,0.72,0.11
+smart_fair,bbr,1,5,0.935,0.057,0.78,0.17,0.76,0.14
+smart_fair,bbr,2,5,0.818,0.080,0.64,0.16,0.50,0.09
+smart_fair,bbr,3,5,0.779,0.065,0.67,0.24,0.44,0.18
+smart_fair,cubic,1,5,0.982,0.016,0.88,0.06,0.88,0.06
+smart_fair,cubic,2,5,0.969,0.036,1.09,0.12,0.80,0.16
+smart_fair,cubic,3,5,0.968,0.025,1.03,0.16,0.79,0.12
+smart_nofair,bbr,1,5,0.897,0.079,1.31,0.19,0.69,0.19
+smart_nofair,bbr,2,5,0.713,0.080,0.99,0.73,0.37,0.12
+smart_nofair,bbr,3,5,0.840,0.118,1.16,0.56,0.55,0.18
+smart_nofair,cubic,1,5,0.879,0.055,1.37,0.09,0.63,0.09
+smart_nofair,cubic,2,5,0.788,0.067,1.72,0.17,0.58,0.06
+smart_nofair,cubic,3,5,0.708,0.143,2.08,0.43,0.42,0.16
+
+# Welch tests, per background/k:  A vs B
+neural vs neural_polite | bbr k=1 Jain          0.935 vs 0.878  t=1.41 p=0.198
+neural vs neural_polite | bbr k=1 subject share 0.909 vs 0.637  t=1.95 p=0.103
+neural vs neural_polite | bbr k=1 min share     0.772 vs 0.637  t=1.46 p=0.183
+neural vs neural_polite | bbr k=2 Jain          0.879 vs 0.830  t=1.26 p=0.247
+neural vs neural_polite | bbr k=2 subject share 0.919 vs 0.619  t=2.03 p=0.083
+neural vs neural_polite | bbr k=2 min share     0.525 vs 0.553  t=-0.29 p=0.781
+neural vs neural_polite | bbr k=3 Jain          0.787 vs 0.865  t=-2.19 p=0.060
+neural vs neural_polite | bbr k=3 subject share 1.327 vs 0.664  t=6.15 p=0.000
+neural vs neural_polite | bbr k=3 min share     0.338 vs 0.559  t=-3.26 p=0.012
+neural vs neural_polite | cubic k=1 Jain          0.957 vs 0.911  t=1.16 p=0.287
+neural vs neural_polite | cubic k=1 subject share 1.197 vs 0.720  t=5.24 p=0.002
+neural vs neural_polite | cubic k=1 min share     0.803 vs 0.720  t=0.92 p=0.392
+neural vs neural_polite | cubic k=2 Jain          0.853 vs 0.940  t=-3.87 p=0.005
+neural vs neural_polite | cubic k=2 subject share 1.584 vs 0.802  t=6.50 p=0.001
+neural vs neural_polite | cubic k=2 min share     0.687 vs 0.702  t=-0.26 p=0.806
+neural vs neural_polite | cubic k=3 Jain          0.827 vs 0.951  t=-5.71 p=0.001
+neural vs neural_polite | cubic k=3 subject share 1.727 vs 0.749  t=10.68 p=0.000
+neural vs neural_polite | cubic k=3 min share     0.573 vs 0.720  t=-1.99 p=0.082
+smart_fair vs neural | bbr k=1 Jain          0.935 vs 0.935  t=-0.02 p=0.984
+smart_fair vs neural | bbr k=1 subject share 0.778 vs 0.909  t=-0.88 p=0.408
+smart_fair vs neural | bbr k=1 min share     0.762 vs 0.772  t=-0.11 p=0.918
+smart_fair vs neural | bbr k=2 Jain          0.818 vs 0.879  t=-1.28 p=0.237
+smart_fair vs neural | bbr k=2 subject share 0.635 vs 0.919  t=-1.96 p=0.095
+smart_fair vs neural | bbr k=2 min share     0.501 vs 0.525  t=-0.27 p=0.799
+smart_fair vs neural | bbr k=3 Jain          0.779 vs 0.787  t=-0.21 p=0.840
+smart_fair vs neural | bbr k=3 subject share 0.665 vs 1.327  t=-5.01 p=0.001
+smart_fair vs neural | bbr k=3 min share     0.439 vs 0.338  t=1.07 p=0.324
+smart_fair vs neural | cubic k=1 Jain          0.982 vs 0.957  t=1.22 p=0.277
+smart_fair vs neural | cubic k=1 subject share 0.877 vs 1.197  t=-6.05 p=0.001
+smart_fair vs neural | cubic k=1 min share     0.877 vs 0.803  t=1.38 p=0.210
+smart_fair vs neural | cubic k=2 Jain          0.969 vs 0.853  t=4.94 p=0.001
+smart_fair vs neural | cubic k=2 subject share 1.090 vs 1.584  t=-7.42 p=0.000
+smart_fair vs neural | cubic k=2 min share     0.796 vs 0.687  t=1.47 p=0.201
+smart_fair vs neural | cubic k=3 Jain          0.968 vs 0.827  t=6.51 p=0.000
+smart_fair vs neural | cubic k=3 subject share 1.027 vs 1.727  t=-6.92 p=0.000
+smart_fair vs neural | cubic k=3 min share     0.792 vs 0.573  t=2.82 p=0.023
+smart_fair vs neural_polite | bbr k=1 Jain          0.935 vs 0.878  t=1.41 p=0.198
+smart_fair vs neural_polite | bbr k=1 subject share 0.778 vs 0.637  t=1.46 p=0.186
+smart_fair vs neural_polite | bbr k=1 min share     0.762 vs 0.637  t=1.44 p=0.188
+smart_fair vs neural_polite | bbr k=2 Jain          0.818 vs 0.830  t=-0.30 p=0.774
+smart_fair vs neural_polite | bbr k=2 subject share 0.635 vs 0.619  t=0.15 p=0.883
+smart_fair vs neural_polite | bbr k=2 min share     0.501 vs 0.553  t=-0.87 p=0.412
+smart_fair vs neural_polite | bbr k=3 Jain          0.779 vs 0.865  t=-2.31 p=0.051
+smart_fair vs neural_polite | bbr k=3 subject share 0.665 vs 0.664  t=0.01 p=0.994
+smart_fair vs neural_polite | bbr k=3 min share     0.439 vs 0.559  t=-1.25 p=0.255
+smart_fair vs neural_polite | cubic k=1 Jain          0.982 vs 0.911  t=2.02 p=0.108
+smart_fair vs neural_polite | cubic k=1 subject share 0.877 vs 0.720  t=1.86 p=0.121
+smart_fair vs neural_polite | cubic k=1 min share     0.877 vs 0.720  t=1.86 p=0.121
+smart_fair vs neural_polite | cubic k=2 Jain          0.969 vs 0.940  t=1.27 p=0.239
+smart_fair vs neural_polite | cubic k=2 subject share 1.090 vs 0.802  t=2.28 p=0.065
+smart_fair vs neural_polite | cubic k=2 min share     0.796 vs 0.702  t=1.08 p=0.314
+smart_fair vs neural_polite | cubic k=3 Jain          0.968 vs 0.951  t=1.10 p=0.304
+smart_fair vs neural_polite | cubic k=3 subject share 1.027 vs 0.749  t=3.02 p=0.018
+smart_fair vs neural_polite | cubic k=3 min share     0.792 vs 0.720  t=0.97 p=0.361
+smart_fair vs smart_nofair | bbr k=1 Jain          0.935 vs 0.897  t=0.88 p=0.408
+smart_fair vs smart_nofair | bbr k=1 subject share 0.778 vs 1.306  t=-4.63 p=0.002
+smart_fair vs smart_nofair | bbr k=1 min share     0.762 vs 0.694  t=0.65 p=0.538
+smart_fair vs smart_nofair | bbr k=2 Jain          0.818 vs 0.713  t=2.07 p=0.072
+smart_fair vs smart_nofair | bbr k=2 subject share 0.635 vs 0.988  t=-1.06 p=0.343
+smart_fair vs smart_nofair | bbr k=2 min share     0.501 vs 0.374  t=1.88 p=0.101
+smart_fair vs smart_nofair | bbr k=3 Jain          0.779 vs 0.840  t=-1.02 p=0.346
+smart_fair vs smart_nofair | bbr k=3 subject share 0.665 vs 1.161  t=-1.81 p=0.125
+smart_fair vs smart_nofair | bbr k=3 min share     0.439 vs 0.547  t=-0.93 p=0.381
+smart_fair vs smart_nofair | cubic k=1 Jain          0.982 vs 0.879  t=4.00 p=0.012
+smart_fair vs smart_nofair | cubic k=1 subject share 0.877 vs 1.367  t=-9.61 p=0.000
+smart_fair vs smart_nofair | cubic k=1 min share     0.877 vs 0.633  t=4.77 p=0.002
+smart_fair vs smart_nofair | cubic k=2 Jain          0.969 vs 0.788  t=5.33 p=0.002
+smart_fair vs smart_nofair | cubic k=2 subject share 1.090 vs 1.718  t=-6.68 p=0.000
+smart_fair vs smart_nofair | cubic k=2 min share     0.796 vs 0.581  t=2.89 p=0.033
+smart_fair vs smart_nofair | cubic k=3 Jain          0.968 vs 0.708  t=4.01 p=0.014
+smart_fair vs smart_nofair | cubic k=3 subject share 1.027 vs 2.075  t=-5.07 p=0.004
+smart_fair vs smart_nofair | cubic k=3 min share     0.792 vs 0.420  t=4.07 p=0.004

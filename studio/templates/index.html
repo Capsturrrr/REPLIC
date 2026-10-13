@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Poise-RUDP Studio</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a30;--panel2:#18223f;--line:#27324f;--tx:#e6ebf7;--mut:#8b97b5;--acc:#34d399;--warn:#fbbf24;--bad:#f87171}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);background:#0e1530;position:sticky;top:0;z-index:5}
+header h1{font-size:17px;margin:0;font-weight:650;letter-spacing:.2px}
+header .sub{color:var(--mut);font-size:12px}
+.pill{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--bad)}.dot.on{background:var(--acc)}
+main{display:grid;grid-template-columns:300px 1fr;gap:16px;padding:16px 20px;max-width:1500px;margin:auto}
+@media(max-width:1000px){main{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card h2{margin:0 0 10px;font-size:12px;letter-spacing:.9px;text-transform:uppercase;color:var(--mut);font-weight:600}
+label{display:block;font-size:12px;color:var(--mut);margin:10px 0 2px}
+label b{color:var(--tx);float:right;font-weight:600;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.arms label{display:flex;gap:8px;align-items:center;color:var(--tx);font-size:13px;margin:6px 0}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+button{background:var(--acc);color:#04170f;border:0;border-radius:8px;padding:9px 14px;font-weight:650;cursor:pointer;font-size:13px}
+button.sec{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+button:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.presets button{font-size:12px;padding:5px 9px}
+.grid{display:grid;gap:16px}
+.lanes{display:grid;gap:10px}
+.lane{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:grid;grid-template-columns:170px 1fr;gap:12px;align-items:center}
+.lane .nm{font-weight:650;display:flex;align-items:center;gap:7px}
+.bar{height:12px;background:#0b1226;border-radius:7px;overflow:hidden;border:1px solid var(--line)}
+.bar>i{display:block;height:100%;width:0;transition:width .1s linear}
+.stats{display:flex;gap:16px;flex-wrap:wrap;margin-top:6px;font-size:12px;color:var(--mut);font-variant-numeric:tabular-nums}
+.stats b{color:var(--tx);font-weight:600}
+.badge{font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid var(--line);color:var(--mut)}
+.badge.win{color:#04170f;background:var(--acc);border-color:var(--acc);font-weight:700}
+.charts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:1200px){.charts{grid-template-columns:1fr}}
+canvas{width:100%;height:190px;display:block;background:#0d1429;border-radius:8px;border:1px solid var(--line)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mut);margin-bottom:8px}
+.legend span{display:flex;align-items:center;gap:5px}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:4px 8px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--mut);font-weight:600;position:sticky;top:0;background:var(--panel)}
+.scroll{max-height:290px;overflow:auto;border:1px solid var(--line);border-radius:8px}
+tr.sel{background:#1d2a4d}tr:hover{background:#16213f;cursor:pointer}
+.ok{color:var(--acc)}.no{color:var(--bad)}
+.tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap}
+.tabs button{padding:4px 10px;font-size:12px;background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+.tabs button.on{background:var(--acc);color:#04170f}
+.hex{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;background:#0d1429;border:1px solid var(--line);border-radius:8px;padding:10px;margin-top:8px;overflow:auto;white-space:pre}
+.hexf{display:inline-block;padding:1px 4px;border-radius:4px;margin-right:3px}
+.f-seq{background:#1e3a8a}.f-ack{background:#14532d}.f-fl{background:#78350f}.f-crc{background:#7f1d1d}.f-len{background:#4c1d95}
+.res table td:first-child{font-weight:600}
+.note{font-size:12px;color:var(--mut);margin-top:8px}
+.modes{display:flex;gap:8px;margin-bottom:12px}
+.modes button{background:var(--panel2);color:var(--tx);border:1px solid var(--line)}
+.modes button.on{background:var(--acc);color:#04170f}
+select{background:var(--panel2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+.grpgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px}
+.grp{display:block;padding:12px}
+.grp .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:8px}
+.grp .jn{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.grp .jl{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.8px}
+.stack{display:flex;height:26px;border-radius:7px;overflow:hidden;border:1px solid var(--line);background:#0b1226}
+.stack i{display:block;height:100%;transition:width .15s linear}
+.flowrow{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--mut);margin-top:5px;font-variant-numeric:tabular-nums}
+.flowrow b{color:var(--tx);font-weight:600}
+.verdict{margin-top:8px;font-size:12px;padding:6px 8px;border-radius:7px;background:#0d1429;border:1px solid var(--line)}
+.good{color:var(--acc)}.bad{color:var(--bad)}
+.err{color:var(--bad);font-size:12px;margin-top:8px;min-height:16px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Poise-RUDP Studio</h1><div class="sub">real C sender / receiver / impairment proxy, live from this machine</div></div>
+  <div class="pill"><span class="dot" id="dot"></span><span id="conn">connecting…</span><span id="clock">0.0 s</span></div>
+</header>
+<main>
+  <aside class="grid" style="align-content:start">
+    <div class="card">
+      <h2>Path (applies to every arm)</h2>
+      <div class="presets row" style="margin-top:0">
+        <button class="sec" data-p="clean">Clean</button>
+        <button class="sec" data-p="lossy">Lossy Wi-Fi</button>
+        <button class="sec" data-p="lte">Mobile</button>
+        <button class="sec" data-p="sat">Satellite</button>
+        <button class="sec" data-p="coex">Shared link</button>
+      </div>
+      <label>Loss <b id="v_loss"></b></label><input id="loss" type="range" step="0.5">
+      <label>Jitter <b id="v_jitter"></b></label><input id="jitter" type="range" step="1">
+      <label>One-way delay <b id="v_delay"></b></label><input id="delay" type="range" step="1">
+      <label>Bandwidth <b id="v_rate_pps"></b></label><input id="rate_pps" type="range" step="50">
+      <label>Queue <b id="v_queue"></b></label><input id="queue" type="range" step="5">
+      <label>Transfer size <b id="v_packets"></b></label><input id="packets" type="range" step="100">
+    </div>
+    <div class="card arms" id="cx_card" style="display:none">
+      <h2>Coexistence setup</h2>
+      <div class="note" style="margin-top:0">Each selected policy runs one after the other on its own bottleneck, shared with the background flows below (running them at once would starve the senders of CPU). Compare the Jain index and the share bars.</div>
+      <label>Policies under test</label>
+      <div id="subjlist"></div>
+      <label>Background flows</label>
+      <select id="bgsel"><option value="cubic">CUBIC (loss-based)</option><option value="bbr">BBR-style (model-based)</option></select>
+      <label>Number of background flows <b id="v_k"></b></label><input id="kk" type="range" min="1" max="3" step="1" value="2">
+      <label>Repeats (a single run is noisy) <b id="v_reps"></b></label><input id="reps" type="range" min="1" max="5" step="1" value="3">
+      <div class="row"><button id="gocx">Start coexistence test</button><button id="stopcx" class="sec" disabled>Stop</button></div>
+      <div class="err" id="errcx"></div>
+    </div>
+    <div class="card arms" id="race_card">
+      <h2>Racers</h2>
+      <div id="armlist"></div>
+      <div class="row"><button id="go">Start race</button><button id="stop" class="sec" disabled>Stop</button></div>
+      <div class="err" id="err"></div>
+      <div class="note">Each racer gets its own identical emulated bottleneck (same loss, jitter, delay, rate, queue and seed), so the race compares policies, not luck. FEC is a fixed XOR parity packet per 8 data packets; it does not adapt.</div>
+    </div>
+  </aside>
+
+  <section class="grid" style="align-content:start">
+    <div class="modes"><button id="m_race" class="on">Policy race</button><button id="m_cx">Coexistence arena · bandwidth-bully test</button></div>
+    <div class="card">
+      <h2 id="arena_t">Policy race arena</h2>
+      <div class="lanes" id="lanes"><div class="note">Pick a path, choose racers and press Start race.</div></div>
+      <div class="grpgrid" id="grps" style="display:none"></div>
+    </div>
+
+    <div class="card">
+      <h2>Live telemetry · 100 ms</h2>
+      <div class="legend" id="legend"></div>
+      <div class="charts">
+        <div><div class="note" style="margin:0 0 4px">Congestion window (packets)</div><canvas id="c_cwnd"></canvas></div>
+        <div><div class="note" style="margin:0 0 4px">Smoothed RTT (ms)</div><canvas id="c_rtt"></canvas></div>
+        <div><div class="note" style="margin:0 0 4px">Goodput (Mbit/s, 0.5 s window)</div><canvas id="c_gp"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card res" id="resbox" style="display:none">
+      <h2>Result</h2>
+      <table id="restab"></table>
+      <div class="note" id="resnote"></div>
+    </div>
+
+    <div class="card">
+      <h2>Packet dissector</h2>
+      <div class="tabs" id="pktabs"></div>
+      <div class="scroll"><table id="pktab"><thead><tr><th>t (ms)</th><th>dir</th><th>seq</th><th>ack</th><th>flags</th><th>CRC-16</th><th>CRC</th><th>len</th></tr></thead><tbody></tbody></table></div>
+      <div class="row" style="margin-top:8px"><button class="sec" id="pause">Pause view</button><span class="note" style="align-self:center">seq and ack are shown relative to the first data packet (hover for the absolute 32-bit value). Shows the newest packets the sender put on the wire (C→S) and the ACKs it received (S→C). CRC is recomputed in the browser backend with CRC-16/CCITT-FALSE.</span></div>
+      <div class="hex" id="hex">Click a packet to see its 13-byte header.</div>
+    </div>
+
+    <div class="card">
+      <h2>Fairness study (Jain's index, from results/fairness)</h2>
+      <div id="fair" class="note">loading…</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+let AGG={}, REP_DONE=0, REP_TOTAL=1, CFG=null, sock=null, order=[], series={}, pk={}, selArm=null, paused=false, rowSel=null, running=false, MODE='race', COL={}, LAB={}, GROUPS={};
+const FMT={loss:v=>v+' %',jitter:v=>v+' ms',delay:v=>v+' ms',rate_pps:v=>v+' pps ('+(v*1200*8/1e6).toFixed(1)+' Mbit/s at 1200 B)',queue:v=>v+' pkts',packets:v=>v+' pkts ('+(v*1200/1e6).toFixed(1)+' MB)'};
+const PRE={clean:{loss:0,jitter:2,delay:20,rate_pps:1000,queue:60},lossy:{loss:2,jitter:10,delay:30,rate_pps:1000,queue:60},lte:{loss:5,jitter:20,delay:40,rate_pps:800,queue:60},sat:{loss:1,jitter:5,delay:120,rate_pps:600,queue:100},coex:{loss:0.1,jitter:3,delay:30,rate_pps:1000,queue:60,packets:3000}};
+function val(k){return +$(k).value}
+function setv(k,v){$(k).value=v;$('v_'+k).textContent=FMT[k](+v)}
+
+async function init(){
+  CFG=await (await fetch('/api/config')).json();
+  for(const k of Object.keys(CFG.limits)){const e=$(k);e.min=CFG.limits[k][0];e.max=CFG.limits[k][1];setv(k,CFG.defaults[k]);e.oninput=()=>setv(k,e.value)}
+  const arms=Object.entries(CFG.arms);
+  $('armlist').innerHTML=arms.filter(([k])=>!['cubic','bbr'].includes(k)).map(([k,a])=>`<label><input type="checkbox" value="${k}" ${CFG.defaults.arms.includes(k)?'checked':''}><span class="sw" style="background:${a.color}"></span>${a.label}</label>`).join('')+
+     arms.filter(([k])=>['cubic','bbr'].includes(k)).map(([k,a])=>`<label><input type="checkbox" value="${k}"><span class="sw" style="background:${a.color}"></span>${a.label}</label>`).join('');
+  $('subjlist').innerHTML=['smart','smart_polite','smart_true'].map(k=>`<label class="subj"><input type="checkbox" value="${k}" ${CFG.coexist_defaults.subjects.includes(k)?'checked':''}><span class="sw" style="background:${CFG.arms[k].color}"></span>${CFG.arms[k].label}</label>`).join('');
+  $('subjlist').querySelectorAll('label').forEach(l=>{l.style.cssText='display:flex;gap:8px;align-items:center;color:var(--tx);font-size:13px;margin:6px 0'});
+  if(!CFG.true_smart_ready) $('err').textContent='results/smart/smart_final.txt is missing: the Poise policy is unavailable until it is trained.';
+  $('kk').oninput=()=>$('v_k').textContent=$('kk').value; $('v_k').textContent=$('kk').value;
+  $('reps').oninput=()=>$('v_reps').textContent=$('reps').value; $('v_reps').textContent=$('reps').value;
+  document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{const p=PRE[b.dataset.p];for(const k in p)setv(k,p[k])});
+  $('go').onclick=()=>start('race'); $('gocx').onclick=()=>start('coexist');
+  $('stop').onclick=$('stopcx').onclick=()=>{REP_TOTAL=REP_DONE;fetch('/api/stop',{method:'POST'})};
+  $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'Resume view':'Pause view'};
+  $('m_race').onclick=()=>setMode('race'); $('m_cx').onclick=()=>{setMode('coexist');const p=PRE.coex;for(const k in p)setv(k,p[k])};
+  connect(); loadFair();
+}
+function setMode(m){
+  MODE=m; $('m_race').classList.toggle('on',m==='race'); $('m_cx').classList.toggle('on',m==='coexist');
+  $('race_card').style.display=m==='race'?'':'none'; $('cx_card').style.display=m==='coexist'?'':'none';
+  $('lanes').style.display=m==='race'?'':'none'; $('grps').style.display=m==='coexist'?'':'none';
+  $('arena_t').textContent=m==='race'?'Policy race arena':'Coexistence arena: one policy vs background flows on a shared bottleneck';
+}
+async function start(mode,auto){
+  if(mode==='coexist'&&!auto){AGG={};REP_DONE=0;REP_TOTAL=+$('reps').value}
+  const eb=mode==='race'?$('err'):$('errcx'); eb.textContent='';
+  const body={};for(const k of Object.keys(CFG.limits))body[k]=val(k);
+  let url='/api/race';
+  if(mode==='race'){
+    body.arms=[...document.querySelectorAll('#armlist input:checked')].map(e=>e.value);
+    if(!body.arms.length){eb.textContent='Pick at least one racer.';return}
+    if(body.arms.length>4){eb.textContent='At most 4 racers.';return}
+  }else{
+    url='/api/coexist'; body.subjects=[...document.querySelectorAll('#subjlist input:checked')].map(e=>e.value);
+    if(!body.subjects.length){eb.textContent='Pick a policy to test.';return}
+    if(body.subjects.length>2){eb.textContent='At most 2 policies at once.';return}
+    body.bg=$('bgsel').value; body.k=+$('kk').value;
+  }
+  const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+  if(!r.ok){eb.textContent=(await r.json()).detail||'could not start';return}
+  order=[];series={};pk={};COL={};LAB={};GROUPS={};rowSel=null;$('resbox').style.display='none';MODE=mode;
+  $('lanes').innerHTML='<div class="note">starting…</div>';$('grps').innerHTML='';
+  window._pending=true;
+}
+function connect(){
+  sock=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws');
+  sock.onopen=()=>{$('dot').classList.add('on');$('conn').textContent='live'};
+  sock.onclose=()=>{$('dot').classList.remove('on');$('conn').textContent='disconnected, retrying…';setTimeout(connect,1500)};
+  sock.onmessage=ev=>{const m=JSON.parse(ev.data);if(m.type==='telemetry')onTel(m);else if(m.type==='summary')onSummary(m)};
+}
+function build(m){
+  order=Object.keys(m.arms); selArm=order[0]; series={}; COL={}; LAB={};
+  order.forEach(a=>{series[a]={cwnd:[],rtt:[],gp:[]};COL[a]=m.arms[a].color;LAB[a]=m.arms[a].policy});
+  if(m.mode==='coexist'){
+    setMode('coexist');
+    $('grps').innerHTML=Object.entries(m.groups).map(([g,v])=>`<div class="lane grp" id="g_${g.replace(/\W/g,'_')}"><div class="hd"><div><div class="jl">${v.label} vs ${m.arms[v.flows[1]]?m.arms[v.flows[1]].policy.replace(/ #\d+.*/,''):''} ×${v.flows.length-1}</div><div class="jl" style="text-transform:none;letter-spacing:0">Jain's index <span id="gs_${g.replace(/\W/g,'_')}"></span></div></div><div class="jn" id="gj_${g.replace(/\W/g,'_')}">–</div></div>
+      <div class="stack" id="gst_${g.replace(/\W/g,'_')}">${v.flows.map(f=>`<i id="gb_${f.replace(/\W/g,'_')}" style="width:${100/v.flows.length}%;background:${COL[f]}"></i>`).join('')}</div>
+      ${v.flows.map(f=>`<div class="flowrow"><span><span class="sw" style="background:${COL[f]}"></span> ${LAB[f]}</span><span>share <b id="gsh_${f.replace(/\W/g,'_')}">–</b> · cwnd <b id="gc_${f.replace(/\W/g,'_')}">–</b> · <b id="gg_${f.replace(/\W/g,'_')}">–</b> Mbit/s</span></div>`).join('')}
+      <div class="verdict" id="gv_${g.replace(/\W/g,'_')}">measuring…</div></div>`).join('');
+  }else{
+    setMode('race');
+    $('lanes').innerHTML=order.map(a=>`<div class="lane" id="ln_${a}"><div class="nm"><span class="sw" style="background:${COL[a]}"></span>${LAB[a]} <span class="badge" id="bd_${a}">…</span></div>
+     <div><div class="bar"><i id="pb_${a}" style="background:${COL[a]}"></i></div>
+     <div class="stats"><span>cwnd <b id="s_cwnd_${a}">–</b></span><span>RTT <b id="s_rtt_${a}">–</b> ms</span><span>loss events <b id="s_loss_${a}">–</b></span><span>goodput <b id="s_gp_${a}">–</b> Mbit/s</span><span>FEC <b id="s_fec_${a}">–</b></span></div></div></div>`).join('');
+  }
+  $('legend').innerHTML=order.map(a=>`<span><i class="sw" style="background:${COL[a]}"></i>${LAB[a]}</span>`).join('');
+  $('pktabs').innerHTML=order.map(a=>`<button data-a="${a}" class="${a===selArm?'on':''}">${LAB[a]}</button>`).join('');
+  $('pktabs').querySelectorAll('button').forEach(b=>b.onclick=()=>{selArm=b.dataset.a;rowSel=null;$('pktabs').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));renderPk()});
+  window._pending=false; window._race=m.race;
+}
+const sid=s=>s.replace(/\W/g,'_');
+function verdict(g,v){
+  if(v.status==='queued') return `<span style="color:var(--mut)">queued: starts when the previous policy has finished (one policy at a time, so CPU load does not distort the test)</span>`;
+  const f=v.frozen, subjIdx=0;
+  const n=v.flows.length, sh=f?f.subject_rel:(v.shares[0]*n);
+  const J=f?f.J:v.live_jain; if(J==null) return '';
+  let t;
+  if(sh>1.25) t=`<span class="bad">bandwidth bully: takes ${sh.toFixed(2)}× its fair share</span>`;
+  else if(sh<0.6) t=`<span class="bad">starved: only ${sh.toFixed(2)}× its fair share</span>`;
+  else if(sh<0.8) t=`<span style="color:var(--warn)">yielding: ${sh.toFixed(2)}× its fair share</span>`;
+  else if(sh>1.1) t=`<span style="color:var(--warn)">slightly over: ${sh.toFixed(2)}× its fair share</span>`;
+  else t=`<span class="good">near fair: ${sh.toFixed(2)}× its fair share</span>`;
+  return t+` &nbsp;·&nbsp; ${f?'final (first flow finished)':'live'}`;
+}
+function onTel(m){
+  if(window._pending&&window._race===m.race) window._pending=false;
+  if(!order.length||window._race!==m.race) build(m);
+  running=m.state==='running';['go','gocx'].forEach(i=>$(i).disabled=running);['stop','stopcx'].forEach(i=>$(i).disabled=!running);
+  $('clock').textContent=(m.t/1000).toFixed(1)+' s';
+  const P=val('packets');
+  for(const [a,s] of Object.entries(m.arms)){
+    if(!series[a])continue;
+    const S=series[a]; S.cwnd.push([m.t,s.cwnd]);S.rtt.push([m.t,s.rtt]);S.gp.push([m.t,s.goodput]);
+    if(m.mode==='race'){
+      $('pb_'+a).style.width=Math.min(100,100*s.acked/P)+'%';
+      $('s_cwnd_'+a).textContent=s.cwnd.toFixed(1);$('s_rtt_'+a).textContent=s.rtt.toFixed(0);
+      $('s_loss_'+a).textContent=(100*s.loss).toFixed(1)+' %';$('s_gp_'+a).textContent=s.goodput.toFixed(2);
+      $('s_fec_'+a).textContent=s.fec.k?`1/${s.fec.k} · ${s.fec.parity} parity`:'off';
+      $('bd_'+a).textContent=s.done?(s.finish_ms?(s.finish_ms/1000).toFixed(2)+' s':'done'):'racing';
+    }else{
+      const e=$('gc_'+sid(a)); if(e){e.textContent=s.cwnd.toFixed(1);$('gg_'+sid(a)).textContent=s.goodput.toFixed(2)}
+    }
+    if(!paused&&s.pk&&s.pk.length){pk[a]=(pk[a]||[]).concat(s.pk).slice(-300)}
+  }
+  if(m.mode==='coexist'&&m.groups){
+    for(const [g,v] of Object.entries(m.groups)){
+      const f=v.frozen, J=f?f.J:v.live_jain, n=v.flows.length, tot=v.shares.reduce((x,y)=>x+y,0)||1;
+      v.flows.forEach((fl,i)=>{const sh=f?(f.acked[i]/(f.acked.reduce((x,y)=>x+y,0)||1)):v.shares[i]/tot;
+        $('gb_'+sid(fl)).style.width=(100*sh)+'%'; $('gsh_'+sid(fl)).textContent=(sh*n).toFixed(2)+'×'});
+      $('gj_'+sid(g)).textContent=J==null?'–':J.toFixed(3); $('gs_'+sid(g)).textContent=f?'(final)':'(live, 0.5 s goodput)';
+      $('gj_'+sid(g)).style.color=J==null?'':(J>=0.93?'var(--acc)':J<0.8?'var(--bad)':'var(--warn)');
+      $('gv_'+sid(g)).innerHTML=verdict(g,v);
+    }
+  }
+  draw();if(!paused)renderPk();
+}
+function onSummary(m){
+  if(m.mode==='coexist'){
+    for(const [g,v] of Object.entries(m.groups)){ if(!v.frozen) continue; const A=AGG[g]=AGG[g]||{label:v.label,J:[],S:[],M:[]}; A.J.push(v.frozen.J);A.S.push(v.frozen.subject_rel);A.M.push(v.frozen.min_rel) }
+    REP_DONE++;
+    const ms=a=>{const m1=a.reduce((x,y)=>x+y,0)/a.length;const sd=a.length>1?Math.sqrt(a.reduce((x,y)=>x+(y-m1)**2,0)/(a.length-1)):0;return m1.toFixed(2)+(a.length>1?' ± '+sd.toFixed(2):'')};
+    $('resbox').style.display='block';
+    $('restab').innerHTML='<tr><th>Policy</th><th>Background</th><th>Runs</th><th>Jain index (mean ± sd)</th><th>Policy share (1.00 = fair)</th><th>Smallest flow (1.00 = fair)</th></tr>'+
+      Object.values(AGG).map(A=>`<tr><td>${A.label}</td><td>${m.params.k}× ${m.params.bg.toUpperCase()}</td><td>${A.J.length}</td><td>${ms(A.J)}</td><td>${ms(A.S)}</td><td>${ms(A.M)}</td></tr>`).join('');
+    $('resnote').textContent='Shares are the packets each flow had delivered when the first flow of that bottleneck finished, the same rule the paper uses. '+(REP_DONE<REP_TOTAL?`Run ${REP_DONE} of ${REP_TOTAL} done, the next starts automatically.`:'Few runs are noisy; the paper reports 5 runs per cell (fairness study below).');
+    if(REP_DONE<REP_TOTAL) setTimeout(()=>start('coexist',true),1800);
+    return;
+  }
+  const rows=Object.entries(m.results).filter(([k,v])=>v.finish_ms).sort((x,y)=>x[1].finish_ms-y[1].finish_ms);
+  if(!rows.length)return;
+  const best=rows[0][1].finish_ms;
+  $('resbox').style.display='block';
+  $('restab').innerHTML='<tr><th>#</th><th>Policy</th><th>Completion</th><th>vs winner</th><th>Retransmissions</th><th>Timeouts</th><th>Avg RTT</th></tr>'+
+    rows.map(([k,v],i)=>`<tr><td>${i+1}</td><td>${v.label}</td><td>${(v.finish_ms/1000).toFixed(2)} s</td><td>${i?'+'+(100*(v.finish_ms/best-1)).toFixed(0)+' %':'–'}</td><td>${v.retx??'–'}</td><td>${v.timeouts??'–'}</td><td>${v.avg_rtt?.toFixed(0)??'–'} ms</td></tr>`).join('');
+  $('resnote').textContent='One race is one sample. Randomness in loss and jitter changes the order between runs; the paper reports means over repeated seeds with significance tests.';
+  rows.forEach(([k],i)=>{const b=$('bd_'+k);if(b&&i===0){b.classList.add('win');b.textContent='winner · '+(rows[0][1].finish_ms/1000).toFixed(2)+' s'}});
+}
+function renderPk(){
+  const rows=(pk[selArm]||[]).slice(-60).reverse();
+  $('pktab').querySelector('tbody').innerHTML=rows.map((p,i)=>`<tr data-i="${i}" class="${rowSel===p.t+p.dir+p.seq+p.ack?'sel':''}"><td>${p.t.toFixed(1)}</td><td>${p.dir}</td><td title="absolute ${p.seq}">${p.seq_r!=null?p.seq_r:'–'}</td><td title="absolute ${p.ack}">${p.ack_r!=null?p.ack_r:(p.ack?p.ack:'–')}</td><td>${p.flags}</td><td>0x${p.crc}</td><td class="${p.crc_ok?'ok':'no'}">${p.crc_ok?'✓':'✗'}</td><td>${p.len}</td></tr>`).join('');
+  $('pktab').querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>{const p=rows[+tr.dataset.i];rowSel=p.t+p.dir+p.seq+p.ack;showHex(p);renderPk()});
+}
+function h(n,b){return n.toString(16).toUpperCase().padStart(b*2,'0').replace(/(..)(?=.)/g,'$1 ')}
+function showHex(p){
+  $('hex').innerHTML=`<span class="hexf f-seq">${h(p.seq,4)}</span> <span class="hexf f-ack">${h(p.ack,4)}</span> <span class="hexf f-fl">${h(p.fl,1)}</span> <span class="hexf f-crc">${p.crc.replace(/(..)/,'$1 ')}</span> <span class="hexf f-len">${h(p.len,2)}</span>\n`+
+   `seq=${p.seq}  ack=${p.ack}  flags=${p.flags} (0x${p.fl.toString(16)})  crc16=0x${p.crc} ${p.crc_ok?'(valid)':'(MISMATCH)'}  payload_len=${p.len}  ${p.dir==='C>S'?'sender → receiver':'receiver → sender (ACK'+(p.len==32?', carries 32-byte SACK bitmap':'')+')'}  t=${p.t} ms`;
+}
+function drawChart(cv,key){
+  const dpr=devicePixelRatio||1,w=cv.clientWidth,hh=cv.clientHeight;cv.width=w*dpr;cv.height=hh*dpr;const c=cv.getContext('2d');c.scale(dpr,dpr);
+  const L=40,R=8,Tp=8,B=20;c.clearRect(0,0,w,hh);
+  let mx=1,tx=1000;for(const a of order){for(const [t,v] of (series[a]||{})[key]||[]){if(v>mx)mx=v;if(t>tx)tx=t}}
+  mx*=1.1;c.strokeStyle='#27324f';c.fillStyle='#8b97b5';c.font='10px system-ui';c.lineWidth=1;
+  for(let i=0;i<=4;i++){const y=Tp+(hh-Tp-B)*i/4;c.beginPath();c.moveTo(L,y);c.lineTo(w-R,y);c.stroke();c.fillText((mx*(1-i/4)).toFixed(mx<10?1:0),4,y+3)}
+  for(let i=0;i<=4;i++){const x=L+(w-L-R)*i/4;c.fillText((tx*i/4000).toFixed(1)+'s',x-8,hh-5)}
+  for(const a of order){const d=(series[a]||{})[key]||[];if(!d.length)continue;c.strokeStyle=COL[a];c.lineWidth=a.includes(':bg')?1.2:1.9;c.setLineDash(a.includes(':bg')?[4,3]:[]);c.beginPath();
+    d.forEach(([t,v],i)=>{const x=L+(w-L-R)*t/tx,y=Tp+(hh-Tp-B)*(1-v/mx);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke();c.setLineDash([])}
+}
+function draw(){drawChart($('c_cwnd'),'cwnd');drawChart($('c_rtt'),'rtt');drawChart($('c_gp'),'gp')}
+async function loadFair(){
+  try{const r=await (await fetch('/api/fairness')).json();
+   if(!r.rows.length){$('fair').textContent='No fairness results yet. Run: python3 run_fairness_test.py';return}
+   $('fair').innerHTML='<div class="scroll"><table><tr><th>subject</th><th>background</th><th>bg flows</th><th>runs</th><th>Jain J</th><th>subject share (1.0 = fair)</th><th>smallest flow (1.0 = fair)</th></tr>'+
+    r.rows.map(x=>`<tr><td>${x.subject}</td><td>${x.background}</td><td>${x.k}</td><td>${x.n}</td><td>${x.J_mean} ± ${x.J_sd}</td><td>${x.subj_mean} ± ${x.subj_sd}</td><td>${x.min_mean} ± ${x.min_sd}</td></tr>`).join('')+'</table></div>'}catch(e){$('fair').textContent='unavailable'}
+}
+window.addEventListener('resize',draw);
+init();
+</script>
+</body>
+</html>

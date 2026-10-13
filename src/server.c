@@ -62,7 +62,7 @@ enum { SRW = 256 };   /* receive window: 256 packets, reported as a 32-byte bitm
 
 /* One session per client address (ip:port), so several clients can talk to the server at the same time. */
 typedef struct {
-    int used; struct sockaddr_in addr; conn_state_t state; uint32_t server_seq, expected_seq; double last_active;
+    int used; struct sockaddr_in addr; conn_state_t state; uint32_t server_seq, expected_seq, client_isn; int have_isn; double last_active;
     char reassembled[65536]; size_t reassembled_len;
     FILE *out_fp; uint64_t fnv; unsigned long long out_bytes;
 #ifndef RUDP_GBN
@@ -71,6 +71,67 @@ typedef struct {
 } sess_t;
 
 static sess_t sessions[MAXSESS];
+#define DELIVER(S, ptr, n) do { if ((S)->out_fp) { fwrite((ptr), 1, (n), (S)->out_fp); } \
+        for (size_t k_ = 0; k_ < (size_t)(n); k_++) { (S)->fnv ^= ((const uint8_t *)(ptr))[k_]; (S)->fnv *= 1099511628211ULL; } (S)->out_bytes += (n); } while (0)
+#define APPEND(S, ptr, n) do { if ((S)->reassembled_len + (n) < sizeof((S)->reassembled)) { memcpy((S)->reassembled + (S)->reassembled_len, (ptr), (n)); (S)->reassembled_len += (n); } } while (0)
+
+static int quiet = 0;
+#ifndef RUDP_GBN
+/* v2 FEC receive state: ring of recently received payloads and the parity packets still waiting for a missing packet */
+enum { FR = 512, PG = 16 };
+static uint8_t fbuf[MAXSESS][FR][MAX_PAYLOAD]; static uint16_t flen[MAXSESS][FR]; static uint32_t fseq1[MAXSESS][FR];
+static uint8_t pbuf[MAXSESS][PG][MAX_PAYLOAD]; static uint32_t pgs[MAXSESS][PG], plx[MAXSESS][PG]; static int pn[MAXSESS][PG], pvalid[MAXSESS][PG];
+static long fec_recovered = 0;
+
+static void sr_accept(sess_t *S, uint32_t seq, const uint8_t *pay, uint16_t plen) {
+    int si = (int)(S - sessions);
+    fseq1[si][seq % FR] = seq + 1; flen[si][seq % FR] = plen; memcpy(fbuf[si][seq % FR], pay, plen);
+            if (seq == S->expected_seq) {
+                APPEND(S, pay, plen);
+                DELIVER(S, pay, plen);
+                if (!quiet) printf("ACCEPTED seq=%u (%u bytes)\n", seq, plen);
+                S->expected_seq++;
+                while (S->have[S->expected_seq % SRW]) {          /* buffered packets that are now in order */
+                    int slot = (int)(S->expected_seq % SRW);
+                    APPEND(S, S->buf[slot], S->len[slot]);
+                    DELIVER(S, S->buf[slot], S->len[slot]);
+                    S->have[slot] = 0; S->expected_seq++;
+                }
+            } else if (seq > S->expected_seq && seq - S->expected_seq < SRW) {
+                int slot = (int)(seq % SRW);
+                if (!S->have[slot]) { memcpy(S->buf[slot], pay, plen); S->len[slot] = plen; S->have[slot] = 1; }
+                if (!quiet) printf("BUFFERED seq=%u (expected %u)\n", seq, S->expected_seq);
+            } else {
+                if (!quiet) printf("DUPLICATE seq=%u (expected %u)\n", seq, S->expected_seq);
+            }
+}
+
+static int fec_present(sess_t *S, uint32_t q) { return q < S->expected_seq || S->have[q % SRW]; }
+static void fec_try(sess_t *S) {
+    int si = (int)(S - sessions), again = 1;
+    while (again) {
+        again = 0;
+        for (int g = 0; g < PG; g++) {
+            if (!pvalid[si][g]) continue;
+            uint32_t gs = pgs[si][g]; int n = pn[si][g], miss = 0; uint32_t m = 0;
+            for (int j = 0; j < n; j++) if (!fec_present(S, gs + (uint32_t)j)) { miss++; m = gs + (uint32_t)j; }
+            if (miss == 0 || gs + (uint32_t)n + FR < S->expected_seq) { pvalid[si][g] = 0; continue; }
+            if (miss != 1) continue;
+            uint8_t rec[MAX_PAYLOAD]; memcpy(rec, pbuf[si][g], MAX_PAYLOAD); uint32_t len = plx[si][g]; int ok = 1;
+            for (int j = 0; j < n; j++) {
+                uint32_t q = gs + (uint32_t)j; if (q == m) continue;
+                if (fseq1[si][q % FR] != q + 1) { ok = 0; break; }
+                for (int k = 0; k < flen[si][q % FR]; k++) rec[k] ^= fbuf[si][q % FR][k];
+                len ^= flen[si][q % FR];
+            }
+            if (!ok || len > MAX_PAYLOAD) { pvalid[si][g] = 0; continue; }
+            if (m - S->expected_seq >= SRW && m != S->expected_seq) continue;
+            sr_accept(S, m, rec, (uint16_t)len); fec_recovered++; pvalid[si][g] = 0; again = 1;
+        }
+    }
+}
+#endif
+
 
 static double mono(void) { struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts); return ts.tv_sec + ts.tv_nsec / 1e9; }
 
@@ -97,18 +158,15 @@ int main(void) {
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) { perror("socket creation failed"); exit(EXIT_FAILURE); }
     memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET; server_addr.sin_addr.s_addr = INADDR_ANY; server_addr.sin_port = htons(SERVER_PORT);
+    server_addr.sin_family = AF_INET; server_addr.sin_addr.s_addr = INADDR_ANY; int listen_port = getenv("RUDP_PORT") ? atoi(getenv("RUDP_PORT")) : SERVER_PORT; server_addr.sin_port = htons(listen_port);
     if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) { perror("bind failed"); close(sockfd); exit(EXIT_FAILURE); }
-    printf("RUDP server listening on port %d (up to %d clients at once)...\n", SERVER_PORT, MAXSESS);
+    printf("RUDP server listening on port %d (up to %d clients at once)...\n", listen_port, MAXSESS);
 
     /* file mode: RUDP_OUT=path writes the delivered byte stream to a file (path.<clientport> when several clients are active);
        RUDP_QUIET=1 silences the per-packet log */
-    const char *out_path = getenv("RUDP_OUT"); int quiet = getenv("RUDP_QUIET") != NULL;
+    const char *out_path = getenv("RUDP_OUT"); quiet = getenv("RUDP_QUIET") != NULL;
     srand((unsigned int)time(NULL));
 
-#define DELIVER(S, ptr, n) do { if ((S)->out_fp) { fwrite((ptr), 1, (n), (S)->out_fp); } \
-        for (size_t k_ = 0; k_ < (size_t)(n); k_++) { (S)->fnv ^= ((const uint8_t *)(ptr))[k_]; (S)->fnv *= 1099511628211ULL; } (S)->out_bytes += (n); } while (0)
-#define APPEND(S, ptr, n) do { if ((S)->reassembled_len + (n) < sizeof((S)->reassembled)) { memcpy((S)->reassembled + (S)->reassembled_len, (ptr), (n)); (S)->reassembled_len += (n); } } while (0)
 
     while (1) {
         ssize_t n = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0, (struct sockaddr *)&client_addr, &client_len);
@@ -132,16 +190,26 @@ int main(void) {
         if (pkt.flags & FLAG_SYN) {
             /* Accept a fresh SYN in ANY state: a client killed mid-session must not block its next attempt. */
             uint32_t client_seq = pkt.seq_num;
+            /* v2 fix: a SYN retransmitted because our SYN-ACK was lost carries the same initial sequence number. It is a DUPLICATE of the
+               connection we already accepted, not a new one: answer with the SAME SYN-ACK and keep all state (before this the session was
+               reset, and its output went to out.bin.<port> while out.bin stayed empty). Netem drops return-path packets; the proxy never did. */
+            if (S->state == STATE_SYN_RECEIVED && S->have_isn && S->client_isn == client_seq) {
+                rudp_packet_t dup; memset(&dup, 0, sizeof(dup));
+                dup.seq_num = S->server_seq; dup.ack_num = client_seq + 1; dup.flags = FLAG_SYN | FLAG_ACK;
+                send_packet(sockfd, &dup, &client_addr, client_len);
+                continue;
+            }
+            S->client_isn = client_seq; S->have_isn = 1;
             S->server_seq = (uint32_t)rand();
             S->expected_seq = client_seq + 1;
             S->reassembled_len = 0;
 #ifndef RUDP_GBN
-            memset(S->have, 0, sizeof S->have);
+            memset(S->have, 0, sizeof S->have); memset(pvalid[(int)(S - sessions)], 0, sizeof pvalid[0]); memset(fseq1[(int)(S - sessions)], 0, sizeof fseq1[0]);
 #endif
             if (S->out_fp) { fclose(S->out_fp); S->out_fp = NULL; }
             if (out_path) {
                 char path[512];
-                if (count_active() > 0) snprintf(path, sizeof path, "%s.%u", out_path, ntohs(client_addr.sin_port)); else snprintf(path, sizeof path, "%s", out_path);
+                if (count_active() - (S->state != STATE_LISTEN ? 1 : 0) > 0) snprintf(path, sizeof path, "%s.%u", out_path, ntohs(client_addr.sin_port)); else snprintf(path, sizeof path, "%s", out_path);
                 S->out_fp = fopen(path, "wb"); if (!S->out_fp) perror("RUDP_OUT");
             }
             S->fnv = 1469598103934665603ULL; S->out_bytes = 0;
@@ -157,28 +225,26 @@ int main(void) {
             S->state = STATE_ESTABLISHED;
             printf("Handshake complete. State: %s (expecting seq=%u)\n\n", state_name(S->state), S->expected_seq);
 
+        } else if ((pkt.flags & FLAG_FEC) && S->state == STATE_ESTABLISHED) {
+#ifndef RUDP_GBN
+            int si = (int)(S - sessions), g = (int)((pkt.seq_num / 8) % PG);
+            for (int q = 0; q < PG; q++) if (!pvalid[si][q]) { g = q; break; }
+            memset(pbuf[si][g], 0, MAX_PAYLOAD); memcpy(pbuf[si][g], pkt.payload, pkt.payload_len);
+            pgs[si][g] = pkt.seq_num; pn[si][g] = (int)(pkt.ack_num >> 16); plx[si][g] = pkt.ack_num & 0xFFFF; pvalid[si][g] = 1;
+            uint32_t before = S->expected_seq; fec_try(S);
+            if (S->expected_seq != before || 1) {
+                rudp_packet_t ack; memset(&ack, 0, sizeof ack);
+                ack.seq_num = S->server_seq; ack.ack_num = S->expected_seq; ack.flags = FLAG_ACK; ack.payload_len = SRW / 8;
+                for (int j = 1; j < SRW; j++) if (S->have[(S->expected_seq + (uint32_t)j) % SRW]) ack.payload[j / 8] |= (uint8_t)(1u << (j % 8));
+                send_packet(sockfd, &ack, &client_addr, client_len);
+            }
+#endif
         } else if ((pkt.flags & FLAG_DATA) && S->state == STATE_ESTABLISHED) {
 #ifndef RUDP_GBN
             /* Selective acknowledgment build: buffer out-of-order packets (256-packet window) and report them
                in a 32-byte bitmap carried in every ACK: bit j set means seq expected_seq+j was received. */
-            if (pkt.seq_num == S->expected_seq) {
-                APPEND(S, pkt.payload, pkt.payload_len);
-                DELIVER(S, pkt.payload, pkt.payload_len);
-                if (!quiet) printf("ACCEPTED seq=%u (%u bytes)\n", pkt.seq_num, pkt.payload_len);
-                S->expected_seq++;
-                while (S->have[S->expected_seq % SRW]) {          /* buffered packets that are now in order */
-                    int slot = (int)(S->expected_seq % SRW);
-                    APPEND(S, S->buf[slot], S->len[slot]);
-                    DELIVER(S, S->buf[slot], S->len[slot]);
-                    S->have[slot] = 0; S->expected_seq++;
-                }
-            } else if (pkt.seq_num > S->expected_seq && pkt.seq_num - S->expected_seq < SRW) {
-                int slot = (int)(pkt.seq_num % SRW);
-                if (!S->have[slot]) { memcpy(S->buf[slot], pkt.payload, pkt.payload_len); S->len[slot] = pkt.payload_len; S->have[slot] = 1; }
-                if (!quiet) printf("BUFFERED seq=%u (expected %u)\n", pkt.seq_num, S->expected_seq);
-            } else {
-                if (!quiet) printf("DUPLICATE seq=%u (expected %u)\n", pkt.seq_num, S->expected_seq);
-            }
+            sr_accept(S, pkt.seq_num, pkt.payload, pkt.payload_len);
+            fec_try(S);
             {
                 rudp_packet_t ack;
                 memset(&ack, 0, sizeof(ack));

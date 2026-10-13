@@ -1,0 +1,9 @@
+% paired comparison, matched on the drawn path (seed); ratio < 1 means the policy finished faster than the reference
+\begin{table*}[t]\centering\footnotesize
+\caption{Paired completion-time ratio versus the reference (same seed $\Rightarrow$ same path). Geometric mean with 95\% $t$-interval on the log ratio; Holm-adjusted paired $t$ $p$-value within each family and reference. Ratio $<1$: faster than the reference.}
+\label{tab:scalepaired}\begin{tabular}{lllrrr}\toprule
+Family & Policy & vs & ratio [95\% CI] & faster in & $p_{Holm}$\\\midrule
+dc\_microburst & bbr & cubic & 0.70 [0.59, 0.83] & 24/30 & $<$0.001 \\
+dc\_microburst & smart & cubic & 1.33 [1.11, 1.59] & 7/30 & 0.003 \\
+dc\_microburst & smart+fec & cubic & 1.26 [1.10, 1.44] & 5/30 & 0.003 \\
+\bottomrule\end{tabular}\end{table*}

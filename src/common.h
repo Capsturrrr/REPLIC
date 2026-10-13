@@ -8,14 +8,15 @@
 #define SERVER_PORT 8888
 #endif
 #define SERVER_IP "127.0.0.1"
-#define BUFFER_SIZE 1024
-#define MAX_PAYLOAD 512
+#define BUFFER_SIZE 2048
+#define MAX_PAYLOAD 1200
 
 /* Flag bits — a packet can carry more than one, e.g. SYN+ACK */
 #define FLAG_SYN  0x01
 #define FLAG_ACK  0x02
 #define FLAG_FIN  0x04
 #define FLAG_DATA 0x08
+#define FLAG_FEC  0x10   /* v2: XOR parity packet over a group of data packets */
 
 /* Phase 4: reliable delivery tuning */
 #define WINDOW_SIZE 4          /* legacy fixed window, unused once congestion control drives cwnd */

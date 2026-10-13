@@ -1,0 +1,43 @@
+v2 FEC test via impair proxy, 256000 B, 1200 B payloads, bottleneck matched in bytes/s. ms per run; K=0 means FEC off, K=8 one parity per 8 packets
+== lossy 2% (4 reps, K=4 also) ==
+aimd K0: 4052 2982 2147 1370 | K8: 1258 1153 1110 1220 | K4: 1142 1670 1112 868
+deep K0: 2361 815 1394 967 | K8: 1101 1101 1147 1021 | K4: 1280 1144 1450 1564
+== 5G ==
+K=0 aimd aimd,477.7,214,274 OK
+K=0 deep deep,489.0,214,217 OK
+K=8 aimd aimd,487.3,214,242 OK
+K=8 deep deep,432.5,214,214 OK
+K=0 aimd aimd,558.6,214,263 OK
+K=0 deep deep,403.1,214,215 OK
+K=8 aimd aimd,505.7,214,243 OK
+K=8 deep deep,430.8,214,214 OK
+K=0 aimd aimd,401.2,214,274 OK
+K=0 deep deep,397.9,214,214 OK
+K=8 aimd aimd,634.8,214,286 OK
+K=8 deep deep,429.2,214,214 OK
+== 10% loss ==
+K=0 aimd aimd,3654.3,214,234 OK
+K=0 deep deep,2225.0,214,252 OK
+K=8 aimd aimd,2277.6,214,226 OK
+K=8 deep deep,2013.9,214,250 OK
+K=0 aimd aimd,4133.3,214,236 OK
+K=0 deep deep,2470.4,214,244 OK
+K=8 aimd aimd,2251.6,214,227 BAD
+K=8 deep deep,1349.1,214,247 OK
+K=0 aimd aimd,4227.8,214,232 OK
+K=0 deep deep,3121.2,214,254 OK
+K=8 aimd aimd,2305.3,214,226 OK
+K=8 deep deep,2152.7,214,248 OK
+== satellite ==
+K=0 aimd aimd,2425.9,214,229 BAD
+K=0 deep deep,2236.7,214,215 OK
+K=8 aimd aimd,2454.7,214,240 OK
+K=8 deep deep,2393.5,214,226 OK
+K=0 aimd aimd,2447.3,214,231 OK
+K=0 deep deep,2285.5,214,215 OK
+K=8 aimd aimd,2441.7,214,236 OK
+K=8 deep deep,2429.4,214,226 OK
+K=0 aimd aimd,2449.7,214,231 OK
+K=0 deep deep,2236.8,214,215 OK
+K=8 aimd aimd,3541.3,214,237 OK
+K=8 deep deep,2423.6,214,226 OK

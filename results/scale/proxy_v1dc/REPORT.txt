@@ -1,0 +1,23 @@
+backend: UDP impairment proxy (forward-path loss, uniform jitter, synthetic cross traffic)
+seeds per cell requested: 30
+families:
+  dc_microburst: datacenter-like: sub-ms to 1 ms one-way delay, 8-12 MB/s, shallow 20-40 kB buffer, no random loss, short 1-3 ms line-rate cross-traffic bursts every 20-40 ms
+  enterprise_campus: enterprise campus: 2-8 ms one-way delay, 0-2 ms jitter, up to 0.1% loss, 2.5-5 MB/s, 60-120 kB buffer, moderate on/off cross traffic
+  cellular_highlat: high-latency cellular: 40-120 ms one-way delay, 10-40 ms jitter, 0.5-3% loss, 150-600 kB/s, 20-50 kB buffer
+
+LIMITS
+  * path families are our own parameter ranges, not measurements of real networks
+  * dc_microburst cross traffic is a synthetic on/off process in the proxy; it does not exist under netem (the netem backend keeps delay/jitter/loss/rate/buffer only)
+  * with n=30, p99 interpolates between the two largest samples; report it as a point estimate
+  * the proxy impairs the forward path (delay both ways, loss/queue forward only); netem on lo impairs both directions -- do not mix the two in one comparison
+  * a single 1 MB transfer per run: short-flow behaviour (slow start, handshake) dominates on dc_microburst
+  * confidence intervals describe the sampling error over drawn paths and run noise together, not any one real path
+
+dc_microburst      bbr        n_ok 30/30  mean     268.1 [215.1,321.1]  median     227.9  p95     415.5  p99     757.1
+dc_microburst      cubic      n_ok 30/30  mean     369.0 [324.2,413.9]  median     335.3  p95     542.0  p99     669.1
+dc_microburst      smart      n_ok 30/30  mean     499.1 [421.1,577.1]  median     442.2  p95     837.1  p99    1168.3
+dc_microburst      smart+fec  n_ok 30/30  mean     455.0 [415.3,494.6]  median     456.4  p95     604.4  p99     652.0
+
+dc_microburst      bbr        vs cubic     ratio 0.700 [0.592,0.827] faster 24/30 p_t 0.0001 p_wilcoxon 0.0000 p_holm 0.0004
+dc_microburst      smart      vs cubic     ratio 1.332 [1.114,1.593] faster 7/30 p_t 0.0027 p_wilcoxon 0.0020 p_holm 0.0033
+dc_microburst      smart+fec  vs cubic     ratio 1.257 [1.098,1.439] faster 5/30 p_t 0.0017 p_wilcoxon 0.0008 p_holm 0.0033

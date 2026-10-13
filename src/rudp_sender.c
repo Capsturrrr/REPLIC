@@ -2,7 +2,7 @@
  * librudp: the RUDP sender (reliability machinery plus a pluggable congestion controller). The public API is in rudp.h; the command-line
  * front end is smart_client.c. Original notes follow.
  *
- * Smart-RUDP client: RUDP sender with a pluggable congestion controller.
+ * Poise-RUDP client: RUDP sender with a pluggable congestion controller.
  *   --mode aimd : rule-based slow start + AIMD (the original RUDP policy)
  *   --mode rl   : Q-learning cwnd controller (rl_cc.h)
  *   --mode rl2  : the chat-style table agent (no-shrink rule, window cap 32, decisions every 100-500 ms)
@@ -27,10 +27,16 @@
 #include "common.h"
 #include "rl_cc.h"
 #include "deep_cc.h"
+#if defined(__has_include)
+#if __has_include("neural_weights.h")
+#define SM_HAVE_BUILTIN        /* weights compiled into the binary (src/neural_weights.h, written by train_smart_rudp.py --export) */
+#endif
+#endif
+#include "smart_cc.h"
 #include "rudp.h"
 
 #define PKT_BYTES 40
-#define MAXN 65536   /* 32 MB of 512-byte chunks in file mode */
+#define MAXN 65536   /* chunks in file mode */
 #define QCAP 8192
 
 typedef struct { double t; int len; uint8_t buf[RUDP_HEADER_SIZE + MAX_PAYLOAD]; } pend_t;
@@ -81,6 +87,7 @@ static void pcap_write(double t_ms, int to_server, int port, const uint8_t *pl, 
     memcpy(pk + 28, pl, (size_t)n);
     double ts = pcap_epoch + t_ms / 1000.0; uint32_t sec = (uint32_t)ts, us = (uint32_t)((ts - sec) * 1e6), l = (uint32_t)tot;
     fwrite(&sec,4,1,pcapf); fwrite(&us,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(pk, 1, (size_t)tot, pcapf);
+    if (getenv("RUDP_LIVE")) fflush(pcapf);
 }
 
 /* ---- interpretability hooks (environment variables, off by default) ----
@@ -235,15 +242,27 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     int use_cubic = !strcmp(mode, "cubic");   /* CUBIC window growth (Ha, Rhee, Xu 2008), loss response x0.7 */
     int use_rl = !strcmp(mode, "rl");
     int use_bbr = !strcmp(mode, "bbr");   /* simplified BBRv1 (Cardwell et al. 2016): model-based, ignores loss; see results/bbr_*.txt */
-    int use_deep = !strcmp(mode, "deep"), use_rl2 = !strcmp(mode, "rl2"), chat = use_deep || use_rl2;
+    int use_deep = !strcmp(mode, "deep"), use_rl2 = !strcmp(mode, "rl2"), use_smart = !strcmp(mode, "smart"), chat = use_deep || use_rl2 || use_smart;
     if (use_rl2 && !cap_set && maxcwnd > 32) maxcwnd = 32;   /* the table agent expects a cap of 32 */
     int classic = getenv("RUDP_CLASSIC") != NULL;               /* RUDP_CLASSIC=1: the original agent settings (cap 32, no hand-over) used by the older evaluation scripts */
-    if (use_deep && pace == 0 && !classic) pace = 2.0;   /* neural agent paces new packets at 2 x cwnd/srtt: 3% faster, 23% fewer retransmissions (vt sweep) */
+    if ((use_deep || use_smart) && pace == 0 && !classic) pace = 2.0;   /* neural agent paces new packets at 2 x cwnd/srtt: 3% faster, 23% fewer retransmissions (vt sweep) */
+    if (use_smart && ssdeep < 0) ssdeep = 64;
     if (use_deep && ssdeep < 0) ssdeep = classic ? 0 : 64;   /* slow start up to 64 packets before the policy takes over (see web/vt_random.py sweep) */
+    if (use_smart && !cap_set) maxcwnd = 128;
     if (use_deep && !cap_set) maxcwnd = classic ? 32 : 128;                /* performance default for the neural agent (it was trained with a cap of 32 but generalises; see eval_perf2.sh) */
+    if (use_smart) hyb = 0;                      /* Poise: no external AIMD hand-over, no polite guard; the policy alone decides */
     if (use_deep && hyb < 0) hyb = classic ? 0.0 : 0.10;                     /* performance default: hand over to AIMD under heavy loss; --hybrid 0 turns it off */
     if (use_sack && maxcwnd > 250) maxcwnd = 250;   /* the receiver buffers a 256-packet window */
     if (init_cwnd < 0) init_cwnd = chat ? 10.0 : 1.0;
+    sm_net_t smnet; sm_hist_t smh; sm_iv_t smiv; sm_hist_init(&smh); memset(&smiv, 0, sizeof smiv);
+    if (use_smart) {
+        if (dfile) { int lr = sm_load(&smnet, dfile); if (lr) { fprintf(stderr, "cannot load smart weights %s (%d)\n", dfile, lr); return RUDP_ERR_ARGS; } }
+#ifdef SM_HAVE_BUILTIN
+        else sm_builtin(&smnet);
+#else
+        else { fprintf(stderr, "--mode smart needs --dfile smart_*.txt (no compiled-in weights)\n"); return RUDP_ERR_ARGS; }
+#endif
+    }
     deep_net_t dnet; if (use_deep && (!dfile || deep_load(&dnet, dfile) != 0)) { fprintf(stderr, "need --dfile with the exported network\n"); return RUDP_ERR_ARGS; }
     if (npk > MAXN) npk = MAXN;
     if (queue_cap > QCAP / 2) queue_cap = QCAP / 2;
@@ -319,6 +338,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     ring_t fwd = { malloc(sizeof(pend_t) * QCAP), 0, 0 }, rev = { malloc(sizeof(pend_t) * QCAP), 0, 0 };
 
     FILE *tr = trace ? fopen(trace, "w") : NULL;
+    if (tr && getenv("RUDP_LIVE")) setvbuf(tr, NULL, _IOLBF, 0);   /* Studio: flush every trace line so a browser can follow live */
     if (tr) fprintf(tr, "time_ms,event,cwnd,rtt_ms\n");
 
     /* ---- sender state ---- */
@@ -330,14 +350,15 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     double bb_t[64] = {0}; long bb_d[64] = {0}; int bb_n = 0; long bb_deliv = 0;
     double bw_t[32] = {0}, bw_v[32] = {0}; int bw_n = 0; double bbr_bw = 0, bbr_gain = 2.885, bbr_full_bw = 0; int bbr_state = 0, bbr_full_cnt = 0, bbr_phase = 0;
     long bbr_round_end = 0; double bbr_phase_start = 0, bbr_rt = 1e9, bbr_rt_t = 0;   /* bbr_rt: min RTT over the last 10 s (BBR's RTprop filter; ProbeRTT is replaced by this expiry) */
-    long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0;
+    double last_prog = now_ms(); int tlp_sent = 0, rack_on = getenv("RUDP_NORACK") ? 0 : 1;
+    long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0, fec_tx = 0; int fec_k = getenv("RUDP_FEC") ? atoi(getenv("RUDP_FEC")) : 0;
     double timer_start = 0; int timer_on = 0;
     /* RL interval stats */
     double iv_start = 0, iv_rtt_sum = 0; long iv_rtt_n = 0, iv_acked = 0, iv_sent = 0, iv_retx = 0;
     int prev_s = -1, prev_a = -1; double rew_sum = 0; long rew_n = 0;
     long iv_new = 0, iv_lossev = 0; int last_act = 2;
 
-    if (use_deep && ssdeep > 0) { ss_phase = 1; ssthresh = ssdeep; }
+    if ((use_deep || use_smart) && ssdeep > 0) { ss_phase = 1; ssthresh = ssdeep; }
     double t0 = now_ms(); iv_start = t0; timer_start = t0;
     if (tr) fprintf(tr, "0,START,%.2f,0\n", cwnd);
 
@@ -347,6 +368,13 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
         tx_total++; iv_sent++; if (!(isretx)) iv_new++; if (isretx) { retx++; iv_retx++; retx_flag[i] = 1; } \
         sent_at[i] = tn_; \
         if (ar_ >= 0) rpush(&fwd, ar_, b_, l_); \
+        if (!(isretx) && fec_k > 0 && ((i) % fec_k == fec_k - 1 || (i) == npk - 1)) { \
+            int gs_ = (i) - (i) % fec_k, n_ = (i) - gs_ + 1; rudp_packet_t fp_; memset(&fp_, 0, sizeof fp_); uint32_t lx_ = 0; \
+            for (int j_ = gs_; j_ <= (i); j_++) { for (int k_ = 0; k_ < pk[j_].payload_len; k_++) fp_.payload[k_] ^= pk[j_].payload[k_]; lx_ ^= pk[j_].payload_len; } \
+            fp_.seq_num = pk[gs_].seq_num; fp_.flags = FLAG_FEC; fp_.payload_len = MAX_PAYLOAD; fp_.ack_num = ((uint32_t)n_ << 16) | lx_; \
+            uint8_t fb_[BUFFER_SIZE]; int fl_ = rudp_pack(&fp_, fb_, sizeof fb_); double fa_ = fwd_path(tn_); fec_tx++; \
+            if (fa_ >= 0 && fl_ > 0) rpush(&fwd, fa_, fb_, fl_); \
+        } \
     } while (0)
 
     while (base < npk) {
@@ -391,7 +419,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     if (rtt_n >= 8 && rttvar < dev_floor) dev_floor = rttvar;
                     rto = srtt + 4 * rttvar; if (rto < srtt * rto_mult) rto = srtt * rto_mult; if (rto < 60) rto = 60; if (rto > 3000) rto = 3000;
                 }
-                iv_acked += newly; base = nb; dup = 0; last_ack = a;
+                last_prog = now; tlp_sent = 0; iv_acked += newly; if (use_smart) { int bi = (int)((now - iv_start) / SM_BIN_MS); if (bi >= 0 && bi < SM_NBINS) smiv.bins[bi] += newly; } base = nb; dup = 0; last_ack = a;
                 if ((!use_rl && !chat && !use_bbr) || guard > 0 || ss_phase) {
                     for (int k = 0; k < newly; k++) {
                         if (cwnd < ssthresh) cwnd += 1.0;
@@ -403,6 +431,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     }
                     if (cwnd > maxcwnd) cwnd = maxcwnd;
                     if (ss_phase && cwnd >= ssdeep) ss_phase = 0;
+                    if (ss_phase && rack_on && !getenv("RUDP_NOHYSTART") && rtt_n >= 8 && srtt > 0 && min_rtt < 1e8 && srtt >= min_rtt * 1.25 + 4 * rttvar) ss_phase = 0;   /* HyStart-style: leave slow start when the queue starts to build, not at the next 100 ms control interval */
                 }
                 if (use_bbr) {
                     bb_deliv += newly; bb_t[bb_n % 64] = now; bb_d[bb_n % 64] = bb_deliv; bb_n++;
@@ -442,11 +471,34 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                         else { ssthresh = cwnd / 2; if (ssthresh < 1) ssthresh = 1; cwnd = ssthresh; }
                     }
                     { int hi = next; if (use_sack) { hi = base + 1; for (int i = base; i < next; i++) if (sacked[i]) hi = i; }
-                      for (int i = base; i < hi; i++) if (!(use_sack && sacked[i])) TX(i, 1); }
+                      for (int i = base; i < hi; i++) if (!(use_sack && sacked[i]) && !(use_sack && rack_on && retx_flag[i] && now - sent_at[i] < (srtt > 0 ? srtt * 1.25 + 4 : 100))) TX(i, 1); }
                     dup = 0; timer_start = now;
                     if (tr) fprintf(tr, "%.1f,FAST_RETX,%.2f,%.1f\n", now - t0, cwnd, srtt);
                 }
             } else last_ack = a;
+        }
+        /* 3b. SACK scoreboard loss detection (RFC 6675 / RACK style). A packet is lost when >= 3 packets sent after it are already SACKed;
+               a retransmission is itself re-sent if it has been outstanding for more than ~1.25 x srtt and the scoreboard still says lost.
+               All holes in a window are repaired in one round trip and the window is cut once per recovery episode. */
+        if (use_sack && rack_on && base < next) {
+            int cnt = 0, lost_found = 0;
+            for (int i = next - 1; i >= base; i--) {
+                if (sacked[i]) { cnt++; continue; }
+                if (cnt >= 3 && (!retx_flag[i] || now - sent_at[i] >= (srtt > 0 ? srtt * 1.25 + 4 : 100))) { TX(i, 1); lost_found = 1; }
+            }
+            if (lost_found && base > recover) {
+                recover = next - 1; fast_retx++; iv_lossev++; ss_phase = 0;
+                if ((!use_rl && !chat && !use_bbr) || guard > 0) {
+                    if (use_cubic) { wmax = cwnd; ssthresh = cwnd * 0.7; if (ssthresh < 2) ssthresh = 2; cwnd = ssthresh; kcub = cbrt(wmax * 0.3 / 0.4); epoch = now; }
+                    else { ssthresh = cwnd / 2; if (ssthresh < 1) ssthresh = 1; cwnd = ssthresh; }
+                }
+                if (tr) fprintf(tr, "%.1f,SACK_RETX,%.2f,%.1f\n", now - t0, cwnd, srtt);
+            }
+            /* tail-loss probe: nothing has advanced for 2 srtt + 10 ms, so re-send the oldest unSACKed packet once without cutting the window */
+            if (!tlp_sent && srtt > 0 && now - last_prog >= 2 * srtt + 10) {
+                for (int i = base; i < next; i++) if (!sacked[i]) { if (!retx_flag[i] || now - sent_at[i] >= srtt * 1.25 + 4) TX(i, 1); break; }
+                tlp_sent = 1;
+            }
         }
         /* 4. RTO */
         int rto_fire = timer_on && base < npk && now - timer_start >= rto; int first_exp = base;
@@ -479,6 +531,12 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                 double dur = (now - iv_start) / 1000.0;
                 long nw = iv_new, ac = iv_acked, le = iv_lossev;
                 double avg_rtt = iv_rtt_n ? iv_rtt_sum / iv_rtt_n : (srtt > 0 ? srtt : 1);
+                double sm_x[SM_IN], sm_aux[4]; int sm_a_ok = 0;
+                if (use_smart) {
+                    smiv.dur_ms = now - iv_start; smiv.srtt = srtt > 0 ? srtt : 0; smiv.min_rtt = min_rtt; smiv.rtt_sum = iv_rtt_sum; smiv.rtt_n = iv_rtt_n;
+                    smiv.inflight = (double)(next - base); smiv.new_sent = nw; smiv.acked = ac; smiv.lossev = le;
+                    sm_features(&smh, &smiv, cwnd, sm_x, sm_aux); sm_a_ok = 1; memset(smiv.bins, 0, sizeof smiv.bins);
+                }
                 iv_start = now; iv_rtt_sum = 0; iv_rtt_n = iv_acked = iv_sent = iv_retx = 0; iv_new = iv_lossev = 0;
                 if (!(nw == 0 && ac == 0 && le == 0)) {
                     double base_r = min_rtt < 1e8 ? min_rtt : 50.0;
@@ -492,6 +550,13 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     int act = 2;
                     if (guard > 0) { if (tr) fprintf(tr, "%.1f,GUARD,%.2f,%.1f\n", now - t0, cwnd, srtt); }
                     else if (ss_phase) { if (ratio >= ss_ratio || lossf > 0) ss_phase = 0; }
+                    else if (use_smart && sm_a_ok) {
+                        double a = sm_forward(&smnet, sm_x);              /* mean action in (-1, 1) */
+                        smh.last_a = a;
+                        cwnd *= exp2(a); if (cwnd < 2) cwnd = 2; if (cwnd > maxcwnd) cwnd = maxcwnd;
+                        if (tr) fprintf(tr, "%.1f,SMART,%.2f,%.1f\n", now - t0, cwnd, srtt);
+                        goto smart_done;
+                    }
                     else if (use_deep) {
                         double x[DN_IN] = { (ratio - 1.0 > 3.0 ? 3.0 : ratio - 1.0) / 3.0, (lossf > 0.3 ? 0.3 : lossf) / 0.3, cwnd / 32.0, thr, RL_MULT[last_act] - 1.0 }, q[DN_OUT];
                         { static double nz = -1; static int tr_ok = -1; static FILE *slog = NULL; static int slog_t = 0;
@@ -508,6 +573,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
                     }
                     if (guard == 0 && !ss_phase) { cwnd *= RL_MULT[act]; if (cwnd < 2) cwnd = 2; if (cwnd > maxcwnd) cwnd = maxcwnd; last_act = act; }
                     if (tr) fprintf(tr, "%.1f,RL_%d,%.2f,%.1f\n", now - t0, act, cwnd, srtt);
+                    smart_done: ;
                 }
             }
         }
@@ -567,7 +633,7 @@ static int run_transfer(const rudp_options_t *o, const char *fpath, const void *
     fin.seq_num = base_seq + (uint32_t)npk; fin.flags = FLAG_FIN;
     int l = rudp_pack(&fin, buf, sizeof buf);
     if (!vt) {
-    /* fix: the FIN used to be sent once; if it was lost the server never closed (and never flushed its output file).
+    /* v2 fix: the FIN used to be sent once; if it was lost the server never closed (and never flushed its output file).
        Retransmit it until the matching ACK arrives, at most 12 tries, 150 ms apart. */
     uint8_t fb[BUFFER_SIZE]; memcpy(fb, buf, (size_t)l);
     for (int tryn = 0; tryn < 12; tryn++) {

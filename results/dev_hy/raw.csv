@@ -1,0 +1,13 @@
+scenario,policy,size,rep,ok,fail,ms,goodput_MBps,sent,retx,timeouts,backend
+clean,smart,1000000,0,1,,1710.9,0.5845,834,0,0,proxy
+clean,smart,1000000,1,1,,1713.9,0.5835,834,0,0,proxy
+clean,smart,1000000,2,1,,1771.8,0.5644,834,0,0,proxy
+clean,smart,1000000,3,1,,1734.0,0.5767,834,0,0,proxy
+loss1_j5,smart,1000000,0,1,,2966.3,0.3371,842,8,0,proxy
+loss1_j5,smart,1000000,1,1,,3567.4,0.2803,858,24,0,proxy
+loss1_j5,smart,1000000,2,1,,4428.2,0.2258,857,23,4,proxy
+loss1_j5,smart,1000000,3,1,,2920.7,0.3424,843,9,1,proxy
+wan,smart,1000000,0,1,,4400.5,0.2272,847,13,0,proxy
+wan,smart,1000000,1,1,,4798.8,0.2084,852,18,1,proxy
+wan,smart,1000000,2,1,,4564.3,0.2191,840,6,0,proxy
+wan,smart,1000000,3,1,,4174.1,0.2396,840,6,1,proxy

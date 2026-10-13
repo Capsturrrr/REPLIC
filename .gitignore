@@ -17,3 +17,12 @@ lib/
 *.key
 secrets*
 *token*
+
+# v2 raw per-run traces (summaries, tables and figures are kept)
+results/**/traces/
+results/orch/
+results/orch_smart/
+results/**/work/
+results/**/work_dir/
+*.pyc
+__pycache__/

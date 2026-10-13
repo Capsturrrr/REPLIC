@@ -1,0 +1,1233 @@
+[238/700] loss5_j20    aimd        1000000 rep7 ok=1 ms=16494.8
+[239/700] loss5_j20    aimd        1000000 rep8 ok=1 ms=15427.4
+[240/700] loss5_j20    aimd        1000000 rep9 ok=1 ms=12513.4
+[241/700] loss5_j20    cubic       1000000 rep0 ok=1 ms=37046.4
+[242/700] loss5_j20    cubic       1000000 rep1 ok=1 ms=39812.9
+[243/700] loss5_j20    cubic       1000000 rep2 ok=1 ms=35332.2
+[244/700] loss5_j20    cubic       1000000 rep3 ok=1 ms=24590.3
+[245/700] loss5_j20    cubic       1000000 rep4 ok=1 ms=40758.0
+[246/700] loss5_j20    cubic       1000000 rep5 ok=1 ms=42992.1
+[247/700] loss5_j20    cubic       1000000 rep6 ok=1 ms=32553.7
+[248/700] loss5_j20    cubic       1000000 rep7 ok=1 ms=27249.5
+[249/700] loss5_j20    cubic       1000000 rep8 ok=1 ms=59150.9
+[250/700] loss5_j20    cubic       1000000 rep9 ok=1 ms=46764.4
+[251/700] loss5_j20    bbr         1000000 rep0 ok=1 ms=20586.3
+[252/700] loss5_j20    bbr         1000000 rep1 ok=1 ms=20733.5
+[253/700] loss5_j20    bbr         1000000 rep2 ok=1 ms=18773.9
+[254/700] loss5_j20    bbr         1000000 rep3 ok=1 ms=21120.2
+[255/700] loss5_j20    bbr         1000000 rep4 ok=1 ms=23329.9
+[256/700] loss5_j20    bbr         1000000 rep5 ok=1 ms=19615.4
+[257/700] loss5_j20    bbr         1000000 rep6 ok=1 ms=24143.2
+[258/700] loss5_j20    bbr         1000000 rep7 ok=1 ms=24073.6
+[259/700] loss5_j20    bbr         1000000 rep8 ok=1 ms=19025.6
+[260/700] loss5_j20    bbr         1000000 rep9 ok=1 ms=16561.6
+[261/700] loss5_j20    neural      1000000 rep0 ok=1 ms=6541.4
+[262/700] loss5_j20    neural      1000000 rep1 ok=1 ms=10119.6
+[263/700] loss5_j20    neural      1000000 rep2 ok=1 ms=16747.2
+[264/700] loss5_j20    neural      1000000 rep3 ok=1 ms=12078.2
+[265/700] loss5_j20    neural      1000000 rep4 ok=1 ms=10201.5
+[266/700] loss5_j20    neural      1000000 rep5 ok=1 ms=8566.2
+[267/700] loss5_j20    neural      1000000 rep6 ok=1 ms=15097.4
+[268/700] loss5_j20    neural      1000000 rep7 ok=1 ms=14347.3
+[269/700] loss5_j20    neural      1000000 rep8 ok=1 ms=7013.6
+[270/700] loss5_j20    neural      1000000 rep9 ok=1 ms=6920.7
+[271/700] loss5_j20    smart       1000000 rep0 ok=1 ms=28232.2
+[272/700] loss5_j20    smart       1000000 rep1 ok=1 ms=38597.7
+[273/700] loss5_j20    smart       1000000 rep2 ok=1 ms=23039.4
+[274/700] loss5_j20    smart       1000000 rep3 ok=1 ms=25394.1
+[275/700] loss5_j20    smart       1000000 rep4 ok=1 ms=18649.3
+[276/700] loss5_j20    smart       1000000 rep5 ok=1 ms=24377.9
+[277/700] loss5_j20    smart       1000000 rep6 ok=1 ms=24582.2
+[278/700] loss5_j20    smart       1000000 rep7 ok=1 ms=26253.4
+[279/700] loss5_j20    smart       1000000 rep8 ok=1 ms=22271.7
+[280/700] loss5_j20    smart       1000000 rep9 ok=1 ms=24708.4
+[281/700] loss10_j35   tcp_cubic   1000000 rep0 ok=1 ms=24512.18414399773
+[282/700] loss10_j35   tcp_cubic   1000000 rep1 ok=1 ms=22997.62276600086
+[283/700] loss10_j35   tcp_cubic   1000000 rep2 ok=1 ms=23139.089012001932
+[284/700] loss10_j35   tcp_cubic   1000000 rep3 ok=1 ms=28531.47588000138
+[285/700] loss10_j35   tcp_cubic   1000000 rep4 ok=1 ms=22847.708435998356
+[286/700] loss10_j35   tcp_cubic   1000000 rep5 ok=1 ms=35086.15929899679
+[287/700] loss10_j35   tcp_cubic   1000000 rep6 ok=1 ms=24899.042078999628
+[288/700] loss10_j35   tcp_cubic   1000000 rep7 ok=1 ms=19063.88018400321
+[289/700] loss10_j35   tcp_cubic   1000000 rep8 ok=1 ms=30717.7520059995
+[290/700] loss10_j35   tcp_cubic   1000000 rep9 ok=1 ms=28063.144443003694
+[291/700] loss10_j35   tcp_bbr     1000000 rep0 ok=1 ms=3087.911083996005
+[292/700] loss10_j35   tcp_bbr     1000000 rep1 ok=1 ms=5070.710990999942
+[293/700] loss10_j35   tcp_bbr     1000000 rep2 ok=1 ms=3757.844853003917
+[294/700] loss10_j35   tcp_bbr     1000000 rep3 ok=1 ms=3364.2398349984433
+[295/700] loss10_j35   tcp_bbr     1000000 rep4 ok=1 ms=3671.972244999779
+[296/700] loss10_j35   tcp_bbr     1000000 rep5 ok=1 ms=4023.544796000351
+[297/700] loss10_j35   tcp_bbr     1000000 rep6 ok=1 ms=3198.043393997068
+[298/700] loss10_j35   tcp_bbr     1000000 rep7 ok=1 ms=3243.4606309980154
+[299/700] loss10_j35   tcp_bbr     1000000 rep8 ok=1 ms=3011.527508002473
+[300/700] loss10_j35   tcp_bbr     1000000 rep9 ok=1 ms=4696.178530000907
+[301/700] loss10_j35   aimd        1000000 rep0 ok=1 ms=122909.9
+[302/700] loss10_j35   aimd        1000000 rep1 ok=1 ms=92806.4
+[303/700] loss10_j35   aimd        1000000 rep2 ok=1 ms=58530.2
+[304/700] loss10_j35   aimd        1000000 rep3 ok=1 ms=131918.7
+[305/700] loss10_j35   aimd        1000000 rep4 ok=1 ms=119808.9
+[306/700] loss10_j35   aimd        1000000 rep5 ok=1 ms=133473.9
+[307/700] loss10_j35   aimd        1000000 rep6 ok=1 ms=136406.1
+[308/700] loss10_j35   aimd        1000000 rep7 ok=1 ms=120909.5
+[309/700] loss10_j35   aimd        1000000 rep8 ok=1 ms=111769.0
+[310/700] loss10_j35   aimd        1000000 rep9 ok=1 ms=115113.0
+[311/700] loss10_j35   cubic       1000000 rep0 ok=1 ms=123062.6
+[312/700] loss10_j35   cubic       1000000 rep1 ok=1 ms=176249.5
+[313/700] loss10_j35   cubic       1000000 rep2 ok=1 ms=171363.1
+[314/700] loss10_j35   cubic       1000000 rep3 ok=1 ms=158190.9
+[315/700] loss10_j35   cubic       1000000 rep4 ok=1 ms=174931.1
+[316/700] loss10_j35   cubic       1000000 rep5 ok=0 ms=
+[317/700] loss10_j35   cubic       1000000 rep6 ok=1 ms=190620.1
+[318/700] loss10_j35   cubic       1000000 rep7 ok=1 ms=170426.4
+[319/700] loss10_j35   cubic       1000000 rep8 ok=1 ms=121825.9
+[320/700] loss10_j35   cubic       1000000 rep9 ok=1 ms=115150.0
+[321/700] loss10_j35   bbr         1000000 rep0 ok=1 ms=49832.2
+[322/700] loss10_j35   bbr         1000000 rep1 ok=1 ms=86798.8
+[323/700] loss10_j35   bbr         1000000 rep2 ok=1 ms=84736.3
+[324/700] loss10_j35   bbr         1000000 rep3 ok=1 ms=94150.2
+[325/700] loss10_j35   bbr         1000000 rep4 ok=1 ms=122727.8
+[326/700] loss10_j35   bbr         1000000 rep5 ok=1 ms=57486.6
+[327/700] loss10_j35   bbr         1000000 rep6 ok=1 ms=75330.5
+[328/700] loss10_j35   bbr         1000000 rep7 ok=1 ms=69729.0
+[329/700] loss10_j35   bbr         1000000 rep8 ok=1 ms=87063.3
+[330/700] loss10_j35   bbr         1000000 rep9 ok=1 ms=72281.5
+[331/700] loss10_j35   neural      1000000 rep0 ok=1 ms=17008.6
+[332/700] loss10_j35   neural      1000000 rep1 ok=1 ms=11508.9
+[333/700] loss10_j35   neural      1000000 rep2 ok=1 ms=33351.1
+[334/700] loss10_j35   neural      1000000 rep3 ok=1 ms=40935.2
+[335/700] loss10_j35   neural      1000000 rep4 ok=1 ms=16522.8
+[336/700] loss10_j35   neural      1000000 rep5 ok=1 ms=30465.3
+[337/700] loss10_j35   neural      1000000 rep6 ok=1 ms=48964.2
+[338/700] loss10_j35   neural      1000000 rep7 ok=1 ms=38239.4
+[339/700] loss10_j35   neural      1000000 rep8 ok=1 ms=25531.1
+[340/700] loss10_j35   neural      1000000 rep9 ok=1 ms=32874.5
+[341/700] loss10_j35   smart       1000000 rep0 ok=1 ms=177489.2
+[342/700] loss10_j35   smart       1000000 rep1 ok=1 ms=132388.5
+[343/700] loss10_j35   smart       1000000 rep2 ok=1 ms=127883.6
+[344/700] loss10_j35   smart       1000000 rep3 ok=1 ms=85409.8
+[345/700] loss10_j35   smart       1000000 rep4 ok=1 ms=64952.8
+[346/700] loss10_j35   smart       1000000 rep5 ok=1 ms=70745.8
+[347/700] loss10_j35   smart       1000000 rep6 ok=1 ms=119216.9
+[348/700] loss10_j35   smart       1000000 rep7 ok=1 ms=91902.6
+[349/700] loss10_j35   smart       1000000 rep8 ok=1 ms=132725.1
+[350/700] loss10_j35   smart       1000000 rep9 ok=1 ms=87823.5
+[351/700] loss20_j50   tcp_cubic   1000000 rep0 ok=0 ms=
+[352/700] loss20_j50   tcp_cubic   1000000 rep1 ok=1 ms=248118.92036000063
+[353/700] loss20_j50   tcp_cubic   1000000 rep2 ok=0 ms=
+[354/700] loss20_j50   tcp_cubic   1000000 rep3 ok=0 ms=
+[355/700] loss20_j50   tcp_cubic   1000000 rep4 ok=0 ms=
+[356/700] loss20_j50   tcp_cubic   1000000 rep5 ok=1 ms=172861.5043309983
+[357/700] loss20_j50   tcp_cubic   1000000 rep6 ok=0 ms=
+[358/700] loss20_j50   tcp_cubic   1000000 rep7 ok=1 ms=77558.64602699876
+[359/700] loss20_j50   tcp_cubic   1000000 rep8 ok=0 ms=
+[360/700] loss20_j50   tcp_cubic   1000000 rep9 ok=0 ms=
+[361/700] loss20_j50   tcp_bbr     1000000 rep0 ok=1 ms=3921.656623999297
+[362/700] loss20_j50   tcp_bbr     1000000 rep1 ok=1 ms=5444.018057998619
+[363/700] loss20_j50   tcp_bbr     1000000 rep2 ok=1 ms=9389.048181001272
+[364/700] loss20_j50   tcp_bbr     1000000 rep3 ok=1 ms=9050.838388000557
+[365/700] loss20_j50   tcp_bbr     1000000 rep4 ok=1 ms=7467.038270995545
+[366/700] loss20_j50   tcp_bbr     1000000 rep5 ok=1 ms=6217.641153998557
+[367/700] loss20_j50   tcp_bbr     1000000 rep6 ok=1 ms=29880.607856001006
+[368/700] loss20_j50   tcp_bbr     1000000 rep7 ok=1 ms=4970.221365998441
+[369/700] loss20_j50   tcp_bbr     1000000 rep8 ok=1 ms=5120.341339999868
+[370/700] loss20_j50   tcp_bbr     1000000 rep9 ok=1 ms=3274.981476002722
+[371/700] loss20_j50   aimd        1000000 rep0 ok=0 ms=
+[372/700] loss20_j50   aimd        1000000 rep1 ok=0 ms=
+[373/700] loss20_j50   aimd        1000000 rep2 ok=0 ms=
+[374/700] loss20_j50   aimd        1000000 rep3 ok=0 ms=
+[375/700] loss20_j50   aimd        1000000 rep4 ok=0 ms=
+[376/700] loss20_j50   aimd        1000000 rep5 ok=0 ms=
+[377/700] loss20_j50   aimd        1000000 rep6 ok=0 ms=
+[378/700] loss20_j50   aimd        1000000 rep7 ok=0 ms=
+[379/700] loss20_j50   aimd        1000000 rep8 ok=0 ms=
+[380/700] loss20_j50   aimd        1000000 rep9 ok=0 ms=
+[381/700] loss20_j50   cubic       1000000 rep0 ok=1 ms=140664.7
+[382/700] loss20_j50   cubic       1000000 rep1 ok=1 ms=93989.8
+[383/700] loss20_j50   cubic       1000000 rep2 ok=1 ms=126191.3
+[384/700] loss20_j50   cubic       1000000 rep3 ok=1 ms=192508.4
+[385/700] loss20_j50   cubic       1000000 rep4 ok=1 ms=164597.9
+[386/700] loss20_j50   cubic       1000000 rep5 ok=1 ms=163717.5
+[387/700] loss20_j50   cubic       1000000 rep6 ok=1 ms=166114.7
+[388/700] loss20_j50   cubic       1000000 rep7 ok=0 ms=
+[389/700] loss20_j50   cubic       1000000 rep8 ok=1 ms=146426.5
+[390/700] loss20_j50   cubic       1000000 rep9 ok=1 ms=84108.1
+[391/700] loss20_j50   bbr         1000000 rep0 ok=1 ms=152502.5
+[392/700] loss20_j50   bbr         1000000 rep1 ok=0 ms=
+[393/700] loss20_j50   bbr         1000000 rep2 ok=0 ms=
+[394/700] loss20_j50   bbr         1000000 rep3 ok=1 ms=59870.0
+[395/700] loss20_j50   bbr         1000000 rep4 ok=0 ms=
+[396/700] loss20_j50   bbr         1000000 rep5 ok=1 ms=88335.8
+[397/700] loss20_j50   bbr         1000000 rep6 ok=1 ms=90689.3
+[398/700] loss20_j50   bbr         1000000 rep7 ok=0 ms=
+[399/700] loss20_j50   bbr         1000000 rep8 ok=1 ms=180927.1
+[400/700] loss20_j50   bbr         1000000 rep9 ok=0 ms=
+[401/700] loss20_j50   neural      1000000 rep0 ok=0 ms=
+[402/700] loss20_j50   neural      1000000 rep1 ok=0 ms=
+[403/700] loss20_j50   neural      1000000 rep2 ok=0 ms=
+[404/700] loss20_j50   neural      1000000 rep3 ok=1 ms=71931.9
+[405/700] loss20_j50   neural      1000000 rep4 ok=1 ms=78776.3
+[406/700] loss20_j50   neural      1000000 rep5 ok=1 ms=97034.8
+[407/700] loss20_j50   neural      1000000 rep6 ok=0 ms=
+[408/700] loss20_j50   neural      1000000 rep7 ok=1 ms=178762.5
+[409/700] loss20_j50   neural      1000000 rep8 ok=1 ms=105346.4
+[410/700] loss20_j50   neural      1000000 rep9 ok=1 ms=66596.4
+[411/700] loss20_j50   smart       1000000 rep0 ok=0 ms=
+[412/700] loss20_j50   smart       1000000 rep1 ok=0 ms=
+[413/700] loss20_j50   smart       1000000 rep2 ok=0 ms=
+[414/700] loss20_j50   smart       1000000 rep3 ok=0 ms=
+[415/700] loss20_j50   smart       1000000 rep4 ok=0 ms=
+[416/700] loss20_j50   smart       1000000 rep5 ok=0 ms=
+[417/700] loss20_j50   smart       1000000 rep6 ok=0 ms=
+[418/700] loss20_j50   smart       1000000 rep7 ok=0 ms=
+[419/700] loss20_j50   smart       1000000 rep8 ok=0 ms=
+[420/700] loss20_j50   smart       1000000 rep9 ok=0 ms=
+[421/700] lte          tcp_cubic   1000000 rep0 ok=1 ms=1684.8416389984777
+[422/700] lte          tcp_cubic   1000000 rep1 ok=1 ms=1718.8067739989492
+[423/700] lte          tcp_cubic   1000000 rep2 ok=1 ms=1665.4846469973563
+[424/700] lte          tcp_cubic   1000000 rep3 ok=1 ms=1682.6571139972657
+[425/700] lte          tcp_cubic   1000000 rep4 ok=1 ms=1721.476666003582
+[426/700] lte          tcp_cubic   1000000 rep5 ok=1 ms=1725.7750449934974
+[427/700] lte          tcp_cubic   1000000 rep6 ok=1 ms=2231.3822559954133
+[428/700] lte          tcp_cubic   1000000 rep7 ok=1 ms=1747.5567829969805
+[429/700] lte          tcp_cubic   1000000 rep8 ok=1 ms=1678.2487359960214
+[430/700] lte          tcp_cubic   1000000 rep9 ok=1 ms=1701.5793390019098
+[431/700] lte          tcp_bbr     1000000 rep0 ok=1 ms=1750.9138090026681
+[432/700] lte          tcp_bbr     1000000 rep1 ok=1 ms=1645.7015429987223
+[433/700] lte          tcp_bbr     1000000 rep2 ok=1 ms=1680.7582790061133
+[434/700] lte          tcp_bbr     1000000 rep3 ok=1 ms=1650.020488006703
+[435/700] lte          tcp_bbr     1000000 rep4 ok=1 ms=1715.3338019998046
+[436/700] lte          tcp_bbr     1000000 rep5 ok=1 ms=1691.7116089971387
+[437/700] lte          tcp_bbr     1000000 rep6 ok=1 ms=1669.1486920026364
+[438/700] lte          tcp_bbr     1000000 rep7 ok=1 ms=1705.465845996514
+[439/700] lte          tcp_bbr     1000000 rep8 ok=1 ms=1670.9033890001592
+[440/700] lte          tcp_bbr     1000000 rep9 ok=1 ms=1760.9405430048355
+[441/700] lte          aimd        1000000 rep0 ok=1 ms=7335.7
+[442/700] lte          aimd        1000000 rep1 ok=1 ms=5990.5
+[443/700] lte          aimd        1000000 rep2 ok=1 ms=7665.7
+[444/700] lte          aimd        1000000 rep3 ok=1 ms=5355.9
+[445/700] lte          aimd        1000000 rep4 ok=1 ms=7589.6
+[446/700] lte          aimd        1000000 rep5 ok=1 ms=6976.7
+[447/700] lte          aimd        1000000 rep6 ok=1 ms=8879.5
+[448/700] lte          aimd        1000000 rep7 ok=1 ms=7920.8
+[449/700] lte          aimd        1000000 rep8 ok=1 ms=6942.0
+[450/700] lte          aimd        1000000 rep9 ok=1 ms=7798.6
+[451/700] lte          cubic       1000000 rep0 ok=1 ms=10217.1
+[452/700] lte          cubic       1000000 rep1 ok=1 ms=11255.5
+[453/700] lte          cubic       1000000 rep2 ok=1 ms=15990.1
+[454/700] lte          cubic       1000000 rep3 ok=1 ms=8948.4
+[455/700] lte          cubic       1000000 rep4 ok=1 ms=15674.4
+[456/700] lte          cubic       1000000 rep5 ok=1 ms=15179.5
+[457/700] lte          cubic       1000000 rep6 ok=1 ms=13671.1
+[458/700] lte          cubic       1000000 rep7 ok=1 ms=11163.2
+[459/700] lte          cubic       1000000 rep8 ok=1 ms=14434.5
+[460/700] lte          cubic       1000000 rep9 ok=1 ms=13703.9
+[461/700] lte          bbr         1000000 rep0 ok=1 ms=2180.1
+[462/700] lte          bbr         1000000 rep1 ok=1 ms=6157.0
+[463/700] lte          bbr         1000000 rep2 ok=1 ms=2421.5
+[464/700] lte          bbr         1000000 rep3 ok=1 ms=4816.7
+[465/700] lte          bbr         1000000 rep4 ok=1 ms=2841.8
+[466/700] lte          bbr         1000000 rep5 ok=1 ms=2972.9
+[467/700] lte          bbr         1000000 rep6 ok=1 ms=2321.0
+[468/700] lte          bbr         1000000 rep7 ok=1 ms=2371.5
+[469/700] lte          bbr         1000000 rep8 ok=1 ms=2240.1
+[470/700] lte          bbr         1000000 rep9 ok=1 ms=3060.8
+[471/700] lte          neural      1000000 rep0 ok=1 ms=1969.3
+[472/700] lte          neural      1000000 rep1 ok=1 ms=2926.6
+[473/700] lte          neural      1000000 rep2 ok=1 ms=2629.9
+[474/700] lte          neural      1000000 rep3 ok=1 ms=2508.9
+[475/700] lte          neural      1000000 rep4 ok=1 ms=2284.2
+[476/700] lte          neural      1000000 rep5 ok=1 ms=2864.9
+[477/700] lte          neural      1000000 rep6 ok=1 ms=2946.7
+[478/700] lte          neural      1000000 rep7 ok=1 ms=2385.4
+[479/700] lte          neural      1000000 rep8 ok=1 ms=2485.6
+[480/700] lte          neural      1000000 rep9 ok=1 ms=3376.5
+[481/700] lte          smart       1000000 rep0 ok=1 ms=2486.6
+[482/700] lte          smart       1000000 rep1 ok=1 ms=2196.8
+[483/700] lte          smart       1000000 rep2 ok=1 ms=4106.1
+[484/700] lte          smart       1000000 rep3 ok=1 ms=4020.0
+[485/700] lte          smart       1000000 rep4 ok=1 ms=3067.3
+[486/700] lte          smart       1000000 rep5 ok=1 ms=2476.5
+[487/700] lte          smart       1000000 rep6 ok=1 ms=4070.8
+[488/700] lte          smart       1000000 rep7 ok=1 ms=3346.0
+[489/700] lte          smart       1000000 rep8 ok=1 ms=4823.7
+[490/700] lte          smart       1000000 rep9 ok=1 ms=3199.6
+[491/700] wan          tcp_cubic   1000000 rep0 ok=1 ms=5531.298996997066
+[492/700] wan          tcp_cubic   1000000 rep1 ok=1 ms=3840.23644500121
+[493/700] wan          tcp_cubic   1000000 rep2 ok=1 ms=7578.231059000245
+[494/700] wan          tcp_cubic   1000000 rep3 ok=1 ms=4424.076058996434
+[495/700] wan          tcp_cubic   1000000 rep4 ok=1 ms=4265.936662995955
+[496/700] wan          tcp_cubic   1000000 rep5 ok=1 ms=5240.239452999958
+[497/700] wan          tcp_cubic   1000000 rep6 ok=1 ms=3888.8065880018985
+[498/700] wan          tcp_cubic   1000000 rep7 ok=1 ms=5568.747573001019
+[499/700] wan          tcp_cubic   1000000 rep8 ok=1 ms=4038.305264999508
+[500/700] wan          tcp_cubic   1000000 rep9 ok=1 ms=4074.659290999989
+[501/700] wan          tcp_bbr     1000000 rep0 ok=1 ms=3901.9561919994885
+[502/700] wan          tcp_bbr     1000000 rep1 ok=1 ms=3901.6806239960715
+[503/700] wan          tcp_bbr     1000000 rep2 ok=1 ms=3801.9265120019554
+[504/700] wan          tcp_bbr     1000000 rep3 ok=1 ms=3901.157966000028
+[505/700] wan          tcp_bbr     1000000 rep4 ok=1 ms=4099.854977001087
+[506/700] wan          tcp_bbr     1000000 rep5 ok=1 ms=3918.7270529946545
+[507/700] wan          tcp_bbr     1000000 rep6 ok=1 ms=3955.23303799564
+[508/700] wan          tcp_bbr     1000000 rep7 ok=1 ms=3901.13816599478
+[509/700] wan          tcp_bbr     1000000 rep8 ok=1 ms=3807.5993949969416
+[510/700] wan          tcp_bbr     1000000 rep9 ok=1 ms=3779.3790960058686
+[511/700] wan          aimd        1000000 rep0 ok=1 ms=9944.0
+[512/700] wan          aimd        1000000 rep1 ok=1 ms=10773.5
+[513/700] wan          aimd        1000000 rep2 ok=1 ms=10604.7
+[514/700] wan          aimd        1000000 rep3 ok=1 ms=11290.6
+[515/700] wan          aimd        1000000 rep4 ok=1 ms=10230.5
+[516/700] wan          aimd        1000000 rep5 ok=1 ms=10872.3
+[517/700] wan          aimd        1000000 rep6 ok=1 ms=11577.3
+[518/700] wan          aimd        1000000 rep7 ok=1 ms=9455.2
+[519/700] wan          aimd        1000000 rep8 ok=1 ms=13165.6
+[520/700] wan          aimd        1000000 rep9 ok=1 ms=11453.5
+[521/700] wan          cubic       1000000 rep0 ok=1 ms=15898.1
+[522/700] wan          cubic       1000000 rep1 ok=1 ms=20543.4
+[523/700] wan          cubic       1000000 rep2 ok=1 ms=15542.2
+[524/700] wan          cubic       1000000 rep3 ok=1 ms=18909.3
+[525/700] wan          cubic       1000000 rep4 ok=1 ms=14699.4
+[526/700] wan          cubic       1000000 rep5 ok=1 ms=18236.0
+[527/700] wan          cubic       1000000 rep6 ok=1 ms=20506.4
+[528/700] wan          cubic       1000000 rep7 ok=1 ms=19086.6
+[529/700] wan          cubic       1000000 rep8 ok=1 ms=18135.6
+[530/700] wan          cubic       1000000 rep9 ok=1 ms=20257.1
+[531/700] wan          bbr         1000000 rep0 ok=1 ms=4733.0
+[532/700] wan          bbr         1000000 rep1 ok=1 ms=15624.9
+[533/700] wan          bbr         1000000 rep2 ok=1 ms=4775.2
+[534/700] wan          bbr         1000000 rep3 ok=1 ms=15733.2
+[535/700] wan          bbr         1000000 rep4 ok=1 ms=8740.1
+[536/700] wan          bbr         1000000 rep5 ok=1 ms=5677.7
+[537/700] wan          bbr         1000000 rep6 ok=1 ms=5267.9
+[538/700] wan          bbr         1000000 rep7 ok=1 ms=9380.1
+[539/700] wan          bbr         1000000 rep8 ok=1 ms=5429.4
+[540/700] wan          bbr         1000000 rep9 ok=1 ms=5306.4
+[541/700] wan          neural      1000000 rep0 ok=1 ms=6629.6
+[542/700] wan          neural      1000000 rep1 ok=1 ms=6878.5
+[543/700] wan          neural      1000000 rep2 ok=1 ms=7258.6
+[544/700] wan          neural      1000000 rep3 ok=1 ms=5257.8
+[545/700] wan          neural      1000000 rep4 ok=1 ms=6328.3
+[546/700] wan          neural      1000000 rep5 ok=1 ms=6693.7
+[547/700] wan          neural      1000000 rep6 ok=1 ms=5392.2
+[548/700] wan          neural      1000000 rep7 ok=1 ms=4498.4
+[549/700] wan          neural      1000000 rep8 ok=1 ms=5822.5
+[550/700] wan          neural      1000000 rep9 ok=1 ms=5329.9
+[551/700] wan          smart       1000000 rep0 ok=1 ms=5436.4
+[552/700] wan          smart       1000000 rep1 ok=1 ms=5685.0
+[553/700] wan          smart       1000000 rep2 ok=1 ms=5745.9
+[554/700] wan          smart       1000000 rep3 ok=1 ms=5531.0
+[555/700] wan          smart       1000000 rep4 ok=1 ms=7918.1
+[556/700] wan          smart       1000000 rep5 ok=1 ms=5594.8
+[557/700] wan          smart       1000000 rep6 ok=1 ms=6309.8
+[558/700] wan          smart       1000000 rep7 ok=1 ms=4501.8
+[559/700] wan          smart       1000000 rep8 ok=1 ms=9103.8
+[560/700] wan          smart       1000000 rep9 ok=1 ms=6031.3
+[561/700] wan_hi       tcp_cubic   1000000 rep0 ok=1 ms=5589.535343002353
+[562/700] wan_hi       tcp_cubic   1000000 rep1 ok=1 ms=4669.157710995933
+[563/700] wan_hi       tcp_cubic   1000000 rep2 ok=1 ms=8355.863576995034
+[564/700] wan_hi       tcp_cubic   1000000 rep3 ok=1 ms=3995.4673489992274
+[565/700] wan_hi       tcp_cubic   1000000 rep4 ok=1 ms=4586.286307006958
+[566/700] wan_hi       tcp_cubic   1000000 rep5 ok=1 ms=11229.690104002657
+[567/700] wan_hi       tcp_cubic   1000000 rep6 ok=1 ms=7428.8705050057615
+[568/700] wan_hi       tcp_cubic   1000000 rep7 ok=1 ms=4670.41546600376
+[569/700] wan_hi       tcp_cubic   1000000 rep8 ok=1 ms=4236.248499000794
+[570/700] wan_hi       tcp_cubic   1000000 rep9 ok=1 ms=6789.79895899829
+[571/700] wan_hi       tcp_bbr     1000000 rep0 ok=1 ms=4648.3728520033765
+[572/700] wan_hi       tcp_bbr     1000000 rep1 ok=1 ms=4449.500183000055
+[573/700] wan_hi       tcp_bbr     1000000 rep2 ok=1 ms=4176.69911700068
+[574/700] wan_hi       tcp_bbr     1000000 rep3 ok=1 ms=4381.953611999052
+[575/700] wan_hi       tcp_bbr     1000000 rep4 ok=1 ms=4496.224470996822
+[576/700] wan_hi       tcp_bbr     1000000 rep5 ok=1 ms=4194.834153997363
+[577/700] wan_hi       tcp_bbr     1000000 rep6 ok=1 ms=4273.58386600099
+[578/700] wan_hi       tcp_bbr     1000000 rep7 ok=1 ms=4416.069591999985
+[579/700] wan_hi       tcp_bbr     1000000 rep8 ok=1 ms=4259.183909998683
+[580/700] wan_hi       tcp_bbr     1000000 rep9 ok=1 ms=4361.288660002174
+[581/700] wan_hi       aimd        1000000 rep0 ok=1 ms=24050.8
+[582/700] wan_hi       aimd        1000000 rep1 ok=1 ms=22981.6
+[583/700] wan_hi       aimd        1000000 rep2 ok=1 ms=27046.3
+[584/700] wan_hi       aimd        1000000 rep3 ok=1 ms=25407.3
+[585/700] wan_hi       aimd        1000000 rep4 ok=1 ms=28918.5
+[586/700] wan_hi       aimd        1000000 rep5 ok=1 ms=26571.0
+[587/700] wan_hi       aimd        1000000 rep6 ok=1 ms=23651.3
+[588/700] wan_hi       aimd        1000000 rep7 ok=1 ms=27636.4
+[589/700] wan_hi       aimd        1000000 rep8 ok=1 ms=23319.7
+[590/700] wan_hi       aimd        1000000 rep9 ok=1 ms=20508.3
+[591/700] wan_hi       cubic       1000000 rep0 ok=1 ms=22526.0
+[592/700] wan_hi       cubic       1000000 rep1 ok=1 ms=38184.4
+[593/700] wan_hi       cubic       1000000 rep2 ok=1 ms=33486.6
+[594/700] wan_hi       cubic       1000000 rep3 ok=1 ms=30784.0
+[595/700] wan_hi       cubic       1000000 rep4 ok=1 ms=33405.8
+[596/700] wan_hi       cubic       1000000 rep5 ok=1 ms=28163.7
+[597/700] wan_hi       cubic       1000000 rep6 ok=1 ms=27954.2
+[598/700] wan_hi       cubic       1000000 rep7 ok=1 ms=24759.0
+[599/700] wan_hi       cubic       1000000 rep8 ok=1 ms=23881.7
+[600/700] wan_hi       cubic       1000000 rep9 ok=1 ms=39473.8
+[601/700] wan_hi       bbr         1000000 rep0 ok=1 ms=7875.7
+[602/700] wan_hi       bbr         1000000 rep1 ok=1 ms=7945.9
+[603/700] wan_hi       bbr         1000000 rep2 ok=1 ms=6678.3
+[604/700] wan_hi       bbr         1000000 rep3 ok=1 ms=6120.6
+[605/700] wan_hi       bbr         1000000 rep4 ok=1 ms=8201.8
+[606/700] wan_hi       bbr         1000000 rep5 ok=1 ms=6726.9
+[607/700] wan_hi       bbr         1000000 rep6 ok=1 ms=10020.9
+[608/700] wan_hi       bbr         1000000 rep7 ok=1 ms=9062.2
+[609/700] wan_hi       bbr         1000000 rep8 ok=1 ms=7695.7
+[610/700] wan_hi       bbr         1000000 rep9 ok=1 ms=7281.8
+[611/700] wan_hi       neural      1000000 rep0 ok=1 ms=6171.2
+[612/700] wan_hi       neural      1000000 rep1 ok=1 ms=7085.3
+[613/700] wan_hi       neural      1000000 rep2 ok=1 ms=6188.2
+[614/700] wan_hi       neural      1000000 rep3 ok=1 ms=9400.4
+[615/700] wan_hi       neural      1000000 rep4 ok=1 ms=9460.6
+[616/700] wan_hi       neural      1000000 rep5 ok=1 ms=8829.7
+[617/700] wan_hi       neural      1000000 rep6 ok=1 ms=6654.7
+[618/700] wan_hi       neural      1000000 rep7 ok=1 ms=6222.4
+[619/700] wan_hi       neural      1000000 rep8 ok=1 ms=9136.7
+[620/700] wan_hi       neural      1000000 rep9 ok=1 ms=5628.3
+[621/700] wan_hi       smart       1000000 rep0 ok=1 ms=4972.6
+[622/700] wan_hi       smart       1000000 rep1 ok=1 ms=6868.0
+[623/700] wan_hi       smart       1000000 rep2 ok=1 ms=11622.1
+[624/700] wan_hi       smart       1000000 rep3 ok=1 ms=9845.4
+[625/700] wan_hi       smart       1000000 rep4 ok=1 ms=7881.0
+[626/700] wan_hi       smart       1000000 rep5 ok=1 ms=11681.2
+[627/700] wan_hi       smart       1000000 rep6 ok=1 ms=8759.1
+[628/700] wan_hi       smart       1000000 rep7 ok=1 ms=5867.9
+[629/700] wan_hi       smart       1000000 rep8 ok=1 ms=8586.3
+[630/700] wan_hi       smart       1000000 rep9 ok=1 ms=6014.5
+[631/700] sat          tcp_cubic   1000000 rep0 ok=1 ms=5851.660647000244
+[632/700] sat          tcp_cubic   1000000 rep1 ok=1 ms=9219.131549005397
+[633/700] sat          tcp_cubic   1000000 rep2 ok=1 ms=5813.1817120010965
+[634/700] sat          tcp_cubic   1000000 rep3 ok=1 ms=6020.9617459986475
+[635/700] sat          tcp_cubic   1000000 rep4 ok=1 ms=5825.7330499982345
+[636/700] sat          tcp_cubic   1000000 rep5 ok=1 ms=5850.765103998128
+[637/700] sat          tcp_cubic   1000000 rep6 ok=1 ms=5802.253923000535
+[638/700] sat          tcp_cubic   1000000 rep7 ok=1 ms=6654.496639996069
+[639/700] sat          tcp_cubic   1000000 rep8 ok=1 ms=5870.431734001613
+[640/700] sat          tcp_cubic   1000000 rep9 ok=1 ms=5839.848973002518
+[641/700] sat          tcp_bbr     1000000 rep0 ok=1 ms=6247.591047998867
+[642/700] sat          tcp_bbr     1000000 rep1 ok=1 ms=5960.758930996235
+[643/700] sat          tcp_bbr     1000000 rep2 ok=1 ms=5864.945802997681
+[644/700] sat          tcp_bbr     1000000 rep3 ok=1 ms=6114.008667005692
+[645/700] sat          tcp_bbr     1000000 rep4 ok=1 ms=6229.482552000263
+[646/700] sat          tcp_bbr     1000000 rep5 ok=1 ms=5823.402860005444
+[647/700] sat          tcp_bbr     1000000 rep6 ok=1 ms=6049.768048003898
+[648/700] sat          tcp_bbr     1000000 rep7 ok=1 ms=5969.669673999306
+[649/700] sat          tcp_bbr     1000000 rep8 ok=1 ms=6036.149192004814
+[650/700] sat          tcp_bbr     1000000 rep9 ok=1 ms=5874.6703090000665
+[651/700] sat          aimd        1000000 rep0 ok=1 ms=25611.9
+[652/700] sat          aimd        1000000 rep1 ok=1 ms=27820.7
+[653/700] sat          aimd        1000000 rep2 ok=1 ms=26120.2
+[654/700] sat          aimd        1000000 rep3 ok=1 ms=29348.5
+[655/700] sat          aimd        1000000 rep4 ok=1 ms=23931.1
+[656/700] sat          aimd        1000000 rep5 ok=1 ms=31858.8
+[657/700] sat          aimd        1000000 rep6 ok=1 ms=29252.7
+[658/700] sat          aimd        1000000 rep7 ok=1 ms=33112.7
+[659/700] sat          aimd        1000000 rep8 ok=1 ms=27550.9
+[660/700] sat          aimd        1000000 rep9 ok=1 ms=27961.4
+[661/700] sat          cubic       1000000 rep0 ok=1 ms=31627.8
+[662/700] sat          cubic       1000000 rep1 ok=1 ms=31205.4
+[663/700] sat          cubic       1000000 rep2 ok=1 ms=16250.6
+[664/700] sat          cubic       1000000 rep3 ok=1 ms=30588.4
+[665/700] sat          cubic       1000000 rep4 ok=1 ms=28345.1
+[666/700] sat          cubic       1000000 rep5 ok=1 ms=33687.1
+[667/700] sat          cubic       1000000 rep6 ok=1 ms=30534.5
+[668/700] sat          cubic       1000000 rep7 ok=1 ms=27773.2
+[669/700] sat          cubic       1000000 rep8 ok=1 ms=26985.6
+[670/700] sat          cubic       1000000 rep9 ok=1 ms=35029.8
+[671/700] sat          bbr         1000000 rep0 ok=1 ms=12047.5
+[672/700] sat          bbr         1000000 rep1 ok=1 ms=11057.3
+[673/700] sat          bbr         1000000 rep2 ok=1 ms=9734.2
+[674/700] sat          bbr         1000000 rep3 ok=1 ms=9659.0
+[675/700] sat          bbr         1000000 rep4 ok=1 ms=12079.7
+[676/700] sat          bbr         1000000 rep5 ok=1 ms=8214.8
+[677/700] sat          bbr         1000000 rep6 ok=1 ms=9123.9
+[678/700] sat          bbr         1000000 rep7 ok=1 ms=8311.8
+[679/700] sat          bbr         1000000 rep8 ok=1 ms=9741.6
+[680/700] sat          bbr         1000000 rep9 ok=1 ms=13335.2
+[681/700] sat          neural      1000000 rep0 ok=1 ms=9076.0
+[682/700] sat          neural      1000000 rep1 ok=1 ms=10163.4
+[683/700] sat          neural      1000000 rep2 ok=1 ms=8311.7
+[684/700] sat          neural      1000000 rep3 ok=1 ms=9149.8
+[685/700] sat          neural      1000000 rep4 ok=1 ms=8409.4
+[686/700] sat          neural      1000000 rep5 ok=1 ms=6906.6
+[687/700] sat          neural      1000000 rep6 ok=1 ms=8013.3
+[688/700] sat          neural      1000000 rep7 ok=1 ms=7083.4
+[689/700] sat          neural      1000000 rep8 ok=1 ms=8851.0
+[690/700] sat          neural      1000000 rep9 ok=1 ms=8300.9
+[691/700] sat          smart       1000000 rep0 ok=1 ms=12098.5
+[692/700] sat          smart       1000000 rep1 ok=1 ms=8631.2
+[693/700] sat          smart       1000000 rep2 ok=1 ms=6919.0
+[694/700] sat          smart       1000000 rep3 ok=1 ms=7335.4
+[695/700] sat          smart       1000000 rep4 ok=1 ms=7174.3
+[696/700] sat          smart       1000000 rep5 ok=1 ms=11245.6
+[697/700] sat          smart       1000000 rep6 ok=1 ms=11320.0
+[698/700] sat          smart       1000000 rep7 ok=1 ms=6583.9
+[699/700] sat          smart       1000000 rep8 ok=1 ms=6837.7
+[700/700] sat          smart       1000000 rep9 ok=1 ms=6455.9
+clean         1000000 aimd        vs kernel tcp_cubic: x1.04 the time of TCP, Welch p=0.0000
+clean         1000000 aimd        vs kernel tcp_bbr: x1.05 the time of TCP, Welch p=0.0000
+clean         1000000 bbr         vs kernel tcp_cubic: x1.05 the time of TCP, Welch p=0.0000
+clean         1000000 bbr         vs kernel tcp_bbr: x1.05 the time of TCP, Welch p=0.0000
+clean         1000000 cubic       vs kernel tcp_cubic: x1.04 the time of TCP, Welch p=0.0000
+clean         1000000 cubic       vs kernel tcp_bbr: x1.05 the time of TCP, Welch p=0.0000
+clean         1000000 neural      vs kernel tcp_cubic: x1.48 the time of TCP, Welch p=0.0003
+clean         1000000 neural      vs kernel tcp_bbr: x1.48 the time of TCP, Welch p=0.0003
+clean         1000000 smart       vs kernel tcp_cubic: x1.04 the time of TCP, Welch p=0.0000
+clean         1000000 smart       vs kernel tcp_bbr: x1.04 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 aimd        vs kernel tcp_cubic: x4.40 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 aimd        vs kernel tcp_bbr: x30.80 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 bbr         vs kernel tcp_cubic: x3.08 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 bbr         vs kernel tcp_bbr: x21.55 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 cubic       vs kernel tcp_cubic: x5.99 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 cubic       vs kernel tcp_bbr: x41.95 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 neural      vs kernel tcp_cubic: x1.14 the time of TCP, Welch p=0.3971
+loss10_j35    1000000 neural      vs kernel tcp_bbr: x7.96 the time of TCP, Welch p=0.0001
+loss10_j35    1000000 smart       vs kernel tcp_cubic: x4.20 the time of TCP, Welch p=0.0000
+loss10_j35    1000000 smart       vs kernel tcp_bbr: x29.37 the time of TCP, Welch p=0.0000
+loss1_j5      1000000 aimd        vs kernel tcp_cubic: x2.38 the time of TCP, Welch p=0.0000
+loss1_j5      1000000 aimd        vs kernel tcp_bbr: x2.39 the time of TCP, Welch p=0.0000
+loss1_j5      1000000 bbr         vs kernel tcp_cubic: x1.27 the time of TCP, Welch p=0.0001
+loss1_j5      1000000 bbr         vs kernel tcp_bbr: x1.28 the time of TCP, Welch p=0.0001
+loss1_j5      1000000 cubic       vs kernel tcp_cubic: x4.73 the time of TCP, Welch p=0.0000
+loss1_j5      1000000 cubic       vs kernel tcp_bbr: x4.75 the time of TCP, Welch p=0.0000
+loss1_j5      1000000 neural      vs kernel tcp_cubic: x1.29 the time of TCP, Welch p=0.0002
+loss1_j5      1000000 neural      vs kernel tcp_bbr: x1.30 the time of TCP, Welch p=0.0002
+loss1_j5      1000000 smart       vs kernel tcp_cubic: x1.19 the time of TCP, Welch p=0.0038
+loss1_j5      1000000 smart       vs kernel tcp_bbr: x1.19 the time of TCP, Welch p=0.0032
+loss20_j50    1000000 bbr         vs kernel tcp_cubic: x0.69 the time of TCP, Welch p=0.4138
+loss20_j50    1000000 bbr         vs kernel tcp_bbr: x13.51 the time of TCP, Welch p=0.0088
+loss20_j50    1000000 cubic       vs kernel tcp_cubic: x0.85 the time of TCP, Welch p=0.6767
+loss20_j50    1000000 cubic       vs kernel tcp_bbr: x16.76 the time of TCP, Welch p=0.0000
+loss20_j50    1000000 neural      vs kernel tcp_cubic: x0.60 the time of TCP, Welch p=0.3090
+loss20_j50    1000000 neural      vs kernel tcp_bbr: x11.77 the time of TCP, Welch p=0.0027
+loss2_j10     1000000 aimd        vs kernel tcp_cubic: x2.17 the time of TCP, Welch p=0.0000
+loss2_j10     1000000 aimd        vs kernel tcp_bbr: x2.92 the time of TCP, Welch p=0.0000
+loss2_j10     1000000 bbr         vs kernel tcp_cubic: x1.84 the time of TCP, Welch p=0.0180
+loss2_j10     1000000 bbr         vs kernel tcp_bbr: x2.47 the time of TCP, Welch p=0.0042
+loss2_j10     1000000 cubic       vs kernel tcp_cubic: x4.10 the time of TCP, Welch p=0.0000
+loss2_j10     1000000 cubic       vs kernel tcp_bbr: x5.51 the time of TCP, Welch p=0.0000
+loss2_j10     1000000 neural      vs kernel tcp_cubic: x1.11 the time of TCP, Welch p=0.2704
+loss2_j10     1000000 neural      vs kernel tcp_bbr: x1.49 the time of TCP, Welch p=0.0002
+loss2_j10     1000000 smart       vs kernel tcp_cubic: x1.34 the time of TCP, Welch p=0.0066
+loss2_j10     1000000 smart       vs kernel tcp_bbr: x1.80 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 aimd        vs kernel tcp_cubic: x1.15 the time of TCP, Welch p=0.0128
+loss5_j20     1000000 aimd        vs kernel tcp_bbr: x4.44 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 bbr         vs kernel tcp_cubic: x1.65 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 bbr         vs kernel tcp_bbr: x6.38 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 cubic       vs kernel tcp_cubic: x3.06 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 cubic       vs kernel tcp_bbr: x11.85 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 neural      vs kernel tcp_cubic: x0.85 the time of TCP, Welch p=0.1515
+loss5_j20     1000000 neural      vs kernel tcp_bbr: x3.30 the time of TCP, Welch p=0.0001
+loss5_j20     1000000 smart       vs kernel tcp_cubic: x2.03 the time of TCP, Welch p=0.0000
+loss5_j20     1000000 smart       vs kernel tcp_bbr: x7.86 the time of TCP, Welch p=0.0000
+lte           1000000 aimd        vs kernel tcp_cubic: x4.13 the time of TCP, Welch p=0.0000
+lte           1000000 aimd        vs kernel tcp_bbr: x4.28 the time of TCP, Welch p=0.0000
+lte           1000000 bbr         vs kernel tcp_cubic: x1.79 the time of TCP, Welch p=0.0088
+lte           1000000 bbr         vs kernel tcp_bbr: x1.85 the time of TCP, Welch p=0.0070
+lte           1000000 cubic       vs kernel tcp_cubic: x7.42 the time of TCP, Welch p=0.0000
+lte           1000000 cubic       vs kernel tcp_bbr: x7.69 the time of TCP, Welch p=0.0000
+lte           1000000 neural      vs kernel tcp_cubic: x1.50 the time of TCP, Welch p=0.0000
+lte           1000000 neural      vs kernel tcp_bbr: x1.56 the time of TCP, Welch p=0.0000
+lte           1000000 smart       vs kernel tcp_cubic: x1.92 the time of TCP, Welch p=0.0002
+lte           1000000 smart       vs kernel tcp_bbr: x1.99 the time of TCP, Welch p=0.0002
+sat           1000000 aimd        vs kernel tcp_cubic: x4.50 the time of TCP, Welch p=0.0000
+sat           1000000 aimd        vs kernel tcp_bbr: x4.70 the time of TCP, Welch p=0.0000
+sat           1000000 bbr         vs kernel tcp_cubic: x1.65 the time of TCP, Welch p=0.0000
+sat           1000000 bbr         vs kernel tcp_bbr: x1.72 the time of TCP, Welch p=0.0000
+sat           1000000 cubic       vs kernel tcp_cubic: x4.65 the time of TCP, Welch p=0.0000
+sat           1000000 cubic       vs kernel tcp_bbr: x4.85 the time of TCP, Welch p=0.0000
+sat           1000000 neural      vs kernel tcp_cubic: x1.34 the time of TCP, Welch p=0.0002
+sat           1000000 neural      vs kernel tcp_bbr: x1.40 the time of TCP, Welch p=0.0000
+sat           1000000 smart       vs kernel tcp_cubic: x1.35 the time of TCP, Welch p=0.0152
+sat           1000000 smart       vs kernel tcp_bbr: x1.41 the time of TCP, Welch p=0.0071
+wan           1000000 aimd        vs kernel tcp_cubic: x2.26 the time of TCP, Welch p=0.0000
+wan           1000000 aimd        vs kernel tcp_bbr: x2.81 the time of TCP, Welch p=0.0000
+wan           1000000 bbr         vs kernel tcp_cubic: x1.66 the time of TCP, Welch p=0.0454
+wan           1000000 bbr         vs kernel tcp_bbr: x2.07 the time of TCP, Welch p=0.0138
+wan           1000000 cubic       vs kernel tcp_cubic: x3.75 the time of TCP, Welch p=0.0000
+wan           1000000 cubic       vs kernel tcp_bbr: x4.67 the time of TCP, Welch p=0.0000
+wan           1000000 neural      vs kernel tcp_cubic: x1.24 the time of TCP, Welch p=0.0225
+wan           1000000 neural      vs kernel tcp_bbr: x1.54 the time of TCP, Welch p=0.0000
+wan           1000000 smart       vs kernel tcp_cubic: x1.28 the time of TCP, Welch p=0.0286
+wan           1000000 smart       vs kernel tcp_bbr: x1.59 the time of TCP, Welch p=0.0004
+wan_hi        1000000 aimd        vs kernel tcp_cubic: x4.06 the time of TCP, Welch p=0.0000
+wan_hi        1000000 aimd        vs kernel tcp_bbr: x5.73 the time of TCP, Welch p=0.0000
+wan_hi        1000000 bbr         vs kernel tcp_cubic: x1.26 the time of TCP, Welch p=0.0712
+wan_hi        1000000 bbr         vs kernel tcp_bbr: x1.78 the time of TCP, Welch p=0.0000
+wan_hi        1000000 cubic       vs kernel tcp_cubic: x4.92 the time of TCP, Welch p=0.0000
+wan_hi        1000000 cubic       vs kernel tcp_bbr: x6.93 the time of TCP, Welch p=0.0000
+wan_hi        1000000 neural      vs kernel tcp_cubic: x1.21 the time of TCP, Welch p=0.1524
+wan_hi        1000000 neural      vs kernel tcp_bbr: x1.71 the time of TCP, Welch p=0.0001
+wan_hi        1000000 smart       vs kernel tcp_cubic: x1.33 the time of TCP, Welch p=0.0641
+wan_hi        1000000 smart       vs kernel tcp_bbr: x1.88 the time of TCP, Welch p=0.0006
+
+done in 21281s: 662/700 runs byte-identical; backend = netem; outputs in /home/Harsh/rudp2/results/wsl_netem/matrix
+NOT OK: [('loss10_j35', 'cubic', 5), ('loss20_j50', 'tcp_cubic', 0), ('loss20_j50', 'tcp_cubic', 2), ('loss20_j50', 'tcp_cubic', 3), ('loss20_j50', 'tcp_cubic', 4), ('loss20_j50', 'tcp_cubic', 6), ('loss20_j50', 'tcp_cubic', 8), ('loss20_j50', 'tcp_cubic', 9), ('loss20_j50', 'aimd', 0), ('loss20_j50', 'aimd', 1), ('loss20_j50', 'aimd', 2), ('loss20_j50', 'aimd', 3), ('loss20_j50', 'aimd', 4), ('loss20_j50', 'aimd', 5), ('loss20_j50', 'aimd', 6), ('loss20_j50', 'aimd', 7), ('loss20_j50', 'aimd', 8), ('loss20_j50', 'aimd', 9), ('loss20_j50', 'cubic', 7), ('loss20_j50', 'bbr', 1), ('loss20_j50', 'bbr', 2), ('loss20_j50', 'bbr', 4), ('loss20_j50', 'bbr', 7), ('loss20_j50', 'bbr', 9), ('loss20_j50', 'neural', 0), ('loss20_j50', 'neural', 1), ('loss20_j50', 'neural', 2), ('loss20_j50', 'neural', 6), ('loss20_j50', 'smart', 0), ('loss20_j50', 'smart', 1), ('loss20_j50', 'smart', 2), ('loss20_j50', 'smart', 3), ('loss20_j50', 'smart', 4), ('loss20_j50', 'smart', 5), ('loss20_j50', 'smart', 6), ('loss20_j50', 'smart', 7), ('loss20_j50', 'smart', 8), ('loss20_j50', 'smart', 9)]
+-- Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs RUDP policies, 10 reps, sizes 1000000: ok
+
+== Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + RUDP
++ python3 run_scale_matrix.py --backend netem --n 30 --out results/wsl_netem/scale
+resuming: 72 rows already in results/wsl_netem/scale/raw.csv
+[73/720] dc_microburst      smart+fec  seed  3 ok=1 ms=367.0  eta 8 min
+[74/720] dc_microburst      neural     seed  3 ok=1 ms=161.0  eta 6 min
+[75/720] dc_microburst      smart      seed  3 ok=1 ms=215.3  eta 6 min
+[76/720] dc_microburst      tcp_bbr    seed  3 ok=1 ms=110.38938699493883  eta 5 min
+[77/720] dc_microburst      cubic      seed  3 ok=1 ms=211.6  eta 5 min
+[78/720] dc_microburst      bbr        seed  3 ok=1 ms=125.3  eta 5 min
+[79/720] dc_microburst      tcp_cubic  seed  3 ok=1 ms=106.7028279940132  eta 4 min
+[80/720] dc_microburst      aimd       seed  3 ok=1 ms=167.0  eta 5 min
+[81/720] enterprise_campus  aimd       seed  3 ok=1 ms=1608.6  eta 6 min
+[82/720] enterprise_campus  tcp_bbr    seed  3 ok=1 ms=362.289538999903  eta 6 min
+[83/720] enterprise_campus  smart      seed  3 ok=1 ms=1175.8  eta 7 min
+[84/720] enterprise_campus  smart+fec  seed  3 ok=1 ms=623.2  eta 7 min
+[85/720] enterprise_campus  tcp_cubic  seed  3 ok=1 ms=362.8154739999445  eta 7 min
+[86/720] enterprise_campus  neural     seed  3 ok=1 ms=560.9  eta 7 min
+[87/720] enterprise_campus  bbr        seed  3 ok=1 ms=468.9  eta 7 min
+[88/720] enterprise_campus  cubic      seed  3 ok=1 ms=3954.4  eta 10 min
+[89/720] cellular_highlat   smart      seed  3 ok=1 ms=9663.0  eta 15 min
+[90/720] cellular_highlat   bbr        seed  3 ok=1 ms=14692.1  eta 24 min
+[91/720] cellular_highlat   tcp_bbr    seed  3 ok=1 ms=3298.28356699727  eta 25 min
+[92/720] cellular_highlat   tcp_cubic  seed  3 ok=1 ms=6664.170727002784  eta 28 min
+[93/720] cellular_highlat   cubic      seed  3 ok=1 ms=37151.7  eta 45 min
+[94/720] cellular_highlat   smart+fec  seed  3 ok=1 ms=3846.5  eta 45 min
+[95/720] cellular_highlat   aimd       seed  3 ok=1 ms=20486.9  eta 53 min
+[96/720] cellular_highlat   neural     seed  3 ok=1 ms=6833.4  eta 54 min
+[97/720] dc_microburst      smart      seed  4 ok=1 ms=268.9  eta 52 min
+[98/720] dc_microburst      cubic      seed  4 ok=1 ms=207.8  eta 50 min
+[99/720] dc_microburst      tcp_cubic  seed  4 ok=1 ms=103.94625399931101  eta 48 min
+[100/720] dc_microburst      bbr        seed  4 ok=1 ms=119.2  eta 46 min
+[101/720] dc_microburst      aimd       seed  4 ok=1 ms=213.5  eta 45 min
+[102/720] dc_microburst      neural     seed  4 ok=1 ms=253.3  eta 43 min
+[103/720] dc_microburst      tcp_bbr    seed  4 ok=1 ms=105.90319400216686  eta 42 min
+[104/720] dc_microburst      smart+fec  seed  4 ok=1 ms=369.2  eta 41 min
+[105/720] enterprise_campus  aimd       seed  4 ok=1 ms=870.9  eta 40 min
+[106/720] enterprise_campus  neural     seed  4 ok=1 ms=356.7  eta 39 min
+[107/720] enterprise_campus  cubic      seed  4 ok=1 ms=1315.8  eta 38 min
+[108/720] enterprise_campus  tcp_bbr    seed  4 ok=1 ms=306.17758099833736  eta 37 min
+[109/720] enterprise_campus  smart+fec  seed  4 ok=1 ms=495.7  eta 36 min
+[110/720] enterprise_campus  smart      seed  4 ok=1 ms=357.2  eta 35 min
+[111/720] enterprise_campus  bbr        seed  4 ok=1 ms=375.3  eta 35 min
+[112/720] enterprise_campus  tcp_cubic  seed  4 ok=1 ms=310.84565900528105  eta 34 min
+[113/720] cellular_highlat   smart      seed  4 ok=1 ms=15008.2  eta 37 min
+[114/720] cellular_highlat   bbr        seed  4 ok=1 ms=8942.7  eta 38 min
+[115/720] cellular_highlat   aimd       seed  4 ok=1 ms=28323.6  eta 44 min
+[116/720] cellular_highlat   cubic      seed  4 ok=1 ms=39783.1  eta 52 min
+[117/720] cellular_highlat   neural     seed  4 ok=1 ms=11299.7  eta 54 min
+[118/720] cellular_highlat   tcp_cubic  seed  4 ok=1 ms=4209.073423000518  eta 53 min
+[119/720] cellular_highlat   smart+fec  seed  4 ok=1 ms=12667.8  eta 55 min
+[120/720] cellular_highlat   tcp_bbr    seed  4 ok=1 ms=4155.795452999882  eta 55 min
+[121/720] dc_microburst      neural     seed  5 ok=1 ms=226.9  eta 54 min
+[122/720] dc_microburst      smart+fec  seed  5 ok=1 ms=428.8  eta 53 min
+[123/720] dc_microburst      tcp_cubic  seed  5 ok=1 ms=121.28610999934608  eta 52 min
+[124/720] dc_microburst      smart      seed  5 ok=1 ms=281.7  eta 51 min
+[125/720] dc_microburst      bbr        seed  5 ok=1 ms=135.9  eta 50 min
+[126/720] dc_microburst      aimd       seed  5 ok=1 ms=225.7  eta 49 min
+[127/720] dc_microburst      tcp_bbr    seed  5 ok=1 ms=121.21621199912624  eta 48 min
+[128/720] dc_microburst      cubic      seed  5 ok=1 ms=368.5  eta 47 min
+[129/720] enterprise_campus  cubic      seed  5 ok=1 ms=1308.8  eta 46 min
+[130/720] enterprise_campus  tcp_bbr    seed  5 ok=1 ms=351.34135199768934  eta 46 min
+[131/720] enterprise_campus  aimd       seed  5 ok=1 ms=703.3  eta 45 min
+[132/720] enterprise_campus  tcp_cubic  seed  5 ok=1 ms=361.8971000032616  eta 44 min
+[133/720] enterprise_campus  bbr        seed  5 ok=1 ms=892.0  eta 44 min
+[134/720] enterprise_campus  neural     seed  5 ok=1 ms=444.9  eta 43 min
+[135/720] enterprise_campus  smart      seed  5 ok=1 ms=441.0  eta 42 min
+[136/720] enterprise_campus  smart+fec  seed  5 ok=1 ms=447.4  eta 42 min
+[137/720] cellular_highlat   smart      seed  5 ok=1 ms=9426.1  eta 42 min
+[138/720] cellular_highlat   tcp_cubic  seed  5 ok=1 ms=6395.122977999563  eta 43 min
+[139/720] cellular_highlat   tcp_bbr    seed  5 ok=1 ms=3123.3454610046465  eta 42 min
+[140/720] cellular_highlat   neural     seed  5 ok=1 ms=8134.6  eta 43 min
+[141/720] cellular_highlat   aimd       seed  5 ok=1 ms=32275.7  eta 47 min
+[142/720] cellular_highlat   cubic      seed  5 ok=1 ms=37745.9  eta 52 min
+[143/720] cellular_highlat   smart+fec  seed  5 ok=1 ms=9741.8  eta 52 min
+[144/720] cellular_highlat   bbr        seed  5 ok=1 ms=8223.9  eta 53 min
+[145/720] dc_microburst      smart+fec  seed  6 ok=1 ms=314.0  eta 52 min
+[146/720] dc_microburst      bbr        seed  6 ok=1 ms=112.2  eta 51 min
+[147/720] dc_microburst      cubic      seed  6 ok=1 ms=202.0  eta 50 min
+[148/720] dc_microburst      neural     seed  6 ok=1 ms=206.7  eta 50 min
+[149/720] dc_microburst      tcp_bbr    seed  6 ok=1 ms=97.13068299606675  eta 49 min
+[150/720] dc_microburst      tcp_cubic  seed  6 ok=1 ms=95.4678199996124  eta 48 min
+[151/720] dc_microburst      aimd       seed  6 ok=1 ms=157.7  eta 48 min
+[152/720] dc_microburst      smart      seed  6 ok=1 ms=263.3  eta 47 min
+[153/720] enterprise_campus  aimd       seed  6 ok=1 ms=1075.5  eta 47 min
+[154/720] enterprise_campus  tcp_bbr    seed  6 ok=1 ms=306.81574000482215  eta 46 min
+[155/720] enterprise_campus  neural     seed  6 ok=1 ms=407.8  eta 45 min
+[156/720] enterprise_campus  tcp_cubic  seed  6 ok=1 ms=314.834527001949  eta 45 min
+[157/720] enterprise_campus  smart+fec  seed  6 ok=1 ms=846.4  eta 44 min
+[158/720] enterprise_campus  cubic      seed  6 ok=1 ms=2721.6  eta 44 min
+[159/720] enterprise_campus  bbr        seed  6 ok=1 ms=441.9  eta 44 min
+[160/720] enterprise_campus  smart      seed  6 ok=1 ms=469.2  eta 43 min
+[161/720] cellular_highlat   tcp_bbr    seed  6 ok=1 ms=3524.411662998318  eta 43 min
+[162/720] cellular_highlat   aimd       seed  6 ok=1 ms=13301.7  eta 44 min
+[163/720] cellular_highlat   tcp_cubic  seed  6 ok=1 ms=16620.66406499798  eta 45 min
+[164/720] cellular_highlat   smart      seed  6 ok=1 ms=22878.4  eta 47 min
+[165/720] cellular_highlat   smart+fec  seed  6 ok=1 ms=11920.8  eta 47 min
+[166/720] cellular_highlat   neural     seed  6 ok=1 ms=4816.4  eta 47 min
+[167/720] cellular_highlat   bbr        seed  6 ok=1 ms=13065.5  eta 48 min
+[168/720] cellular_highlat   cubic      seed  6 ok=1 ms=18925.1  eta 49 min
+[169/720] dc_microburst      tcp_cubic  seed  7 ok=1 ms=104.40417900099419  eta 49 min
+[170/720] dc_microburst      tcp_bbr    seed  7 ok=1 ms=102.05615699669579  eta 48 min
+[171/720] dc_microburst      cubic      seed  7 ok=1 ms=162.7  eta 48 min
+[172/720] dc_microburst      neural     seed  7 ok=1 ms=253.9  eta 47 min
+[173/720] dc_microburst      smart      seed  7 ok=1 ms=155.5  eta 47 min
+[174/720] dc_microburst      smart+fec  seed  7 ok=1 ms=168.4  eta 46 min
+[175/720] dc_microburst      aimd       seed  7 ok=1 ms=156.4  eta 46 min
+[176/720] dc_microburst      bbr        seed  7 ok=1 ms=119.1  eta 45 min
+[177/720] enterprise_campus  cubic      seed  7 ok=1 ms=3118.5  eta 45 min
+[178/720] enterprise_campus  bbr        seed  7 ok=1 ms=534.2  eta 44 min
+[179/720] enterprise_campus  tcp_bbr    seed  7 ok=1 ms=418.3255690004444  eta 44 min
+[180/720] enterprise_campus  smart      seed  7 ok=1 ms=1065.3  eta 44 min
+[181/720] enterprise_campus  tcp_cubic  seed  7 ok=1 ms=423.082785004226  eta 43 min
+[182/720] enterprise_campus  aimd       seed  7 ok=1 ms=1239.0  eta 43 min
+[183/720] enterprise_campus  neural     seed  7 ok=1 ms=571.5  eta 42 min
+[184/720] enterprise_campus  smart+fec  seed  7 ok=1 ms=514.4  eta 42 min
+[185/720] cellular_highlat   bbr        seed  7 ok=1 ms=8123.0  eta 42 min
+[186/720] cellular_highlat   aimd       seed  7 ok=1 ms=22877.8  eta 44 min
+[187/720] cellular_highlat   tcp_bbr    seed  7 ok=1 ms=5485.108629000024  eta 44 min
+[188/720] cellular_highlat   smart+fec  seed  7 ok=1 ms=7907.3  eta 44 min
+[189/720] cellular_highlat   tcp_cubic  seed  7 ok=1 ms=13162.849637003092  eta 45 min
+[190/720] cellular_highlat   smart      seed  7 ok=1 ms=9161.9  eta 45 min
+[191/720] cellular_highlat   cubic      seed  7 ok=1 ms=40820.5  eta 47 min
+[192/720] cellular_highlat   neural     seed  7 ok=1 ms=10336.2  eta 48 min
+[193/720] dc_microburst      tcp_bbr    seed  8 ok=1 ms=102.4820210004691  eta 47 min
+[194/720] dc_microburst      smart+fec  seed  8 ok=1 ms=167.4  eta 47 min
+[195/720] dc_microburst      smart      seed  8 ok=1 ms=154.6  eta 46 min
+[196/720] dc_microburst      bbr        seed  8 ok=1 ms=119.6  eta 46 min
+[197/720] dc_microburst      cubic      seed  8 ok=1 ms=211.0  eta 46 min
+[198/720] dc_microburst      tcp_cubic  seed  8 ok=1 ms=100.16308900230797  eta 45 min
+[199/720] dc_microburst      neural     seed  8 ok=1 ms=153.7  eta 45 min
+[200/720] dc_microburst      aimd       seed  8 ok=1 ms=152.6  eta 44 min
+[201/720] enterprise_campus  cubic      seed  8 ok=1 ms=1159.3  eta 44 min
+[202/720] enterprise_campus  tcp_bbr    seed  8 ok=1 ms=241.4020599971991  eta 44 min
+[203/720] enterprise_campus  smart+fec  seed  8 ok=1 ms=299.7  eta 43 min
+[204/720] enterprise_campus  aimd       seed  8 ok=1 ms=914.5  eta 43 min
+[205/720] enterprise_campus  neural     seed  8 ok=1 ms=446.4  eta 43 min
+[206/720] enterprise_campus  smart      seed  8 ok=1 ms=897.3  eta 42 min
+[207/720] enterprise_campus  bbr        seed  8 ok=1 ms=348.6  eta 42 min
+[208/720] enterprise_campus  tcp_cubic  seed  8 ok=1 ms=245.91605299792718  eta 41 min
+[209/720] cellular_highlat   smart+fec  seed  8 ok=1 ms=4729.3  eta 41 min
+[210/720] cellular_highlat   tcp_cubic  seed  8 ok=1 ms=3222.37504900113  eta 41 min
+[211/720] cellular_highlat   smart      seed  8 ok=1 ms=12026.9  eta 42 min
+[212/720] cellular_highlat   bbr        seed  8 ok=1 ms=6683.8  eta 42 min
+[213/720] cellular_highlat   tcp_bbr    seed  8 ok=1 ms=3435.47346899868  eta 42 min
+[214/720] cellular_highlat   aimd       seed  8 ok=1 ms=27996.3  eta 43 min
+[215/720] cellular_highlat   cubic      seed  8 ok=1 ms=37176.0  eta 45 min
+[216/720] cellular_highlat   neural     seed  8 ok=1 ms=5687.2  eta 45 min
+[217/720] dc_microburst      aimd       seed  9 ok=1 ms=160.3  eta 44 min
+[218/720] dc_microburst      smart      seed  9 ok=1 ms=157.6  eta 44 min
+[219/720] dc_microburst      tcp_bbr    seed  9 ok=1 ms=99.13699800381437  eta 44 min
+[220/720] dc_microburst      tcp_cubic  seed  9 ok=1 ms=97.60248599923216  eta 43 min
+[221/720] dc_microburst      cubic      seed  9 ok=1 ms=164.9  eta 43 min
+[222/720] dc_microburst      neural     seed  9 ok=1 ms=106.2  eta 43 min
+[223/720] dc_microburst      bbr        seed  9 ok=1 ms=116.9  eta 42 min
+[224/720] dc_microburst      smart+fec  seed  9 ok=1 ms=163.1  eta 42 min
+[225/720] enterprise_campus  neural     seed  9 ok=1 ms=287.9  eta 42 min
+[226/720] enterprise_campus  tcp_cubic  seed  9 ok=1 ms=314.1735259996494  eta 41 min
+[227/720] enterprise_campus  bbr        seed  9 ok=1 ms=321.3  eta 41 min
+[228/720] enterprise_campus  cubic      seed  9 ok=1 ms=1724.4  eta 41 min
+[229/720] enterprise_campus  smart      seed  9 ok=1 ms=570.6  eta 40 min
+[230/720] enterprise_campus  aimd       seed  9 ok=1 ms=949.6  eta 40 min
+[231/720] enterprise_campus  tcp_bbr    seed  9 ok=1 ms=234.16427299525822  eta 40 min
+[232/720] enterprise_campus  smart+fec  seed  9 ok=1 ms=564.5  eta 39 min
+[233/720] cellular_highlat   aimd       seed  9 ok=1 ms=24343.1  eta 40 min
+[234/720] cellular_highlat   neural     seed  9 ok=1 ms=7742.2  eta 41 min
+[235/720] cellular_highlat   smart      seed  9 ok=1 ms=6027.1  eta 41 min
+[236/720] cellular_highlat   tcp_cubic  seed  9 ok=1 ms=11834.760293997533  eta 41 min
+[237/720] cellular_highlat   bbr        seed  9 ok=1 ms=6362.3  eta 41 min
+[238/720] cellular_highlat   tcp_bbr    seed  9 ok=1 ms=3894.7043829975883  eta 41 min
+[239/720] cellular_highlat   smart+fec  seed  9 ok=1 ms=4644.1  eta 41 min
+[240/720] cellular_highlat   cubic      seed  9 ok=1 ms=33878.9  eta 42 min
+[241/720] dc_microburst      tcp_bbr    seed 10 ok=1 ms=107.31859700172208  eta 42 min
+[242/720] dc_microburst      neural     seed 10 ok=1 ms=165.3  eta 41 min
+[243/720] dc_microburst      smart+fec  seed 10 ok=1 ms=308.2  eta 41 min
+[244/720] dc_microburst      smart      seed 10 ok=1 ms=157.1  eta 41 min
+[245/720] dc_microburst      tcp_cubic  seed 10 ok=1 ms=105.17541300214361  eta 40 min
+[246/720] dc_microburst      bbr        seed 10 ok=1 ms=120.6  eta 40 min
+[247/720] dc_microburst      aimd       seed 10 ok=1 ms=212.3  eta 40 min
+[248/720] dc_microburst      cubic      seed 10 ok=1 ms=217.0  eta 39 min
+[249/720] enterprise_campus  bbr        seed 10 ok=1 ms=1180.2  eta 39 min
+[250/720] enterprise_campus  smart      seed 10 ok=1 ms=355.6  eta 39 min
+[251/720] enterprise_campus  cubic      seed 10 ok=1 ms=1606.6  eta 39 min
+[252/720] enterprise_campus  neural     seed 10 ok=1 ms=570.1  eta 38 min
+[253/720] enterprise_campus  smart+fec  seed 10 ok=1 ms=603.4  eta 38 min
+[254/720] enterprise_campus  tcp_cubic  seed 10 ok=1 ms=310.26844200096093  eta 38 min
+[255/720] enterprise_campus  aimd       seed 10 ok=1 ms=832.1  eta 38 min
+[256/720] enterprise_campus  tcp_bbr    seed 10 ok=1 ms=304.73690000508213  eta 37 min
+[257/720] cellular_highlat   neural     seed 10 ok=1 ms=5312.8  eta 37 min
+[258/720] cellular_highlat   aimd       seed 10 ok=1 ms=14205.4  eta 38 min
+[259/720] cellular_highlat   tcp_cubic  seed 10 ok=1 ms=9905.520833999617  eta 38 min
+[260/720] cellular_highlat   tcp_bbr    seed 10 ok=1 ms=3200.1182099993457  eta 38 min
+[261/720] cellular_highlat   smart      seed 10 ok=1 ms=16955.8  eta 38 min
+[262/720] cellular_highlat   smart+fec  seed 10 ok=1 ms=4410.7  eta 38 min
+[263/720] cellular_highlat   bbr        seed 10 ok=1 ms=11004.7  eta 38 min
+[264/720] cellular_highlat   cubic      seed 10 ok=1 ms=24284.2  eta 39 min
+[265/720] dc_microburst      tcp_bbr    seed 11 ok=1 ms=132.65493100334425  eta 39 min
+[266/720] dc_microburst      aimd       seed 11 ok=1 ms=318.2  eta 38 min
+[267/720] dc_microburst      neural     seed 11 ok=1 ms=236.1  eta 38 min
+[268/720] dc_microburst      smart      seed 11 ok=1 ms=286.5  eta 38 min
+[269/720] dc_microburst      tcp_cubic  seed 11 ok=1 ms=131.53634600166697  eta 38 min
+[270/720] dc_microburst      bbr        seed 11 ok=1 ms=147.0  eta 37 min
+[271/720] dc_microburst      smart+fec  seed 11 ok=1 ms=440.1  eta 37 min
+[272/720] dc_microburst      cubic      seed 11 ok=1 ms=239.2  eta 37 min
+[273/720] enterprise_campus  smart+fec  seed 11 ok=1 ms=328.7  eta 37 min
+[274/720] enterprise_campus  aimd       seed 11 ok=1 ms=1034.9  eta 36 min
+[275/720] enterprise_campus  tcp_bbr    seed 11 ok=1 ms=250.62321800214704  eta 36 min
+[276/720] enterprise_campus  tcp_cubic  seed 11 ok=1 ms=260.91221700335154  eta 36 min
+[277/720] enterprise_campus  smart      seed 11 ok=1 ms=306.1  eta 36 min
+[278/720] enterprise_campus  neural     seed 11 ok=1 ms=517.8  eta 35 min
+[279/720] enterprise_campus  bbr        seed 11 ok=1 ms=362.1  eta 35 min
+[280/720] enterprise_campus  cubic      seed 11 ok=1 ms=2312.1  eta 35 min
+[281/720] cellular_highlat   neural     seed 11 ok=1 ms=6998.2  eta 35 min
+[282/720] cellular_highlat   smart      seed 11 ok=1 ms=5937.1  eta 35 min
+[283/720] cellular_highlat   smart+fec  seed 11 ok=1 ms=2981.7  eta 35 min
+[284/720] cellular_highlat   tcp_bbr    seed 11 ok=1 ms=2802.509281995299  eta 35 min
+[285/720] cellular_highlat   cubic      seed 11 ok=1 ms=30554.0  eta 36 min
+[286/720] cellular_highlat   bbr        seed 11 ok=1 ms=4703.9  eta 36 min
+[287/720] cellular_highlat   aimd       seed 11 ok=1 ms=19451.2  eta 36 min
+[288/720] cellular_highlat   tcp_cubic  seed 11 ok=1 ms=4366.537778994825  eta 36 min
+[289/720] dc_microburst      bbr        seed 12 ok=1 ms=127.2  eta 36 min
+[290/720] dc_microburst      tcp_bbr    seed 12 ok=1 ms=109.34730400185799  eta 35 min
+[291/720] dc_microburst      tcp_cubic  seed 12 ok=1 ms=106.91572899668245  eta 35 min
+[292/720] dc_microburst      smart+fec  seed 12 ok=1 ms=180.3  eta 35 min
+[293/720] dc_microburst      neural     seed 12 ok=1 ms=265.4  eta 35 min
+[294/720] dc_microburst      aimd       seed 12 ok=1 ms=168.0  eta 35 min
+[295/720] dc_microburst      smart      seed 12 ok=1 ms=212.4  eta 34 min
+[296/720] dc_microburst      cubic      seed 12 ok=1 ms=272.7  eta 34 min
+[297/720] enterprise_campus  bbr        seed 12 ok=1 ms=526.9  eta 34 min
+[298/720] enterprise_campus  smart      seed 12 ok=1 ms=968.6  eta 34 min
+[299/720] enterprise_campus  smart+fec  seed 12 ok=1 ms=923.9  eta 33 min
+[300/720] enterprise_campus  tcp_cubic  seed 12 ok=1 ms=357.47446700406726  eta 33 min
+[301/720] enterprise_campus  tcp_bbr    seed 12 ok=1 ms=355.1046229986241  eta 33 min
+[302/720] enterprise_campus  cubic      seed 12 ok=1 ms=1796.8  eta 33 min
+[303/720] enterprise_campus  neural     seed 12 ok=1 ms=416.2  eta 33 min
+[304/720] enterprise_campus  aimd       seed 12 ok=1 ms=1428.5  eta 33 min
+[305/720] cellular_highlat   smart      seed 12 ok=1 ms=4903.1  eta 32 min
+[306/720] cellular_highlat   tcp_cubic  seed 12 ok=1 ms=2701.9249069999205  eta 32 min
+[307/720] cellular_highlat   bbr        seed 12 ok=1 ms=4605.6  eta 32 min
+[308/720] cellular_highlat   cubic      seed 12 ok=1 ms=25989.7  eta 33 min
+[309/720] cellular_highlat   aimd       seed 12 ok=1 ms=13254.9  eta 33 min
+[310/720] cellular_highlat   smart+fec  seed 12 ok=1 ms=3693.7  eta 33 min
+[311/720] cellular_highlat   neural     seed 12 ok=1 ms=3627.9  eta 33 min
+[312/720] cellular_highlat   tcp_bbr    seed 12 ok=1 ms=2894.4822319972445  eta 33 min
+[313/720] dc_microburst      smart      seed 13 ok=1 ms=156.5  eta 33 min
+[314/720] dc_microburst      tcp_cubic  seed 13 ok=1 ms=101.69422299804864  eta 32 min
+[315/720] dc_microburst      smart+fec  seed 13 ok=1 ms=217.6  eta 32 min
+[316/720] dc_microburst      aimd       seed 13 ok=1 ms=162.3  eta 32 min
+[317/720] dc_microburst      tcp_bbr    seed 13 ok=1 ms=103.55368399905274  eta 32 min
+[318/720] dc_microburst      bbr        seed 13 ok=1 ms=121.6  eta 32 min
+[319/720] dc_microburst      neural     seed 13 ok=1 ms=215.2  eta 31 min
+[320/720] dc_microburst      cubic      seed 13 ok=1 ms=206.1  eta 31 min
+[321/720] enterprise_campus  cubic      seed 13 ok=1 ms=1831.2  eta 31 min
+[322/720] enterprise_campus  smart+fec  seed 13 ok=1 ms=510.0  eta 31 min
+[323/720] enterprise_campus  smart      seed 13 ok=1 ms=327.6  eta 31 min
+[324/720] enterprise_campus  aimd       seed 13 ok=1 ms=871.3  eta 30 min
+[325/720] enterprise_campus  neural     seed 13 ok=1 ms=447.3  eta 30 min
+[326/720] enterprise_campus  bbr        seed 13 ok=1 ms=354.5  eta 30 min
+[327/720] enterprise_campus  tcp_cubic  seed 13 ok=1 ms=256.37724900298053  eta 30 min
+[328/720] enterprise_campus  tcp_bbr    seed 13 ok=1 ms=251.92171100206906  eta 30 min
+[329/720] cellular_highlat   tcp_cubic  seed 13 ok=1 ms=2864.4896889964  eta 30 min
+[330/720] cellular_highlat   aimd       seed 13 ok=1 ms=19187.5  eta 30 min
+[331/720] cellular_highlat   smart      seed 13 ok=1 ms=6694.5  eta 30 min
+[332/720] cellular_highlat   tcp_bbr    seed 13 ok=1 ms=2785.308291997353  eta 30 min
+[333/720] cellular_highlat   bbr        seed 13 ok=1 ms=7360.7  eta 30 min
+[334/720] cellular_highlat   neural     seed 13 ok=1 ms=4689.4  eta 30 min
+[335/720] cellular_highlat   smart+fec  seed 13 ok=1 ms=3815.6  eta 30 min
+[336/720] cellular_highlat   cubic      seed 13 ok=1 ms=32100.5  eta 30 min
+[337/720] dc_microburst      tcp_bbr    seed 14 ok=1 ms=117.33459899551235  eta 30 min
+[338/720] dc_microburst      tcp_cubic  seed 14 ok=1 ms=113.45174300367944  eta 30 min
+[339/720] dc_microburst      smart+fec  seed 14 ok=1 ms=380.6  eta 30 min
+[340/720] dc_microburst      aimd       seed 14 ok=1 ms=173.5  eta 30 min
+[341/720] dc_microburst      bbr        seed 14 ok=1 ms=132.0  eta 29 min
+[342/720] dc_microburst      neural     seed 14 ok=1 ms=214.7  eta 29 min
+[343/720] dc_microburst      smart      seed 14 ok=1 ms=331.9  eta 29 min
+[344/720] dc_microburst      cubic      seed 14 ok=1 ms=276.7  eta 29 min
+[345/720] enterprise_campus  bbr        seed 14 ok=1 ms=360.3  eta 29 min
+[346/720] enterprise_campus  neural     seed 14 ok=1 ms=461.8  eta 29 min
+[347/720] enterprise_campus  tcp_cubic  seed 14 ok=1 ms=242.18585900234757  eta 28 min
+[348/720] enterprise_campus  smart+fec  seed 14 ok=1 ms=999.6  eta 28 min
+[349/720] enterprise_campus  tcp_bbr    seed 14 ok=1 ms=245.60537900106283  eta 28 min
+[350/720] enterprise_campus  aimd       seed 14 ok=1 ms=1033.6  eta 28 min
+[351/720] enterprise_campus  smart      seed 14 ok=1 ms=994.7  eta 28 min
+[352/720] enterprise_campus  cubic      seed 14 ok=1 ms=3362.2  eta 28 min
+[353/720] cellular_highlat   smart+fec  seed 14 ok=1 ms=6318.4  eta 28 min
+[354/720] cellular_highlat   tcp_cubic  seed 14 ok=1 ms=6279.367278999416  eta 28 min
+[355/720] cellular_highlat   smart      seed 14 ok=1 ms=6014.7  eta 28 min
+[356/720] cellular_highlat   bbr        seed 14 ok=1 ms=16954.1  eta 28 min
+[357/720] cellular_highlat   cubic      seed 14 ok=1 ms=30276.2  eta 28 min
+[358/720] cellular_highlat   neural     seed 14 ok=1 ms=10060.3  eta 28 min
+[359/720] cellular_highlat   aimd       seed 14 ok=1 ms=20728.4  eta 29 min
+[360/720] cellular_highlat   tcp_bbr    seed 14 ok=1 ms=5429.128012998262  eta 29 min
+[361/720] dc_microburst      tcp_bbr    seed 15 ok=1 ms=95.63268099736888  eta 28 min
+[362/720] dc_microburst      tcp_cubic  seed 15 ok=1 ms=94.51974799594609  eta 28 min
+[363/720] dc_microburst      smart      seed 15 ok=1 ms=202.0  eta 28 min
+[364/720] dc_microburst      bbr        seed 15 ok=1 ms=112.5  eta 28 min
+[365/720] dc_microburst      neural     seed 15 ok=1 ms=259.0  eta 28 min
+[366/720] dc_microburst      smart+fec  seed 15 ok=1 ms=216.3  eta 28 min
+[367/720] dc_microburst      aimd       seed 15 ok=1 ms=159.6  eta 27 min
+[368/720] dc_microburst      cubic      seed 15 ok=1 ms=261.4  eta 27 min
+[369/720] enterprise_campus  cubic      seed 15 ok=1 ms=1699.6  eta 27 min
+[370/720] enterprise_campus  bbr        seed 15 ok=1 ms=1030.5  eta 27 min
+[371/720] enterprise_campus  smart+fec  seed 15 ok=1 ms=359.2  eta 27 min
+[372/720] enterprise_campus  tcp_cubic  seed 15 ok=1 ms=536.1161499968148  eta 27 min
+[373/720] enterprise_campus  neural     seed 15 ok=1 ms=388.9  eta 26 min
+[374/720] enterprise_campus  tcp_bbr    seed 15 ok=1 ms=303.27654400025494  eta 26 min
+[375/720] enterprise_campus  aimd       seed 15 ok=1 ms=749.4  eta 26 min
+[376/720] enterprise_campus  smart      seed 15 ok=1 ms=510.9  eta 26 min
+[377/720] cellular_highlat   tcp_cubic  seed 15 ok=1 ms=6266.133812998305  eta 26 min
+[378/720] cellular_highlat   cubic      seed 15 ok=1 ms=34702.7  eta 26 min
+[379/720] cellular_highlat   tcp_bbr    seed 15 ok=1 ms=5487.377637000463  eta 26 min
+[380/720] cellular_highlat   aimd       seed 15 ok=1 ms=24106.8  eta 27 min
+[381/720] cellular_highlat   smart+fec  seed 15 ok=1 ms=6459.3  eta 27 min
+[382/720] cellular_highlat   bbr        seed 15 ok=1 ms=7795.2  eta 27 min
+[383/720] cellular_highlat   smart      seed 15 ok=1 ms=9175.5  eta 27 min
+[384/720] cellular_highlat   neural     seed 15 ok=1 ms=10426.7  eta 27 min
+[385/720] dc_microburst      tcp_cubic  seed 16 ok=1 ms=103.76416899816832  eta 27 min
+[386/720] dc_microburst      smart+fec  seed 16 ok=1 ms=263.8  eta 26 min
+[387/720] dc_microburst      neural     seed 16 ok=1 ms=211.1  eta 26 min
+[388/720] dc_microburst      smart      seed 16 ok=1 ms=155.5  eta 26 min
+[389/720] dc_microburst      tcp_bbr    seed 16 ok=1 ms=104.1905259990017  eta 26 min
+[390/720] dc_microburst      bbr        seed 16 ok=1 ms=117.7  eta 26 min
+[391/720] dc_microburst      cubic      seed 16 ok=1 ms=253.8  eta 26 min
+[392/720] dc_microburst      aimd       seed 16 ok=1 ms=156.2  eta 25 min
+[393/720] enterprise_campus  tcp_cubic  seed 16 ok=1 ms=425.83114299486624  eta 25 min
+[394/720] enterprise_campus  neural     seed 16 ok=1 ms=468.4  eta 25 min
+[395/720] enterprise_campus  smart      seed 16 ok=1 ms=1138.1  eta 25 min
+[396/720] enterprise_campus  tcp_bbr    seed 16 ok=1 ms=416.9195810027304  eta 25 min
+[397/720] enterprise_campus  cubic      seed 16 ok=1 ms=3201.9  eta 25 min
+[398/720] enterprise_campus  smart+fec  seed 16 ok=1 ms=625.3  eta 25 min
+[399/720] enterprise_campus  aimd       seed 16 ok=1 ms=1694.6  eta 25 min
+[400/720] enterprise_campus  bbr        seed 16 ok=1 ms=570.5  eta 24 min
+[401/720] cellular_highlat   bbr        seed 16 ok=1 ms=5818.2  eta 24 min
+[402/720] cellular_highlat   cubic      seed 16 ok=1 ms=43992.7  eta 25 min
+[403/720] cellular_highlat   neural     seed 16 ok=1 ms=8620.2  eta 25 min
+[404/720] cellular_highlat   tcp_cubic  seed 16 ok=1 ms=4295.108506994438  eta 25 min
+[405/720] cellular_highlat   smart+fec  seed 16 ok=1 ms=8571.1  eta 25 min
+[406/720] cellular_highlat   tcp_bbr    seed 16 ok=1 ms=4124.088344004122  eta 25 min
+[407/720] cellular_highlat   aimd       seed 16 ok=1 ms=25757.5  eta 25 min
+[408/720] cellular_highlat   smart      seed 16 ok=1 ms=8897.2  eta 25 min
+[409/720] dc_microburst      smart      seed 17 ok=1 ms=409.6  eta 25 min
+[410/720] dc_microburst      tcp_cubic  seed 17 ok=1 ms=126.83453499630559  eta 25 min
+[411/720] dc_microburst      aimd       seed 17 ok=1 ms=238.2  eta 25 min
+[412/720] dc_microburst      cubic      seed 17 ok=1 ms=281.0  eta 24 min
+[413/720] dc_microburst      smart+fec  seed 17 ok=1 ms=316.0  eta 24 min
+[414/720] dc_microburst      neural     seed 17 ok=1 ms=224.3  eta 24 min
+[415/720] dc_microburst      bbr        seed 17 ok=1 ms=142.2  eta 24 min
+[416/720] dc_microburst      tcp_bbr    seed 17 ok=1 ms=130.04961700062267  eta 24 min
+[417/720] enterprise_campus  bbr        seed 17 ok=1 ms=338.9  eta 24 min
+[418/720] enterprise_campus  smart      seed 17 ok=1 ms=824.2  eta 24 min
+[419/720] enterprise_campus  tcp_bbr    seed 17 ok=1 ms=234.61462299746927  eta 23 min
+[420/720] enterprise_campus  tcp_cubic  seed 17 ok=1 ms=239.6396089970949  eta 23 min
+[421/720] enterprise_campus  smart+fec  seed 17 ok=1 ms=734.9  eta 23 min
+[422/720] enterprise_campus  aimd       seed 17 ok=1 ms=865.2  eta 23 min
+[423/720] enterprise_campus  neural     seed 17 ok=1 ms=411.4  eta 23 min
+[424/720] enterprise_campus  cubic      seed 17 ok=1 ms=2148.4  eta 23 min
+[425/720] cellular_highlat   smart      seed 17 ok=1 ms=6501.3  eta 23 min
+[426/720] cellular_highlat   bbr        seed 17 ok=1 ms=7190.8  eta 23 min
+[427/720] cellular_highlat   cubic      seed 17 ok=1 ms=22307.5  eta 23 min
+[428/720] cellular_highlat   tcp_cubic  seed 17 ok=1 ms=4164.2892450036015  eta 23 min
+[429/720] cellular_highlat   smart+fec  seed 17 ok=1 ms=7327.0  eta 23 min
+[430/720] cellular_highlat   tcp_bbr    seed 17 ok=1 ms=3726.8020429983153  eta 23 min
+[431/720] cellular_highlat   aimd       seed 17 ok=1 ms=19879.3  eta 23 min
+[432/720] cellular_highlat   neural     seed 17 ok=1 ms=6751.4  eta 23 min
+[433/720] dc_microburst      smart      seed 18 ok=1 ms=328.3  eta 23 min
+[434/720] dc_microburst      cubic      seed 18 ok=1 ms=280.1  eta 23 min
+[435/720] dc_microburst      neural     seed 18 ok=1 ms=178.2  eta 22 min
+[436/720] dc_microburst      tcp_cubic  seed 18 ok=1 ms=128.32323399925372  eta 22 min
+[437/720] dc_microburst      aimd       seed 18 ok=1 ms=230.8  eta 22 min
+[438/720] dc_microburst      bbr        seed 18 ok=1 ms=144.1  eta 22 min
+[439/720] dc_microburst      smart+fec  seed 18 ok=1 ms=397.5  eta 22 min
+[440/720] dc_microburst      tcp_bbr    seed 18 ok=1 ms=131.2675409935764  eta 22 min
+[441/720] enterprise_campus  neural     seed 18 ok=1 ms=529.4  eta 22 min
+[442/720] enterprise_campus  tcp_cubic  seed 18 ok=1 ms=422.6665550013422  eta 22 min
+[443/720] enterprise_campus  tcp_bbr    seed 18 ok=1 ms=413.0961170012597  eta 21 min
+[444/720] enterprise_campus  bbr        seed 18 ok=1 ms=512.2  eta 21 min
+[445/720] enterprise_campus  smart+fec  seed 18 ok=1 ms=522.4  eta 21 min
+[446/720] enterprise_campus  smart      seed 18 ok=1 ms=468.6  eta 21 min
+[447/720] enterprise_campus  cubic      seed 18 ok=1 ms=1193.8  eta 21 min
+[448/720] enterprise_campus  aimd       seed 18 ok=1 ms=908.6  eta 21 min
+[449/720] cellular_highlat   cubic      seed 18 ok=1 ms=39820.1  eta 21 min
+[450/720] cellular_highlat   neural     seed 18 ok=1 ms=9629.8  eta 21 min
+[451/720] cellular_highlat   tcp_bbr    seed 18 ok=1 ms=6174.754136998672  eta 21 min
+[452/720] cellular_highlat   smart      seed 18 ok=1 ms=11921.6  eta 21 min
+[453/720] cellular_highlat   aimd       seed 18 ok=1 ms=28273.3  eta 21 min
+[454/720] cellular_highlat   smart+fec  seed 18 ok=1 ms=7021.5  eta 21 min
+[455/720] cellular_highlat   bbr        seed 18 ok=1 ms=7922.2  eta 21 min
+[456/720] cellular_highlat   tcp_cubic  seed 18 ok=1 ms=8868.692679003289  eta 21 min
+[457/720] dc_microburst      smart+fec  seed 19 ok=1 ms=159.0  eta 21 min
+[458/720] dc_microburst      cubic      seed 19 ok=1 ms=202.1  eta 21 min
+[459/720] dc_microburst      smart      seed 19 ok=1 ms=148.6  eta 21 min
+[460/720] dc_microburst      tcp_cubic  seed 19 ok=1 ms=93.31129299971508  eta 21 min
+[461/720] dc_microburst      aimd       seed 19 ok=1 ms=198.9  eta 21 min
+[462/720] dc_microburst      neural     seed 19 ok=1 ms=147.4  eta 20 min
+[463/720] dc_microburst      tcp_bbr    seed 19 ok=1 ms=92.99938500043936  eta 20 min
+[464/720] dc_microburst      bbr        seed 19 ok=1 ms=111.7  eta 20 min
+[465/720] enterprise_campus  tcp_cubic  seed 19 ok=1 ms=374.89698699937435  eta 20 min
+[466/720] enterprise_campus  smart+fec  seed 19 ok=1 ms=466.0  eta 20 min
+[467/720] enterprise_campus  bbr        seed 19 ok=1 ms=566.9  eta 20 min
+[468/720] enterprise_campus  aimd       seed 19 ok=1 ms=1686.1  eta 20 min
+[469/720] enterprise_campus  smart      seed 19 ok=1 ms=1361.9  eta 20 min
+[470/720] enterprise_campus  tcp_bbr    seed 19 ok=1 ms=386.3356939982623  eta 19 min
+[471/720] enterprise_campus  neural     seed 19 ok=1 ms=621.1  eta 19 min
+[472/720] enterprise_campus  cubic      seed 19 ok=1 ms=2974.5  eta 19 min
+[473/720] cellular_highlat   aimd       seed 19 ok=1 ms=14382.0  eta 19 min
+[474/720] cellular_highlat   cubic      seed 19 ok=1 ms=23991.8  eta 19 min
+[475/720] cellular_highlat   tcp_bbr    seed 19 ok=1 ms=2581.2979799957247  eta 19 min
+[476/720] cellular_highlat   neural     seed 19 ok=1 ms=7554.0  eta 19 min
+[477/720] cellular_highlat   bbr        seed 19 ok=1 ms=12631.6  eta 19 min
+[478/720] cellular_highlat   smart      seed 19 ok=1 ms=24228.4  eta 19 min
+[479/720] cellular_highlat   smart+fec  seed 19 ok=1 ms=9895.4  eta 19 min
+[480/720] cellular_highlat   tcp_cubic  seed 19 ok=1 ms=13319.35770000564  eta 19 min
+[481/720] dc_microburst      aimd       seed 20 ok=1 ms=222.4  eta 19 min
+[482/720] dc_microburst      tcp_cubic  seed 20 ok=1 ms=113.72406800364843  eta 19 min
+[483/720] dc_microburst      neural     seed 20 ok=1 ms=213.8  eta 19 min
+[484/720] dc_microburst      bbr        seed 20 ok=1 ms=131.0  eta 19 min
+[485/720] dc_microburst      cubic      seed 20 ok=1 ms=165.1  eta 19 min
+[486/720] dc_microburst      tcp_bbr    seed 20 ok=1 ms=115.89478099631378  eta 19 min
+[487/720] dc_microburst      smart      seed 20 ok=1 ms=319.2  eta 18 min
+[488/720] dc_microburst      smart+fec  seed 20 ok=1 ms=417.1  eta 18 min
+[489/720] enterprise_campus  aimd       seed 20 ok=1 ms=1495.8  eta 18 min
+[490/720] enterprise_campus  smart      seed 20 ok=1 ms=490.9  eta 18 min
+[491/720] enterprise_campus  tcp_cubic  seed 20 ok=1 ms=355.9683950006729  eta 18 min
+[492/720] enterprise_campus  smart+fec  seed 20 ok=1 ms=419.5  eta 18 min
+[493/720] enterprise_campus  neural     seed 20 ok=1 ms=548.1  eta 18 min
+[494/720] enterprise_campus  tcp_bbr    seed 20 ok=1 ms=347.6329719997011  eta 18 min
+[495/720] enterprise_campus  cubic      seed 20 ok=1 ms=2839.0  eta 18 min
+[496/720] enterprise_campus  bbr        seed 20 ok=1 ms=470.3  eta 17 min
+[497/720] cellular_highlat   tcp_cubic  seed 20 ok=1 ms=5031.714468001155  eta 17 min
+[498/720] cellular_highlat   aimd       seed 20 ok=1 ms=27452.0  eta 18 min
+[499/720] cellular_highlat   bbr        seed 20 ok=1 ms=7453.8  eta 17 min
+[500/720] cellular_highlat   smart+fec  seed 20 ok=1 ms=7175.0  eta 17 min
+[501/720] cellular_highlat   neural     seed 20 ok=1 ms=8796.7  eta 17 min
+[502/720] cellular_highlat   tcp_bbr    seed 20 ok=1 ms=5292.023845999211  eta 17 min
+[503/720] cellular_highlat   cubic      seed 20 ok=1 ms=54789.6  eta 18 min
+[504/720] cellular_highlat   smart      seed 20 ok=1 ms=8522.3  eta 18 min
+[505/720] dc_microburst      bbr        seed 21 ok=1 ms=139.2  eta 18 min
+[506/720] dc_microburst      smart      seed 21 ok=1 ms=181.8  eta 17 min
+[507/720] dc_microburst      tcp_bbr    seed 21 ok=1 ms=122.07837500318419  eta 17 min
+[508/720] dc_microburst      cubic      seed 21 ok=1 ms=277.8  eta 17 min
+[509/720] dc_microburst      aimd       seed 21 ok=1 ms=234.4  eta 17 min
+[510/720] dc_microburst      tcp_cubic  seed 21 ok=1 ms=119.15001200395636  eta 17 min
+[511/720] dc_microburst      neural     seed 21 ok=1 ms=173.0  eta 17 min
+[512/720] dc_microburst      smart+fec  seed 21 ok=1 ms=287.2  eta 17 min
+[513/720] enterprise_campus  aimd       seed 21 ok=1 ms=1131.4  eta 17 min
+[514/720] enterprise_campus  cubic      seed 21 ok=1 ms=1769.7  eta 16 min
+[515/720] enterprise_campus  smart+fec  seed 21 ok=1 ms=362.9  eta 16 min
+[516/720] enterprise_campus  bbr        seed 21 ok=1 ms=532.6  eta 16 min
+[517/720] enterprise_campus  tcp_bbr    seed 21 ok=1 ms=287.08170200116  eta 16 min
+[518/720] enterprise_campus  smart      seed 21 ok=1 ms=343.3  eta 16 min
+[519/720] enterprise_campus  neural     seed 21 ok=1 ms=340.0  eta 16 min
+[520/720] enterprise_campus  tcp_cubic  seed 21 ok=1 ms=284.5041359978495  eta 16 min
+[521/720] cellular_highlat   tcp_cubic  seed 21 ok=1 ms=6687.888410000596  eta 16 min
+[522/720] cellular_highlat   cubic      seed 21 ok=1 ms=25071.4  eta 16 min
+[523/720] cellular_highlat   smart+fec  seed 21 ok=1 ms=7318.7  eta 16 min
+[524/720] cellular_highlat   smart      seed 21 ok=1 ms=7921.6  eta 16 min
+[525/720] cellular_highlat   neural     seed 21 ok=1 ms=8550.2  eta 16 min
+[526/720] cellular_highlat   aimd       seed 21 ok=1 ms=17732.7  eta 16 min
+[527/720] cellular_highlat   tcp_bbr    seed 21 ok=1 ms=5994.583374995273  eta 16 min
+[528/720] cellular_highlat   bbr        seed 21 ok=1 ms=8446.6  eta 16 min
+[529/720] dc_microburst      cubic      seed 22 ok=1 ms=272.7  eta 15 min
+[530/720] dc_microburst      neural     seed 22 ok=1 ms=215.7  eta 15 min
+[531/720] dc_microburst      tcp_cubic  seed 22 ok=1 ms=122.37245999858715  eta 15 min
+[532/720] dc_microburst      aimd       seed 22 ok=1 ms=224.8  eta 15 min
+[533/720] dc_microburst      smart      seed 22 ok=1 ms=311.3  eta 15 min
+[534/720] dc_microburst      tcp_bbr    seed 22 ok=1 ms=123.11740499717416  eta 15 min
+[535/720] dc_microburst      bbr        seed 22 ok=1 ms=136.5  eta 15 min
+[536/720] dc_microburst      smart+fec  seed 22 ok=1 ms=356.8  eta 15 min
+[537/720] enterprise_campus  tcp_cubic  seed 22 ok=1 ms=284.9810300031095  eta 15 min
+[538/720] enterprise_campus  neural     seed 22 ok=1 ms=338.4  eta 14 min
+[539/720] enterprise_campus  bbr        seed 22 ok=1 ms=455.9  eta 14 min
+[540/720] enterprise_campus  cubic      seed 22 ok=1 ms=3728.4  eta 14 min
+[541/720] enterprise_campus  tcp_bbr    seed 22 ok=1 ms=286.6838430054486  eta 14 min
+[542/720] enterprise_campus  smart+fec  seed 22 ok=1 ms=1171.9  eta 14 min
+[543/720] enterprise_campus  smart      seed 22 ok=1 ms=341.9  eta 14 min
+[544/720] enterprise_campus  aimd       seed 22 ok=1 ms=1368.9  eta 14 min
+[545/720] cellular_highlat   tcp_bbr    seed 22 ok=1 ms=4007.0117579962243  eta 14 min
+[546/720] cellular_highlat   smart+fec  seed 22 ok=1 ms=4877.7  eta 14 min
+[547/720] cellular_highlat   neural     seed 22 ok=1 ms=7112.8  eta 14 min
+[548/720] cellular_highlat   cubic      seed 22 ok=1 ms=22906.5  eta 14 min
+[549/720] cellular_highlat   aimd       seed 22 ok=1 ms=15763.7  eta 14 min
+[550/720] cellular_highlat   smart      seed 22 ok=1 ms=22026.3  eta 14 min
+[551/720] cellular_highlat   tcp_cubic  seed 22 ok=1 ms=16710.380748001626  eta 14 min
+[552/720] cellular_highlat   bbr        seed 22 ok=1 ms=14906.3  eta 14 min
+[553/720] dc_microburst      neural     seed 23 ok=1 ms=147.7  eta 14 min
+[554/720] dc_microburst      tcp_bbr    seed 23 ok=1 ms=93.75935300340643  eta 13 min
+[555/720] dc_microburst      aimd       seed 23 ok=1 ms=159.1  eta 13 min
+[556/720] dc_microburst      smart      seed 23 ok=1 ms=99.6  eta 13 min
+[557/720] dc_microburst      cubic      seed 23 ok=1 ms=215.5  eta 13 min
+[558/720] dc_microburst      smart+fec  seed 23 ok=1 ms=161.9  eta 13 min
+[559/720] dc_microburst      bbr        seed 23 ok=1 ms=111.2  eta 13 min
+[560/720] dc_microburst      tcp_cubic  seed 23 ok=1 ms=93.66508400125895  eta 13 min
+[561/720] enterprise_campus  aimd       seed 23 ok=1 ms=696.6  eta 13 min
+[562/720] enterprise_campus  smart+fec  seed 23 ok=1 ms=308.4  eta 13 min
+[563/720] enterprise_campus  neural     seed 23 ok=1 ms=335.5  eta 13 min
+[564/720] enterprise_campus  cubic      seed 23 ok=1 ms=1394.1  eta 12 min
+[565/720] enterprise_campus  smart      seed 23 ok=1 ms=281.2  eta 12 min
+[566/720] enterprise_campus  tcp_bbr    seed 23 ok=1 ms=260.1733859992237  eta 12 min
+[567/720] enterprise_campus  bbr        seed 23 ok=1 ms=1414.2  eta 12 min
+[568/720] enterprise_campus  tcp_cubic  seed 23 ok=1 ms=1026.2499389937147  eta 12 min
+[569/720] cellular_highlat   bbr        seed 23 ok=1 ms=8956.1  eta 12 min
+[570/720] cellular_highlat   tcp_cubic  seed 23 ok=1 ms=5992.0216819955385  eta 12 min
+[571/720] cellular_highlat   cubic      seed 23 ok=1 ms=35297.7  eta 12 min
+[572/720] cellular_highlat   tcp_bbr    seed 23 ok=1 ms=5477.719209004135  eta 12 min
+[573/720] cellular_highlat   aimd       seed 23 ok=1 ms=28330.8  eta 12 min
+[574/720] cellular_highlat   neural     seed 23 ok=1 ms=12620.5  eta 12 min
+[575/720] cellular_highlat   smart      seed 23 ok=1 ms=15773.8  eta 12 min
+[576/720] cellular_highlat   smart+fec  seed 23 ok=1 ms=9223.1  eta 12 min
+[577/720] dc_microburst      smart      seed 24 ok=1 ms=148.7  eta 12 min
+[578/720] dc_microburst      aimd       seed 24 ok=1 ms=151.1  eta 12 min
+[579/720] dc_microburst      bbr        seed 24 ok=1 ms=111.7  eta 12 min
+[580/720] dc_microburst      smart+fec  seed 24 ok=1 ms=209.6  eta 11 min
+[581/720] dc_microburst      tcp_cubic  seed 24 ok=1 ms=90.78466000210028  eta 11 min
+[582/720] dc_microburst      tcp_bbr    seed 24 ok=1 ms=94.91523000178859  eta 11 min
+[583/720] dc_microburst      cubic      seed 24 ok=1 ms=156.6  eta 11 min
+[584/720] dc_microburst      neural     seed 24 ok=1 ms=152.2  eta 11 min
+[585/720] enterprise_campus  aimd       seed 24 ok=1 ms=813.0  eta 11 min
+[586/720] enterprise_campus  tcp_bbr    seed 24 ok=1 ms=229.544904002978  eta 11 min
+[587/720] enterprise_campus  cubic      seed 24 ok=1 ms=1528.7  eta 11 min
+[588/720] enterprise_campus  smart      seed 24 ok=1 ms=557.3  eta 11 min
+[589/720] enterprise_campus  smart+fec  seed 24 ok=1 ms=558.9  eta 11 min
+[590/720] enterprise_campus  neural     seed 24 ok=1 ms=291.1  eta 10 min
+[591/720] enterprise_campus  tcp_cubic  seed 24 ok=1 ms=232.64821199700236  eta 10 min
+[592/720] enterprise_campus  bbr        seed 24 ok=1 ms=313.0  eta 10 min
+[593/720] cellular_highlat   bbr        seed 24 ok=1 ms=7662.0  eta 10 min
+[594/720] cellular_highlat   tcp_cubic  seed 24 ok=1 ms=17400.95269399899  eta 10 min
+[595/720] cellular_highlat   tcp_bbr    seed 24 ok=1 ms=3425.000352995994  eta 10 min
+[596/720] cellular_highlat   aimd       seed 24 ok=1 ms=29910.2  eta 10 min
+[597/720] cellular_highlat   neural     seed 24 ok=1 ms=11312.8  eta 10 min
+[598/720] cellular_highlat   smart      seed 24 ok=1 ms=7381.0  eta 10 min
+[599/720] cellular_highlat   cubic      seed 24 ok=1 ms=41231.5  eta 10 min
+[600/720] cellular_highlat   smart+fec  seed 24 ok=1 ms=8022.2  eta 10 min
+[601/720] dc_microburst      tcp_bbr    seed 25 ok=1 ms=117.41225900186691  eta 10 min
+[602/720] dc_microburst      tcp_cubic  seed 25 ok=1 ms=115.19635200238554  eta 10 min
+[603/720] dc_microburst      cubic      seed 25 ok=1 ms=231.3  eta 10 min
+[604/720] dc_microburst      aimd       seed 25 ok=1 ms=176.1  eta 10 min
+[605/720] dc_microburst      smart      seed 25 ok=1 ms=217.8  eta 9 min
+[606/720] dc_microburst      bbr        seed 25 ok=1 ms=136.3  eta 9 min
+[607/720] dc_microburst      neural     seed 25 ok=1 ms=223.9  eta 9 min
+[608/720] dc_microburst      smart+fec  seed 25 ok=1 ms=230.2  eta 9 min
+[609/720] enterprise_campus  aimd       seed 25 ok=1 ms=1326.5  eta 9 min
+[610/720] enterprise_campus  neural     seed 25 ok=1 ms=548.1  eta 9 min
+[611/720] enterprise_campus  bbr        seed 25 ok=1 ms=544.4  eta 9 min
+[612/720] enterprise_campus  tcp_cubic  seed 25 ok=1 ms=412.68703099922277  eta 9 min
+[613/720] enterprise_campus  cubic      seed 25 ok=1 ms=2482.4  eta 9 min
+[614/720] enterprise_campus  smart+fec  seed 25 ok=1 ms=928.0  eta 9 min
+[615/720] enterprise_campus  tcp_bbr    seed 25 ok=1 ms=404.73500399821205  eta 8 min
+[616/720] enterprise_campus  smart      seed 25 ok=1 ms=534.4  eta 8 min
+[617/720] cellular_highlat   smart      seed 25 ok=1 ms=5005.7  eta 8 min
+[618/720] cellular_highlat   aimd       seed 25 ok=1 ms=18021.4  eta 8 min
+[619/720] cellular_highlat   cubic      seed 25 ok=1 ms=22806.0  eta 8 min
+[620/720] cellular_highlat   smart+fec  seed 25 ok=1 ms=6150.4  eta 8 min
+[621/720] cellular_highlat   bbr        seed 25 ok=1 ms=6646.0  eta 8 min
+[622/720] cellular_highlat   tcp_cubic  seed 25 ok=1 ms=5345.161698001903  eta 8 min
+[623/720] cellular_highlat   tcp_bbr    seed 25 ok=1 ms=4465.569439998944  eta 8 min
+[624/720] cellular_highlat   neural     seed 25 ok=1 ms=6625.2  eta 8 min
+[625/720] dc_microburst      tcp_cubic  seed 26 ok=1 ms=124.30718899850035  eta 8 min
+[626/720] dc_microburst      bbr        seed 26 ok=1 ms=142.8  eta 8 min
+[627/720] dc_microburst      cubic      seed 26 ok=1 ms=290.2  eta 8 min
+[628/720] dc_microburst      aimd       seed 26 ok=1 ms=180.6  eta 7 min
+[629/720] dc_microburst      smart+fec  seed 26 ok=1 ms=346.7  eta 7 min
+[630/720] dc_microburst      tcp_bbr    seed 26 ok=1 ms=124.78396399819758  eta 7 min
+[631/720] dc_microburst      smart      seed 26 ok=1 ms=232.1  eta 7 min
+[632/720] dc_microburst      neural     seed 26 ok=1 ms=222.2  eta 7 min
+[633/720] enterprise_campus  bbr        seed 26 ok=1 ms=532.3  eta 7 min
+[634/720] enterprise_campus  neural     seed 26 ok=1 ms=551.3  eta 7 min
+[635/720] enterprise_campus  tcp_bbr    seed 26 ok=1 ms=342.98100999876624  eta 7 min
+[636/720] enterprise_campus  smart+fec  seed 26 ok=1 ms=665.1  eta 7 min
+[637/720] enterprise_campus  aimd       seed 26 ok=1 ms=1664.5  eta 7 min
+[638/720] enterprise_campus  smart      seed 26 ok=1 ms=1228.2  eta 7 min
+[639/720] enterprise_campus  tcp_cubic  seed 26 ok=1 ms=346.3359359957394  eta 6 min
+[640/720] enterprise_campus  cubic      seed 26 ok=1 ms=3672.2  eta 6 min
+[641/720] cellular_highlat   smart+fec  seed 26 ok=1 ms=3575.9  eta 6 min
+[642/720] cellular_highlat   tcp_cubic  seed 26 ok=1 ms=3074.9125959991943  eta 6 min
+[643/720] cellular_highlat   smart      seed 26 ok=1 ms=6240.2  eta 6 min
+[644/720] cellular_highlat   neural     seed 26 ok=1 ms=8552.4  eta 6 min
+[645/720] cellular_highlat   tcp_bbr    seed 26 ok=1 ms=3064.914318994852  eta 6 min
+[646/720] cellular_highlat   aimd       seed 26 ok=1 ms=14923.4  eta 6 min
+[647/720] cellular_highlat   bbr        seed 26 ok=1 ms=5939.0  eta 6 min
+[648/720] cellular_highlat   cubic      seed 26 ok=1 ms=27567.4  eta 6 min
+[649/720] dc_microburst      neural     seed 27 ok=1 ms=267.3  eta 6 min
+[650/720] dc_microburst      smart+fec  seed 27 ok=1 ms=279.6  eta 6 min
+[651/720] dc_microburst      tcp_cubic  seed 27 ok=1 ms=105.59953700430924  eta 6 min
+[652/720] dc_microburst      cubic      seed 27 ok=1 ms=306.7  eta 5 min
+[653/720] dc_microburst      tcp_bbr    seed 27 ok=1 ms=107.25652999826707  eta 5 min
+[654/720] dc_microburst      smart      seed 27 ok=1 ms=218.1  eta 5 min
+[655/720] dc_microburst      bbr        seed 27 ok=1 ms=124.7  eta 5 min
+[656/720] dc_microburst      aimd       seed 27 ok=1 ms=167.3  eta 5 min
+[657/720] enterprise_campus  smart+fec  seed 27 ok=1 ms=502.8  eta 5 min
+[658/720] enterprise_campus  smart      seed 27 ok=1 ms=558.4  eta 5 min
+[659/720] enterprise_campus  tcp_cubic  seed 27 ok=1 ms=455.18900999741163  eta 5 min
+[660/720] enterprise_campus  cubic      seed 27 ok=1 ms=1575.8  eta 5 min
+[661/720] enterprise_campus  aimd       seed 27 ok=1 ms=824.9  eta 5 min
+[662/720] enterprise_campus  bbr        seed 27 ok=1 ms=1496.3  eta 5 min
+[663/720] enterprise_campus  neural     seed 27 ok=1 ms=502.0  eta 5 min
+[664/720] enterprise_campus  tcp_bbr    seed 27 ok=1 ms=377.6586909953039  eta 4 min
+[665/720] cellular_highlat   smart      seed 27 ok=1 ms=13060.6  eta 4 min
+[666/720] cellular_highlat   aimd       seed 27 ok=1 ms=23826.8  eta 4 min
+[667/720] cellular_highlat   tcp_bbr    seed 27 ok=1 ms=3289.0410109976074  eta 4 min
+[668/720] cellular_highlat   neural     seed 27 ok=1 ms=9580.6  eta 4 min
+[669/720] cellular_highlat   cubic      seed 27 ok=1 ms=38751.2  eta 4 min
+[670/720] cellular_highlat   tcp_cubic  seed 27 ok=1 ms=4588.064896001015  eta 4 min
+[671/720] cellular_highlat   smart+fec  seed 27 ok=1 ms=4803.9  eta 4 min
+[672/720] cellular_highlat   bbr        seed 27 ok=1 ms=25854.2  eta 4 min
+[673/720] dc_microburst      aimd       seed 28 ok=1 ms=269.5  eta 4 min
+[674/720] dc_microburst      tcp_bbr    seed 28 ok=1 ms=108.13489399879472  eta 4 min
+[675/720] dc_microburst      smart      seed 28 ok=1 ms=263.4  eta 4 min
+[676/720] dc_microburst      tcp_cubic  seed 28 ok=1 ms=105.09593899769243  eta 4 min
+[677/720] dc_microburst      cubic      seed 28 ok=1 ms=216.8  eta 3 min
+[678/720] dc_microburst      bbr        seed 28 ok=1 ms=120.6  eta 3 min
+[679/720] dc_microburst      neural     seed 28 ok=1 ms=206.8  eta 3 min
+[680/720] dc_microburst      smart+fec  seed 28 ok=1 ms=305.5  eta 3 min
+[681/720] enterprise_campus  neural     seed 28 ok=1 ms=493.5  eta 3 min
+[682/720] enterprise_campus  smart+fec  seed 28 ok=1 ms=432.4  eta 3 min
+[683/720] enterprise_campus  tcp_cubic  seed 28 ok=1 ms=347.2145490013645  eta 3 min
+[684/720] enterprise_campus  bbr        seed 28 ok=1 ms=452.0  eta 3 min
+[685/720] enterprise_campus  cubic      seed 28 ok=1 ms=1813.9  eta 3 min
+[686/720] enterprise_campus  smart      seed 28 ok=1 ms=834.5  eta 3 min
+[687/720] enterprise_campus  tcp_bbr    seed 28 ok=1 ms=343.00217800046084  eta 3 min
+[688/720] enterprise_campus  aimd       seed 28 ok=1 ms=1305.4  eta 3 min
+[689/720] cellular_highlat   smart+fec  seed 28 ok=1 ms=18553.9  eta 2 min
+[690/720] cellular_highlat   tcp_bbr    seed 28 ok=1 ms=3609.341263996612  eta 2 min
+[691/720] cellular_highlat   tcp_cubic  seed 28 ok=1 ms=11309.912848999375  eta 2 min
+[692/720] cellular_highlat   aimd       seed 28 ok=1 ms=20658.2  eta 2 min
+[693/720] cellular_highlat   smart      seed 28 ok=1 ms=21561.4  eta 2 min
+[694/720] cellular_highlat   bbr        seed 28 ok=1 ms=28779.7  eta 2 min
+[695/720] cellular_highlat   neural     seed 28 ok=1 ms=4875.8  eta 2 min
+[696/720] cellular_highlat   cubic      seed 28 ok=1 ms=35579.6  eta 2 min
+[697/720] dc_microburst      cubic      seed 29 ok=1 ms=267.8  eta 2 min
+[698/720] dc_microburst      aimd       seed 29 ok=1 ms=181.3  eta 2 min
+[699/720] dc_microburst      neural     seed 29 ok=1 ms=221.3  eta 2 min
+[700/720] dc_microburst      bbr        seed 29 ok=1 ms=141.6  eta 2 min
+[701/720] dc_microburst      tcp_cubic  seed 29 ok=1 ms=126.33923900284572  eta 2 min
+[702/720] dc_microburst      smart      seed 29 ok=1 ms=359.7  eta 1 min
+[703/720] dc_microburst      tcp_bbr    seed 29 ok=1 ms=127.97262000094634  eta 1 min
+[704/720] dc_microburst      smart+fec  seed 29 ok=1 ms=372.4  eta 1 min
+[705/720] enterprise_campus  bbr        seed 29 ok=1 ms=394.2  eta 1 min
+[706/720] enterprise_campus  cubic      seed 29 ok=1 ms=2989.8  eta 1 min
+[707/720] enterprise_campus  neural     seed 29 ok=1 ms=459.0  eta 1 min
+[708/720] enterprise_campus  tcp_bbr    seed 29 ok=1 ms=300.48020699905464  eta 1 min
+[709/720] enterprise_campus  tcp_cubic  seed 29 ok=1 ms=292.4622940045083  eta 1 min
+[710/720] enterprise_campus  smart      seed 29 ok=1 ms=811.9  eta 1 min
+[711/720] enterprise_campus  aimd       seed 29 ok=1 ms=936.6  eta 1 min
+[712/720] enterprise_campus  smart+fec  seed 29 ok=1 ms=828.2  eta 1 min
+[713/720] cellular_highlat   smart      seed 29 ok=1 ms=23739.0  eta 1 min
+[714/720] cellular_highlat   neural     seed 29 ok=1 ms=6914.1  eta 0 min
+[715/720] cellular_highlat   bbr        seed 29 ok=1 ms=17247.9  eta 0 min
+[716/720] cellular_highlat   smart+fec  seed 29 ok=1 ms=8904.8  eta 0 min
+[717/720] cellular_highlat   tcp_cubic  seed 29 ok=1 ms=12903.805160000047  eta 0 min
+[718/720] cellular_highlat   tcp_bbr    seed 29 ok=1 ms=5298.973632998241  eta 0 min
+[719/720] cellular_highlat   cubic      seed 29 ok=1 ms=37216.8  eta 0 min
+[720/720] cellular_highlat   aimd       seed 29 ok=1 ms=18583.6  eta 0 min
+
+done in 54.3 min: 720/720 byte-identical; outputs in results/wsl_netem/scale
+-- Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + RUDP: ok
+
+== Package results
+proxy scale: 540 rows, n=30 seeds
+netem scale: 720 rows, n=30 seeds
+netem matrix: 700 rows
+written to results/wsl_netem/tex
+
+Next
+  1. Copy results/wsl_netem_LAPTOP-IRSGPS8S_20261013_0240.tar.gz back to the project (WSL: it is already visible from Windows under \\wsl$\...).
+  2. tar xzf it in the project root, then:  python3 gen_paper_tables.py --netem-scale results/wsl_netem/scale/raw.csv --netem-matrix results/wsl_netem/matrix/raw.csv   (already run once inside results/wsl_netem/tex)
+  3. \input{} the generated results/paper_tex/*.tex files in the paper (see paper/section_V_scale_insert.tex).
+Exit status: 0 (non-zero means at least one step failed -- read results/wsl_netem/run.log before using any numbers)
+
+== cleanup: removing netem/tbf from lo and restoring settings
+lo is clean (mtu 65536)

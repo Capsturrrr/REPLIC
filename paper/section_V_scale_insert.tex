@@ -1,0 +1,73 @@
+% section_V_scale_insert.tex -- replaces the n=5 evaluation paragraphs in Sections V and VI.
+% Needs: \usepackage{booktabs}.  The \input files are produced by  python3 gen_paper_tables.py  (every number is computed from raw.csv).
+% Set \texpath to where the generated files live, e.g.  \newcommand{\texpath}{results/paper_tex}
+\providecommand{\texpath}{results/paper_tex}
+\providecommand{\inputif}[1]{\IfFileExists{#1}{\input{#1}}{\fbox{missing generated file #1}}}
+
+\subsection{Sample size, path variance and statistics}
+\label{sec:scale}
+Earlier tables in this paper used $n=5$ runs per cell on hand-picked paths. That is too few to support the percentile columns
+(with $n=5$ the p95 and p99 are both essentially the sample maximum) and says nothing about how results move with the path. We therefore
+re-ran the transfer comparison as a multi-seed, multi-path matrix. Three \emph{path families} are defined as parameter ranges
+(Table~\ref{tab:families}); seed $s\in\{0,\dots,29\}$ draws one concrete path from each family, and every policy is run on exactly that path
+(a paired design) in a seed-dependent random order, so slow drift in machine load cannot favour one policy. Each cell therefore has
+$n=30$ independent runs of a 1\,MB transfer, each on a different path, and the interval estimates include both path variance and run noise.
+
+\begin{table}[t]\centering\footnotesize
+\caption{Path families (one-way delay; the proxy adds the same delay to ACKs). Each seed draws uniformly from the ranges. Cross traffic is a synthetic on/off process at the shared bottleneck (proxy backend only).}
+\label{tab:families}
+\begin{tabular}{@{}lp{5.6cm}@{}}\toprule
+family & ranges\\\midrule
+dc\_microburst & 0.25--1\,ms; 8--12\,MB/s; 20--40\,kB buffer; no random loss; 1--3\,ms line-rate bursts every 20--40\,ms\\
+enterprise\_campus & 2--8\,ms, 0--2\,ms jitter; 2.5--5\,MB/s; 60--120\,kB buffer; 0--0.1\% loss; on/off cross traffic\\
+cellular\_highlat & 40--120\,ms, 10--40\,ms jitter; 150--600\,kB/s; 20--50\,kB buffer; 0.5--3\% loss\\
+\bottomrule\end{tabular}
+\end{table}
+
+For each cell we report the mean with a $t$-based 95\% confidence interval, the median and p95 with 95\% percentile-bootstrap intervals
+(4000 resamples), and p99 as a point estimate only: with $n=30$ it interpolates between the two largest observations and has no meaningful interval.
+Policies are compared by the \emph{ratio} of completion times on the same seed; we report the geometric mean ratio with a 95\% interval from a
+$t$-interval on the log ratios, a paired $t$-test and, in the CSV, a Wilcoxon signed-rank test, with Holm correction within each family and reference.
+Runs that fail the byte-for-byte check are counted ($n_{ok}/n$) and excluded from the timing statistics; a pair is dropped when either member failed.
+
+\subsection{Results: UDP-impairment-proxy backend ($n=30$ per cell)}
+\inputif{\texpath/proxy_scale_table.tex}
+\inputif{\texpath/proxy_scale_paired.tex}
+\inputif{\texpath/proxy_scale_text.tex}
+
+\subsection{Results: kernel TCP under Linux netem ($n=30$ per cell)}
+\label{sec:kerneltcp}
+This backend replaces the user-space proxy with \texttt{tc netem} and \texttt{tbf} on the loopback device and adds native kernel TCP (CUBIC and BBR) as
+baselines. Kernel TCP sends the same random payload, over the same bottleneck, with its timer started after \texttt{connect()} (the RUDP timer starts after
+its handshake) and stopped when the receiver has all bytes and answers, which is the same end condition as the RUDP client. Netem impairs both directions of
+\texttt{lo}, whereas the proxy impairs the forward path only, so \textbf{the two backends are never mixed in one table}. The synthetic cross-traffic bursts of the proxy have
+no netem counterpart; under netem \texttt{dc\_microburst} keeps only its shallow buffer, delay and rate.
+\inputif{\texpath/netem_scale_table.tex}
+\inputif{\texpath/netem_scale_paired.tex}
+\inputif{\texpath/netem_scale_text.tex}
+\inputif{\texpath/netem_matrix.tex}
+
+\subsection{Coexistence with $n=30$ runs per cell}
+\label{sec:fairness30}
+The fairness cells of Section~\ref{sec:fairness} were repeated with 30 runs each (subject against $k$ CUBIC or BBR background flows, $k\in\{1,2\}$).
+\begin{table*}[t]\centering\footnotesize
+\caption{Coexistence, mean $\pm$ s.d. over 30 runs per row. $J$: Jain index over all flows; ``share'': subject throughput divided by the equal share; ``min'': smallest flow's share divided by the equal share.}
+\label{tab:fair30}
+\begin{tabular}{@{}llrrrrr@{}}\toprule
+subject & background & $k$ & $n$ & $J$ & share & min\\\midrule
+\input{\texpath/fairness30_rows.tex}\\
+\bottomrule\end{tabular}
+\end{table*}
+
+\paragraph{Reading Table~\ref{tab:fair30}.} With 30 runs per cell (Welch tests, unadjusted) the Poise agent has a higher Jain index than the static agent against CUBIC
+($k=1$: 0.974 vs 0.942, $p=0.012$; $k=2$: 0.958 vs 0.881, $p<0.001$), and than the static agent with the \texttt{--polite} guard ($k=1$: $p=0.001$; $k=2$: 0.958 vs 0.919, $p=0.015$);
+at $n=5$ the guard comparison was not significant. Against BBR the picture is different: Poise's Jain index is not distinguishable from the static agent's
+($k=1$: $p=0.34$; $k=2$: $p=0.33$), and it takes only about $0.74\times$ its equal share, i.e.\ it yields to the simplified BBR background flows rather than being unfair to them,
+at the cost of its own throughput. We make no fairness claim against BBR beyond ``not a bully''.
+
+\subsection{Threats to validity}
+(i) The path families are our own parameter ranges, not measurements of deployed networks. (ii) Intervals describe sampling error over our families, not any particular real path.
+(iii) On \texttt{dc\_microburst} a 1\,MB transfer ends within a few round-trips, so handshake and slow start, which are fixed rules shared by all RUDP policies, dominate
+the comparison. (iv) The learned policies were trained on a simulator with simplified CUBIC and BBR; no result here should be read as evidence about real BBR deployments.
+(v) A single machine with two cores runs sender, receiver and bottleneck emulation; the order randomisation limits, but does not remove, load-dependent timing noise.
+(vi) Kernel-TCP retransmission counts come from a system-wide counter and are only meaningful on an otherwise idle host.

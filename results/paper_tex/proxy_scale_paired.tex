@@ -1,0 +1,21 @@
+% paired comparison, matched on the drawn path (seed); ratio < 1 means the policy finished faster than the reference
+\begin{table*}[t]\centering\footnotesize
+\caption{Paired completion-time ratio versus the reference (same seed $\Rightarrow$ same path). Geometric mean with 95\% $t$-interval on the log ratio; Holm-adjusted paired $t$ $p$-value within each family and reference. Ratio $<1$: faster than the reference.}
+\label{tab:scalepaired-proxy}\begin{tabular}{lllrrr}\toprule
+Family & Policy & vs & ratio [95\% CI] & faster in & $p_{Holm}$\\\midrule
+cellular\_highlat & aimd & cubic & 1.01 [0.86, 1.18] & 12/30 & 0.917 \\
+cellular\_highlat & bbr & cubic & 0.62 [0.52, 0.75] & 24/30 & $<$0.001 \\
+cellular\_highlat & neural & cubic & 0.61 [0.51, 0.74] & 25/30 & $<$0.001 \\
+cellular\_highlat & smart & cubic & 0.54 [0.45, 0.63] & 27/30 & $<$0.001 \\
+cellular\_highlat & smart+fec & cubic & 0.42 [0.35, 0.51] & 29/30 & $<$0.001 \\
+dc\_microburst & aimd & cubic & 0.93 [0.79, 1.11] & 18/30 & 0.425 \\
+dc\_microburst & bbr & cubic & 0.65 [0.55, 0.78] & 24/30 & $<$0.001 \\
+dc\_microburst & neural & cubic & 1.32 [1.12, 1.56] & 9/30 & 0.004 \\
+dc\_microburst & smart & cubic & 1.36 [1.17, 1.57] & 6/30 & $<$0.001 \\
+dc\_microburst & smart+fec & cubic & 1.41 [1.21, 1.63] & 4/30 & $<$0.001 \\
+enterprise\_campus & aimd & cubic & 1.02 [0.93, 1.13] & 17/30 & 1.000 \\
+enterprise\_campus & bbr & cubic & 1.02 [0.93, 1.12] & 13/30 & 1.000 \\
+enterprise\_campus & neural & cubic & 0.91 [0.84, 1.00] & 20/30 & 0.177 \\
+enterprise\_campus & smart & cubic & 0.87 [0.81, 0.94] & 24/30 & 0.004 \\
+enterprise\_campus & smart+fec & cubic & 0.93 [0.85, 1.01] & 21/30 & 0.233 \\
+\bottomrule\end{tabular}\end{table*}

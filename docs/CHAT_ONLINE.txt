@@ -27,16 +27,16 @@ WEB VERSION (browser UI, same protocol, talks to ./bin/chat or another web copy)
    Right panel: live packet-loss slider, sent/lost/resent counters, in-flight window, protocol log.
 
 WINDOW CONTROLLER (browser version only)
-   Dropdown: Fixed window (8) / AIMD / Smart-RUDP (Q-learning, loads results/q_lossy.txt, keeps learning).
+   Dropdown: Fixed window (8) / AIMD / Poise-RUDP (Q-learning, loads results/q_lossy.txt, keeps learning).
    "Send 60 test messages" times delivery. For a slow lossy path add:  --loss 10 --delay 40
-   (Smart-RUDP did not beat the simple controllers in our tests, same as the report.)
+   (Poise-RUDP did not beat the simple controllers in our tests, same as the report.)
 
 RETRAIN / EVALUATE THE CHAT AGENT
    python3 web/train.py   (about 5 s; writes results/q_chat.txt and prints the held-out comparison table)
 
 Deep (neural network) controller
    python3 web/train_deep.py        trains 4 seeds, keeps the best on validation paths, writes results/dqn_chat.json
-   Pick "Smart-RUDP (deep, neural net)" in the controller dropdown. Needs numpy only (no torch).
+   Pick "Poise-RUDP (deep, neural net)" in the controller dropdown. Needs numpy only (no torch).
    Training is seed-sensitive (1 of 4 seeds was worse than AIMD), hence the validation pick.
    Stress test with all controllers: python3 web/stress.py
 

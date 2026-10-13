@@ -1,0 +1,11 @@
+name	delay_ms	jitter_ms	loss_pct	rate_kBps	queue_kB	note
+clean	5	0	0.0	600	30	0% loss, 10 ms RTT
+loss1_j5	25	5	1	420	26	1% loss, +-5 ms jitter
+loss2_j10	25	10	2	420	26	2% loss, +-10 ms jitter
+loss5_j20	25	20	5	420	26	5% loss, +-20 ms jitter
+loss10_j35	25	35	10	420	26	10% loss, +-35 ms jitter
+loss20_j50	25	50	20	420	26	20% loss, +-50 ms jitter
+lte	30	8	0.5	700	40	cellular-like, 60 ms RTT
+wan	40	15	1.0	300	20	congested enterprise WAN, 80 ms RTT
+wan_hi	100	20	1.0	300	40	high-RTT WAN, 200 ms RTT
+sat	150	10	0.3	210	52	satellite-like, 300 ms RTT

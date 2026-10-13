@@ -6,7 +6,7 @@ Spoken lines are meant to be said aloud: change the wording to suit your voice, 
 
 | Speaker | Parts | Slides |
 |---|---|---|
-| Harshavardhan | Opening, what we built, Smart-RUDP, live demo, close | 1-6, 15-17, 20, 31-34 |
+| Harshavardhan | Opening, what we built, Poise-RUDP, live demo, close | 1-6, 15-17, 20, 31-34 |
 | Rohit | Reliability, congestion control, literature, neural agent | 7-8, 12, 21-25 |
 | Shloak | Testing, results, network, Wireshark, final results | 9-11, 13-14, 18-19, 26-29 |
 
@@ -48,9 +48,9 @@ Spoken lines are meant to be said aloud: change the wording to suit your voice, 
 
 **Shloak:** We wrote a Wireshark dissector in Lua for the RUDP header. Filtering on one sequence number shows every copy of that packet, so retransmissions are visible: the same segment appears again after the timeout.
 
-## 8. Smart-RUDP (Harshavardhan, 8:00 to 9:30), slides 15-17
+## 8. Poise-RUDP (Harshavardhan, 8:00 to 9:30), slides 15-17
 
-**Harshavardhan:** (slide 15) Smart-RUDP replaces the fixed AIMD rule with a learned policy that, once per round trip, picks one of five actions: shrink, hold, or grow the window. First a Q-learning table, then a small neural network (deep RL) with 1,413 weights, trained with a DQN. (slide 16) The code for the agent is short: five inputs, two hidden layers of 32, five outputs. (slide 17) Against a well-tuned AIMD it was honest at first: roughly equal, not a win. We kept working instead of stopping there.
+**Harshavardhan:** (slide 15) Poise-RUDP replaces the fixed AIMD rule with a learned policy that, once per round trip, picks one of five actions: shrink, hold, or grow the window. First a Q-learning table, then a small neural network (deep RL) with 1,413 weights, trained with a DQN. (slide 16) The code for the agent is short: five inputs, two hidden layers of 32, five outputs. (slide 17) Against a well-tuned AIMD it was honest at first: roughly equal, not a win. We kept working instead of stopping there.
 
 ## 9. The neural agent in the C transport (Rohit, 9:30 to 11:00), slides 21-24
 

@@ -1,88 +1,241 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RUDP Drop</title>
+<meta name="description" content="Send a file over RUDP, our reliable-UDP protocol, across an emulated bad network and watch congestion-control policies race. The receiver checks every byte.">
+<meta property="og:title" content="RUDP Drop"><meta property="og:description" content="Race congestion-control policies on a real reliable-UDP transfer.">
+<meta name="theme-color" content="#0c0f0e">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c0f0e'/%3E%3Cpath d='M7 21h6l3-10 3 10h6' fill='none' stroke='%23a8d672' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap">
 <style>
-:root{--bg:#0d1117;--panel:#161b22;--line:#2a313c;--text:#e6edf3;--mute:#8b949e;--acc:#58a6ff;--good:#3fb950;--bad:#f85149;--warn:#d29922;--c1:#8b949e;--c2:#d29922;--c3:#58a6ff}
-@media (prefers-color-scheme:light){:root{--bg:#f6f8fa;--panel:#fff;--line:#d0d7de;--text:#1f2328;--mute:#656d76;--acc:#0969da;--good:#1a7f37;--bad:#cf222e;--warn:#9a6700;--c1:#6e7781;--c2:#9a6700;--c3:#0969da}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-main{max-width:920px;margin:0 auto;padding:28px 16px 60px}
-h1{font-size:26px;margin:0 0 4px;letter-spacing:-.3px}.sub{color:var(--mute);margin:0 0 24px}
-h2{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:26px 0 10px;font-weight:600}
-.drop{border:1.5px dashed var(--line);border-radius:12px;padding:26px;text-align:center;background:var(--panel);cursor:pointer;transition:.15s}
-.drop.over,.drop:hover{border-color:var(--acc)}.drop b{display:block;font-size:16px}.drop span{color:var(--mute);font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;cursor:pointer;transition:.12s;user-select:none}
-.card:hover{border-color:var(--mute)}.card.on{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc) inset}
-.card b{display:block}.card small{color:var(--mute);font-size:12.5px;line-height:1.35;display:block;margin-top:2px}
-button{background:var(--acc);color:#fff;border:0;border-radius:8px;padding:11px 22px;font:600 15px system-ui;cursor:pointer}
-button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:22px}
-#msg{color:var(--bad);font-size:14px}
-.arm{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px}
-.arm .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
-.arm .name{font-weight:650}.badge{font-size:12px;border-radius:99px;padding:2px 9px;border:1px solid var(--line);color:var(--mute)}
-.badge.win{color:var(--good);border-color:var(--good)}.badge.run{color:var(--acc);border-color:var(--acc)}
-.bar{height:8px;background:var(--line);border-radius:6px;overflow:hidden;margin:10px 0 8px}.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
-.stats{display:flex;gap:22px;flex-wrap:wrap;font-size:13.5px;color:var(--mute)}.stats b{color:var(--text);font-variant-numeric:tabular-nums}
-canvas{width:100%;height:120px;display:block;margin-top:10px}
-.ok{color:var(--good)}.no{color:var(--bad)}a{color:var(--acc)}
-.sum{background:var(--panel);border:1px solid var(--good);border-radius:12px;padding:14px 16px;margin:6px 0 16px}
-footer{color:var(--mute);font-size:12.5px;margin-top:30px;line-height:1.5}
-</style></head><body><main>
-<h1>RUDP Drop</h1>
-<p class="sub">Send a file over our own reliable-UDP protocol across a simulated bad network, and watch the congestion-control policies race. The receiver checks every byte.</p>
+:root{
+  --bg:#0c0f0e;--s1:#131716;--s2:#1a1f1d;--line:#262c29;--line2:#333b37;
+  --text:#e8ece9;--mute:#8a948f;--faint:#5c6661;
+  --acc:#a8d672;--acc-ink:#12200a;--acc-soft:rgba(168,214,114,.12);
+  --bad:#e5736a;--warn:#d9a441;
+  --c1:#7d8782;--c2:#d6b36a;--c3:#8fb3d9;--c4:#a8d672;
+  --sans:'Geist',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'Geist Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --shadow:0 18px 40px -22px rgba(0,12,6,.9);
+  --z-skip:30;
+}
+@media (prefers-color-scheme:light){:root{
+  --bg:#f3f4ef;--s1:#fafaf6;--s2:#ecede6;--line:#dcded4;--line2:#c9ccc0;
+  --text:#171b19;--mute:#5d665f;--faint:#8a9289;
+  --acc:#4f7d1e;--acc-ink:#f4f8ec;--acc-soft:rgba(79,125,30,.10);
+  --bad:#b83f35;--warn:#8f6410;
+  --c1:#6c756f;--c2:#9c7420;--c3:#3a6a9c;--c4:#4f7d1e;
+  --shadow:0 18px 40px -26px rgba(40,50,30,.5)}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased;min-height:100dvh}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.055;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.skip{position:absolute;left:12px;top:-60px;background:var(--acc);color:var(--acc-ink);padding:8px 14px;border-radius:6px;font-weight:600;z-index:var(--z-skip);text-decoration:none}
+.skip:focus{top:12px}
+:focus-visible{outline:2px solid var(--acc);outline-offset:3px;border-radius:6px}
+main{max-width:1240px;margin:0 auto;padding:clamp(28px,6vw,72px) clamp(16px,4vw,40px) 72px}
+.eyebrow{font:500 12px/1 var(--mono);color:var(--acc);letter-spacing:.06em;margin:0 0 18px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:"";width:22px;height:1px;background:var(--acc)}
+h1{font-size:clamp(34px,5.4vw,60px);line-height:1.02;letter-spacing:-.035em;font-weight:650;margin:0 0 18px;max-width:15ch;text-wrap:balance}
+.lede{color:var(--mute);max-width:56ch;margin:0;font-size:16px;text-wrap:pretty}
+.desk{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:clamp(28px,5vw,64px);margin-top:clamp(36px,6vw,64px);align-items:start}
+@media (max-width:900px){.desk{grid-template-columns:1fr}}
+.setup{position:sticky;top:24px;display:flex;flex-direction:column;gap:28px}
+@media (max-width:900px){.setup{position:static}}
+.step h2{display:flex;align-items:baseline;gap:10px;font-size:14px;font-weight:600;margin:0 0 12px;letter-spacing:-.005em}
+.step h2 i{font:500 11px var(--mono);color:var(--faint);font-style:normal}
+.drop{width:100%;display:flex;gap:14px;align-items:center;text-align:left;background:var(--s1);color:var(--text);border:1px dashed var(--line2);border-radius:14px;padding:18px;font:inherit;cursor:pointer;transition:border-color .2s,background .2s,transform .15s}
+.drop:hover,.drop.over{border-color:var(--acc);background:var(--acc-soft)}
+.drop:active{transform:scale(.99)}
+.drop svg{flex:none;width:30px;height:30px;color:var(--acc)}
+.drop b{display:block;font-weight:600;overflow-wrap:anywhere}
+.drop span{display:block;color:var(--mute);font-size:13px;margin-top:2px}
+.opt{display:grid;gap:2px;margin:0;padding:0}
+.row{width:100%;display:grid;grid-template-columns:18px 1fr;gap:12px;align-items:start;text-align:left;background:transparent;border:0;color:var(--text);font:inherit;padding:10px 12px;border-radius:10px;cursor:pointer;transition:background .15s;position:relative}
+.row:hover{background:var(--s1)}
+.row:active{background:var(--s2)}
+.row[aria-checked=true]{background:var(--s1);box-shadow:inset 2px 0 0 var(--acc)}
+.row .mk{width:14px;height:14px;margin-top:4px;border:1.5px solid var(--faint);border-radius:50%;display:grid;place-items:center;transition:border-color .15s}
+.row[role=checkbox] .mk{border-radius:4px}
+.row[aria-checked=true] .mk{border-color:var(--acc)}
+.row[aria-checked=true] .mk::after{content:"";width:6px;height:6px;border-radius:50%;background:var(--acc)}
+.row[role=checkbox][aria-checked=true] .mk::after{border-radius:2px}
+.row b{font-weight:550;display:flex;align-items:center;gap:8px}
+.row small{display:block;color:var(--mute);font-size:12.5px;line-height:1.4;margin-top:1px}
+.sw{display:inline-block;width:16px;height:3px;border-radius:2px;background:var(--sw,var(--c1))}
+.go{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+button.send{background:var(--acc);color:var(--acc-ink);border:0;border-radius:11px;padding:13px 26px;font:600 15px var(--sans);cursor:pointer;transition:transform .15s,filter .15s,opacity .15s;box-shadow:var(--shadow)}
+button.send:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.07)}
+button.send:active:not(:disabled){transform:translateY(1px) scale(.98)}
+button.send:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+#msg{color:var(--bad);font-size:13.5px;min-height:1.4em}
+.stage{min-width:0}
+.stagehead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:20px}
+.stagehead h2{margin:0;font-size:14px;font-weight:600}
+.stagehead span{font:12px var(--mono);color:var(--mute)}
+.empty{border:1px dashed var(--line);border-radius:16px;padding:clamp(22px,4vw,40px)}
+.empty p{margin:0 0 22px;color:var(--mute);max-width:46ch;text-wrap:pretty}
+.ghost{display:grid;gap:14px}
+.ghost div{height:10px;border-radius:5px;background:linear-gradient(90deg,var(--s2),var(--s1));position:relative;overflow:hidden}
+.ghost div:nth-child(2){width:78%}.ghost div:nth-child(3){width:54%}
+.ghost div::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);transform:translateX(-100%);animation:sweep 2.6s infinite}
+.ghost div:nth-child(2)::after{animation-delay:.4s}.ghost div:nth-child(3)::after{animation-delay:.8s}
+@keyframes sweep{to{transform:translateX(100%)}}
+.lane{padding:18px 0 22px;border-bottom:1px solid var(--line);animation:rise .4s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.lh{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.lh h3{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em}
+.tag{font:500 12px var(--mono);color:var(--mute);display:inline-flex;align-items:center;gap:7px}
+.tag::before{content:"";width:6px;height:6px;background:var(--faint)}
+.lane[data-s=running] .tag{color:var(--acc)}.lane[data-s=running] .tag::before{background:var(--acc);animation:blink 1.1s infinite}
+.lane[data-s=done] .tag::before{background:var(--acc)}
+.lane[data-s=failed] .tag{color:var(--bad)}.lane[data-s=failed] .tag::before{background:var(--bad)}
+.lane.win .tag{color:var(--acc)}
+@keyframes blink{50%{opacity:.25}}
+.clock{margin-left:auto;font:500 22px var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.clock small{font-size:12px;color:var(--mute);margin-left:3px}
+.track{height:4px;background:var(--s2);border-radius:2px;overflow:hidden;margin:14px 0}
+.track i{display:block;height:100%;width:100%;background:var(--sw,var(--acc));transform-origin:left;transform:scaleX(0);transition:transform .25s linear}
+dl.stats{display:flex;gap:6px 28px;flex-wrap:wrap;margin:0;font-size:13px}
+dl.stats div{display:flex;gap:7px;align-items:baseline}
+dl.stats dt{color:var(--mute)}dl.stats dd{margin:0;font:500 13px var(--mono);font-variant-numeric:tabular-nums}
+canvas{width:100%;height:132px;display:block;margin-top:12px}
+.verdict{margin:10px 0 0;font-size:13px;color:var(--mute);display:flex;gap:6px 14px;flex-wrap:wrap}
+.verdict .ok{color:var(--acc);font-weight:550}.verdict .no{color:var(--bad)}
+a{color:var(--acc);text-underline-offset:3px}
+.summary{background:var(--s1);border-radius:14px;padding:18px 20px;margin-bottom:8px;box-shadow:inset 2px 0 0 var(--acc)}
+.summary b{font-weight:600}.summary p{margin:0 0 6px}
+.summary small{color:var(--mute);font-size:12.5px}
+.ratios{display:flex;gap:4px 22px;flex-wrap:wrap;font:13px var(--mono);margin:8px 0}
+.err{border:1px solid var(--bad);border-radius:12px;padding:14px 16px;color:var(--text);display:flex;gap:12px;align-items:center;justify-content:space-between}
+.err button{background:transparent;color:var(--text);border:1px solid var(--line2);border-radius:8px;padding:7px 14px;font:500 13px var(--sans);cursor:pointer}
+.err button:hover{border-color:var(--text)}
+.skel{height:44px;border-radius:10px;background:var(--s1);margin-bottom:6px;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.45}}
+footer{color:var(--mute);font-size:12.5px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line);max-width:78ch;line-height:1.6}
+code{font:12.5px var(--mono);background:var(--s2);padding:1px 6px;border-radius:5px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style></head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<main id="main">
+  <p class="eyebrow">RUDP / Drop</p>
+  <h1>Send a file across a bad network.</h1>
+  <p class="lede">Your file travels over our own reliable-UDP protocol through an emulated link. Congestion-control policies take turns, and the receiver checks every byte against the original.</p>
 
-<h2>1 · File</h2>
-<div class="drop" id="drop"><b id="fname">Drop a file here, or click to choose</b><span id="fsize">up to 12 MB &middot; 1 MB races in about 30 s on a lossy link, larger files take longer</span></div>
-<input type="file" id="file" hidden>
+  <div class="desk">
+    <aside class="setup" aria-label="Transfer setup">
+      <section class="step"><h2><i>01</i>File</h2>
+        <button type="button" class="drop" id="drop">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 22V8M10 14l6-6 6 6"/><path d="M6 22v3a2 2 0 002 2h16a2 2 0 002-2v-3"/></svg>
+          <div><b id="fname">Drop a file, or click to choose</b><span id="fsize">Up to 12 MB. A 1 MB file takes about 30 s on the lossy link.</span></div>
+        </button>
+        <input type="file" id="file" hidden>
+      </section>
+      <section class="step"><h2><i>02</i>Network</h2>
+        <div class="opt" id="profiles" role="radiogroup" aria-label="Network profile"><div class="skel"></div><div class="skel"></div><div class="skel"></div></div>
+      </section>
+      <section class="step"><h2><i>03</i>Policies to race</h2>
+        <div class="opt" id="arms" role="group" aria-label="Policies"><div class="skel"></div><div class="skel"></div></div>
+      </section>
+      <div class="go"><button class="send" id="go" disabled>Send it</button><span id="msg" role="alert"></span></div>
+    </aside>
 
-<h2>2 · Network</h2><div class="grid" id="profiles"></div>
-<h2>3 · Policies to race</h2><div class="grid" id="arms"></div>
-<div class="row"><button id="go" disabled>Send it</button><span id="msg"></span></div>
+    <section class="stage" aria-live="polite" aria-label="Race results">
+      <div class="stagehead"><h2>Race</h2><span id="stat">idle</span></div>
+      <div id="results">
+        <div class="empty">
+          <p>Nothing has been sent yet. Choose a file and a network, then press send. Each policy gets its own lane and runs one after another, so they do not disturb each other.</p>
+          <div class="ghost" aria-hidden="true"><div></div><div></div><div></div></div>
+        </div>
+      </div>
+    </section>
+  </div>
 
-<div id="results"></div>
-<footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Transfers run one after another so they do not disturb each other.
-Kernel TCP is not in this race because it cannot run through a UDP proxy; see the netem results in the report for that comparison.</footer>
+  <footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Kernel TCP is not in this race because it cannot pass through a UDP proxy; the netem results in the report cover that comparison. One run per policy, so treat small gaps as noise.</footer>
 </main>
+
 <script>
-const $=s=>document.querySelector(s);let cfg,file=null,sel={profile:'lossy',arms:new Set(['aimd32','aimd128','deep'])},poll=null;
+const $=s=>document.querySelector(s);
+let cfg,file=null,sel={profile:'lossy',arms:new Set(['aimd128','deep','smart'])},poll=null,laneFor=null;
+const SW={aimd32:'--c1',aimd128:'--c2',deep:'--c3',smart:'--c4'};
 const fmt=b=>b>1e6?(b/1e6).toFixed(2)+' MB':(b/1e3).toFixed(0)+' kB';
-fetch('/api/config').then(r=>r.json()).then(c=>{cfg=c;
- $('#profiles').innerHTML=Object.entries(c.profiles).map(([k,p])=>`<div class="card ${k===sel.profile?'on':''}" data-p="${k}"><b>${p.label}</b><small>${p.note}</small></div>`).join('');
- $('#arms').innerHTML=Object.entries(c.arms).map(([k,l])=>`<div class="card ${sel.arms.has(k)?'on':''}" data-a="${k}"><b>${l}</b></div>`).join('');
- document.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{sel.profile=e.dataset.p;document.querySelectorAll('[data-p]').forEach(x=>x.classList.toggle('on',x===e))});
- document.querySelectorAll('[data-a]').forEach(e=>e.onclick=()=>{const k=e.dataset.a;sel.arms.has(k)?sel.arms.delete(k):sel.arms.add(k);e.classList.toggle('on');upd()});});
-function setFile(f){if(!f)return;file=f;$('#fname').textContent=f.name;$('#fsize').textContent=fmt(f.size);upd()}
-function upd(){$('#go').disabled=!(file&&sel.arms.size&&file.size>0)}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function showMsg(t){$('#msg').textContent=t||''}
+function loadConfig(){
+  fetch('/api/config').then(r=>{if(!r.ok)throw 0;return r.json()}).then(c=>{cfg=c;
+    if(!c.profiles[sel.profile])sel.profile=Object.keys(c.profiles)[0];
+    sel.arms=new Set([...sel.arms].filter(a=>c.arms[a]));
+    $('#profiles').innerHTML=Object.entries(c.profiles).map(([k,p])=>`<button type="button" class="row" role="radio" aria-checked="${k===sel.profile}" data-p="${k}"><span class="mk"></span><span><b>${esc(p.label)}</b><small>${esc(p.note)}</small></span></button>`).join('');
+    $('#arms').innerHTML=Object.entries(c.arms).map(([k,l])=>`<button type="button" class="row" role="checkbox" aria-checked="${sel.arms.has(k)}" data-a="${k}" style="--sw:var(${SW[k]||'--c1'})"><span class="mk"></span><span><b><i class="sw"></i>${esc(l)}</b></span></button>`).join('');
+    document.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{sel.profile=e.dataset.p;document.querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-checked',x===e))});
+    document.querySelectorAll('[data-a]').forEach(e=>e.onclick=()=>{const k=e.dataset.a;sel.arms.has(k)?sel.arms.delete(k):sel.arms.add(k);e.setAttribute('aria-checked',sel.arms.has(k));upd()});
+    upd();
+  }).catch(()=>{$('#profiles').innerHTML='';$('#arms').innerHTML='';
+    $('#results').innerHTML='<div class="err" role="alert"><span>Could not reach the Drop server. Check that <code>app.py</code> is still running.</span><button type="button" id="retry">Try again</button></div>';
+    $('#retry').onclick=()=>{$('#results').innerHTML='';loadConfig()}});
+}
+loadConfig();
+
+function setFile(f){if(!f)return;file=f;$('#fname').textContent=f.name;$('#fsize').textContent=fmt(f.size)+(f.size>12e6?' is over the 12 MB limit':'');showMsg('');upd()}
+function upd(){$('#go').disabled=!(cfg&&file&&sel.arms.size&&file.size>0&&!poll)}
 const d=$('#drop');d.onclick=()=>$('#file').click();$('#file').onchange=e=>setFile(e.target.files[0]);
 d.ondragover=e=>{e.preventDefault();d.classList.add('over')};d.ondragleave=()=>d.classList.remove('over');
 d.ondrop=e=>{e.preventDefault();d.classList.remove('over');setFile(e.dataTransfer.files[0])};
-$('#go').onclick=async()=>{$('#msg').textContent='';if(file.size>cfg.max_bytes){$('#msg').textContent='File too large';return}
- $('#go').disabled=true;const r=await fetch('/api/start',{method:'POST',body:file,headers:{'X-Filename':file.name,'X-Profile':sel.profile,'X-Arms':[...sel.arms].join(',')}});
- const j=await r.json();if(!r.ok){$('#msg').textContent=j.error;upd();return}
- $('#results').innerHTML='<h2>Race</h2><div id="sum"></div><div id="armlist"></div>';clearInterval(poll);poll=setInterval(()=>tick(j.id),250);tick(j.id)};
-function spark(cv,pts,color,mx,tx){const c=cv.getContext('2d'),d=devicePixelRatio,W=cv.width=cv.clientWidth*d,H=cv.height=cv.clientHeight*d;c.clearRect(0,0,W,H);if(pts.length<2)return;
- const L=34*d,R=6*d,T=16*d,B=16*d,pw=W-L-R,ph=H-T-B,fg=getComputedStyle(document.body).color;
- c.font=`${10*d}px system-ui`;c.fillStyle=fg;c.strokeStyle=fg;c.lineWidth=d;
- c.globalAlpha=.25;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke()}
- c.globalAlpha=.7;for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.fillText(String(Math.round(mx*k/4)),2*d,y+3*d)}
- for(let k=0;k<=4;k++){const x=L+pw*k/4;c.fillText((tx*k/4000).toFixed(tx<10000?1:0)+'s',x-8*d,H-3*d)}
- c.fillText('window (packets) vs time (s); same scale on every arm',L,10*d);c.globalAlpha=1;
- c.strokeStyle=color;c.lineWidth=2*d;c.beginPath();
- pts.forEach((p,i)=>{const x=L+p[0]/tx*pw,y=T+ph*(1-p[1]/mx);i?c.lineTo(x,y):c.moveTo(x,y)});c.stroke()}
-const cols={aimd32:'--c1',aimd128:'--c2',deep:'--c3'};
-async function tick(id){const j=await (await fetch('/api/job/'+id)).json();let h='';
- for(const a of j.arms){const s=j.state[a],pct=Math.min(100,100*(s.received||0)/j.size);
-  const badge=s.status==='running'?'<span class="badge run">sending</span>':s.status==='queued'?'<span class="badge">waiting</span>':s.status==='done'?'<span class="badge" id="b_'+a+'">done</span>':'<span class="badge no">'+s.status+'</span>';
-  h+=`<div class="arm" id="arm_${a}"><div class="top"><span class="name">${cfg.arms[a]}</span>${badge}</div><div class="bar"><i style="width:${s.status==='done'?100:pct}%"></i></div>
-  <div class="stats"><span>time <b>${s.status==='done'?(s.ms/1000).toFixed(2):(s.elapsed||0).toFixed(1)} s</b></span>`+
-  (s.status==='done'?`<span>goodput <b>${s.goodput_mb_s.toFixed(2)} MB/s</b></span><span>retransmitted <b>${s.retx}</b> of ${s.sent} sent</span><span>avg RTT <b>${s.avg_rtt.toFixed(0)} ms</b></span><span class="ok">&#10003; byte-identical (SHA-256) &middot; <a href="/download/${j.id}/${a}">download</a></span>`:'')+
-  (s.error?`<span class="no">${s.error}</span>`:'')+`</div><canvas></canvas></div>`}
- $('#armlist').innerHTML=h;
- const done=j.arms.filter(a=>j.state[a].status==='done');
- const MX=Math.max(4,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[1]))),TX=Math.max(1,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[0])));
- j.arms.forEach(a=>{const s=j.state[a];if(s.trace)spark(document.querySelector('#arm_'+a+' canvas'),s.trace,getComputedStyle(document.documentElement).getPropertyValue(cols[a]),MX,TX)});
- if(done.length){const best=done.reduce((x,y)=>j.state[x].ms<j.state[y].ms?x:y);const b=document.querySelector('#b_'+best);if(b&&j.finished){b.className='badge win';b.textContent='fastest'}
-  if(j.finished&&done.length>1){const o=done.filter(a=>a!==best).map(a=>`${cfg.arms[a]} ${(j.state[a].ms/j.state[best].ms).toFixed(2)}×`).join(', ');
-   $('#sum').innerHTML=`<div class="sum"><b>${cfg.arms[best]}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s. Others took: ${o}. One run per policy, so treat small gaps as noise.</div>`}}
- if(j.finished){clearInterval(poll);upd()}}
+
+$('#go').onclick=async()=>{showMsg('');
+  if(file.size>cfg.max_bytes){showMsg('This file is over the '+fmt(cfg.max_bytes)+' limit.');return}
+  $('#go').disabled=true;$('#stat').textContent='starting';
+  try{
+    const r=await fetch('/api/start',{method:'POST',body:file,headers:{'X-Filename':file.name,'X-Profile':sel.profile,'X-Arms':[...sel.arms].join(',')}});
+    const j=await r.json();if(!r.ok){showMsg(j.error||'The server refused this transfer.');$('#stat').textContent='idle';upd();return}
+    laneFor=null;clearInterval(poll);poll=setInterval(()=>tick(j.id),250);tick(j.id);
+  }catch(e){showMsg('Could not reach the Drop server.');$('#stat').textContent='idle';upd()}
+};
+
+function buildLanes(j){
+  $('#results').innerHTML='<div id="sum"></div>'+j.arms.map(a=>`<article class="lane" id="arm_${a}" data-s="queued" style="--sw:var(${SW[a]||'--c1'})">
+    <div class="lh"><h3>${esc(cfg.arms[a])}</h3><span class="tag" data-k="tag">waiting</span><span class="clock" data-k="clock">0.0<small>s</small></span></div>
+    <div class="track"><i data-k="bar"></i></div>
+    <dl class="stats" data-k="stats"></dl><canvas aria-hidden="true"></canvas><p class="verdict" data-k="verdict"></p></article>`).join('');
+  laneFor=j.id;
+}
+function spark(cv,pts,color,mx,tx){const c=cv.getContext('2d'),dpr=devicePixelRatio||1,W=cv.width=cv.clientWidth*dpr,H=cv.height=cv.clientHeight*dpr;c.clearRect(0,0,W,H);if(!pts||pts.length<2)return;
+  const L=34*dpr,R=6*dpr,T=16*dpr,B=16*dpr,pw=W-L-R,ph=H-T-B,mute=css('--mute'),line=css('--line');
+  c.font=`${10*dpr}px ${css('--mono')}`;c.lineWidth=dpr;c.strokeStyle=line;c.fillStyle=mute;
+  for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();c.fillText(String(Math.round(mx*k/4)),2*dpr,y+3*dpr)}
+  for(let k=0;k<=4;k++){const x=L+pw*k/4,t=(tx*k/4000).toFixed(tx<10000?1:0)+'s',w=c.measureText(t).width;c.fillText(t,Math.min(Math.max(2*dpr,x-8*dpr),W-w-2*dpr),H-3*dpr)}
+  c.fillText('window (packets) vs time; same scale on every lane',L,10*dpr);
+  const path=()=>{pts.forEach((p,i)=>{const x=L+p[0]/tx*pw,y=T+ph*(1-p[1]/mx);i?c.lineTo(x,y):c.moveTo(x,y)})};
+  c.beginPath();path();c.lineTo(L+pts[pts.length-1][0]/tx*pw,T+ph);c.lineTo(L,T+ph);c.closePath();c.globalAlpha=.10;c.fillStyle=color;c.fill();c.globalAlpha=1;
+  c.beginPath();path();c.strokeStyle=color;c.lineWidth=2*dpr;c.lineJoin='round';c.stroke()}
+
+async function tick(id){
+  let j;try{j=await (await fetch('/api/job/'+id)).json()}catch(e){return}
+  if(laneFor!==id)buildLanes(j);
+  const MX=Math.max(4,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[1]))),TX=Math.max(1,...j.arms.flatMap(a=>(j.state[a].trace||[]).map(p=>p[0])));
+  const done=j.arms.filter(a=>j.state[a].status==='done');
+  const best=done.length?done.reduce((x,y)=>j.state[x].ms<j.state[y].ms?x:y):null;
+  for(const a of j.arms){
+    const s=j.state[a],el=document.getElementById('arm_'+a);if(!el)continue;
+    const q=k=>el.querySelector(`[data-k=${k}]`),pct=s.status==='done'?1:Math.min(1,(s.received||0)/j.size);
+    el.dataset.s=['queued','running','done'].includes(s.status)?s.status:'failed';
+    el.classList.toggle('win',!!(j.finished&&best===a&&done.length>1));
+    q('tag').textContent=s.status==='running'?'sending':s.status==='queued'?'waiting':s.status==='done'?(j.finished&&best===a&&done.length>1?'fastest':'done'):s.status;
+    q('bar').style.transform=`scaleX(${pct})`;
+    q('clock').innerHTML=(s.status==='done'?(s.ms/1000).toFixed(2):(s.elapsed||0).toFixed(1))+'<small>s</small>';
+    q('stats').innerHTML=s.status==='done'?`<div><dt>goodput</dt><dd>${s.goodput_mb_s.toFixed(2)} MB/s</dd></div><div><dt>retransmitted</dt><dd>${s.retx} of ${s.sent}</dd></div><div><dt>avg RTT</dt><dd>${s.avg_rtt.toFixed(0)} ms</dd></div>`:(s.status==='running'?`<div><dt>delivered</dt><dd>${(100*pct).toFixed(0)}%</dd></div>`:'');
+    q('verdict').innerHTML=s.status==='done'?`<span class="ok">Byte-identical (SHA-256)</span><a href="/download/${j.id}/${a}">Download the received file</a>`:(s.error?`<span class="no">${esc(s.error)}</span>`:'');
+    if(s.trace)spark(el.querySelector('canvas'),s.trace,css(SW[a]||'--c1'),MX,TX);
+  }
+  $('#stat').textContent=j.finished?`finished, ${done.length} of ${j.arms.length} delivered`:`running, ${done.length} of ${j.arms.length} done`;
+  if(j.finished&&done.length>1){
+    const others=done.filter(a=>a!==best).map(a=>`<span>${esc(cfg.arms[a])} ${(j.state[a].ms/j.state[best].ms).toFixed(2)}×</span>`).join('');
+    $('#sum').innerHTML=`<div class="summary"><p><b>${esc(cfg.arms[best])}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s.</p><div class="ratios">${others}</div><small>Ratios are completion time relative to the fastest. One run per policy, so treat small gaps as noise.</small></div>`}
+  if(j.finished){clearInterval(poll);poll=null;upd()}
+}
 </script></body></html>

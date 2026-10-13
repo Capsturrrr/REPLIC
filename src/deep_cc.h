@@ -1,7 +1,7 @@
 #ifndef DEEP_CC_H
 #define DEEP_CC_H
 /*
- * Smart-RUDP deep agent, inference only: a small neural network (5 -> 32 -> 32 -> 5, ReLU)
+ * Poise-RUDP deep agent, inference only: a small neural network (5 -> 32 -> 32 -> 5, ReLU)
  * that scores the five window actions. Weights are trained in Python (web/train_deep.py)
  * and exported to a text file by web/export_dqn.py.
  * Input features: RTT growth, loss fraction, window size, throughput share, last action.

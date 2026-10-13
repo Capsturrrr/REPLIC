@@ -1,0 +1,33 @@
+resuming: 300 rows already in results/scale/proxy_v2a/raw.csv
+[301/150] cellular_highlat   aimd32     seed  0 ok=1 ms=21725.0  eta -57 min
+[302/150] cellular_highlat   aimd32     seed  1 ok=1 ms=20803.8  eta -56 min
+[303/150] cellular_highlat   aimd32     seed  2 ok=1 ms=15992.6  eta -52 min
+[304/150] cellular_highlat   aimd32     seed  3 ok=1 ms=16610.2  eta -50 min
+[305/150] cellular_highlat   aimd32     seed  4 ok=1 ms=17372.6  eta -50 min
+[306/150] cellular_highlat   aimd32     seed  5 ok=1 ms=21734.9  eta -51 min
+[307/150] cellular_highlat   aimd32     seed  6 ok=1 ms=8353.1  eta -48 min
+[308/150] cellular_highlat   aimd32     seed  7 ok=1 ms=17837.0  eta -48 min
+[309/150] cellular_highlat   aimd32     seed  8 ok=1 ms=14991.4  eta -48 min
+[310/150] cellular_highlat   aimd32     seed  9 ok=1 ms=11592.1  eta -46 min
+[311/150] cellular_highlat   aimd32     seed 10 ok=1 ms=10215.2  eta -45 min
+[312/150] cellular_highlat   aimd32     seed 11 ok=1 ms=10697.5  eta -44 min
+[313/150] cellular_highlat   aimd32     seed 12 ok=1 ms=11281.9  eta -43 min
+[314/150] cellular_highlat   aimd32     seed 13 ok=1 ms=11655.6  eta -43 min
+[315/150] cellular_highlat   aimd32     seed 14 ok=1 ms=17435.9  eta -44 min
+[316/150] cellular_highlat   aimd32     seed 15 ok=1 ms=17140.1  eta -44 min
+[317/150] cellular_highlat   aimd32     seed 16 ok=1 ms=20923.9  eta -45 min
+[318/150] cellular_highlat   aimd32     seed 17 ok=1 ms=10646.0  eta -45 min
+[319/150] cellular_highlat   aimd32     seed 18 ok=1 ms=20649.8  eta -46 min
+[320/150] cellular_highlat   aimd32     seed 19 ok=1 ms=8058.4  eta -45 min
+[321/150] cellular_highlat   aimd32     seed 20 ok=1 ms=15515.5  eta -45 min
+[322/150] cellular_highlat   aimd32     seed 21 ok=1 ms=11512.6  eta -45 min
+[323/150] cellular_highlat   aimd32     seed 22 ok=1 ms=8063.4  eta -45 min
+[324/150] cellular_highlat   aimd32     seed 23 ok=1 ms=18880.6  eta -45 min
+[325/150] cellular_highlat   aimd32     seed 24 ok=1 ms=20833.8  eta -46 min
+[326/150] cellular_highlat   aimd32     seed 25 ok=1 ms=10574.3  eta -46 min
+[327/150] cellular_highlat   aimd32     seed 26 ok=1 ms=11103.8  eta -46 min
+[328/150] cellular_highlat   aimd32     seed 27 ok=1 ms=16242.9  eta -46 min
+[329/150] cellular_highlat   aimd32     seed 28 ok=1 ms=11940.8  eta -46 min
+[330/150] cellular_highlat   aimd32     seed 29 ok=1 ms=17704.6  eta -47 min
+
+done in 7.8 min: 330/330 byte-identical; outputs in results/scale/proxy_v2a

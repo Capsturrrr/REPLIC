@@ -25,7 +25,8 @@ PROFILES = {
 ARMS = {
     "aimd32":  dict(label="AIMD, window 32",    args="--mode aimd --init 10 --maxcwnd 32"),
     "aimd128": dict(label="Tuned AIMD, 128",    args="--mode aimd --init 10 --maxcwnd 128 --ssthresh 128"),
-    "deep":    dict(label="Neural agent",       args="--mode deep --init 10 --dfile results/dqn_chat.txt"),
+    "deep":    dict(label="Neural agent (v1)",  args="--mode deep --init 10 --dfile results/dqn_chat.txt"),
+    "smart":   dict(label="Poise-RUDP (PPO)",   args="--mode smart --init 10"),     # weights compiled in from src/neural_weights.h
 }
 jobs, lock, busy = {}, threading.Lock(), [False]
 
@@ -41,7 +42,7 @@ def build():
     }
     for name, (files, defs, libs) in targets.items():
         out = os.path.join(bindir, name)
-        deps = files + src("common.h", "rudp.h", "rl_cc.h", "deep_cc.h")
+        deps = files + src("common.h", "rudp.h", "rl_cc.h", "deep_cc.h", "smart_cc.h", "neural_weights.h")
         if os.path.exists(out) and all(os.path.getmtime(out) >= os.path.getmtime(f) for f in deps if os.path.exists(f)): continue
         print("compiling", name, flush=True)
         try: subprocess.check_call(["gcc"] + cflags + defs + ["-o", out] + files + libs, cwd=ROOT)

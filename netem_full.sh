@@ -17,7 +17,7 @@ for f in bin/server bin/smart_client results/dqn_chat.txt web/real_baselines.py;
   [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }
 done
 # RUDP must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
-PL=/tmp/rudp_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
+PL=/tmp/rudp_payload_${PKTS}.bin; head -c 256000 /dev/urandom > $PL
 OUT=results/netem_$sc.txt; : > $OUT
 SP=""
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536)

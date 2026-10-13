@@ -1,4 +1,4 @@
-Wireshark steps for the RUDP / Smart-RUDP trace
+Wireshark steps for the RUDP / Poise-RUDP trace
 ================================================
 A. Open the supplied traces (no setup needed besides the dissector)
    1. Copy rudp.lua to Wireshark's personal plugin folder (Help > About Wireshark > Folders > Personal Lua Plugins) and restart Wireshark.

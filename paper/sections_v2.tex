@@ -1,0 +1,91 @@
+% Draft sections III-V for the Poise-RUDP paper (v2). Everything marked [measured] comes from results/ in this repository;
+% everything marked [formulated] is a design that has NOT been implemented or trained, and is labelled as such in the text.
+
+\section{Neural Congestion Control Formulation}
+\label{sec:mdp}
+
+\subsection{Implemented controller as a Markov decision process}
+We cast window control as a finite-horizon MDP $\mathcal{M}=(\mathcal{S},\mathcal{A},P,r,\gamma)$ sampled once per control interval of one smoothed round-trip time.
+\textbf{State.} $s_t=(g_t,\ \ell_t,\ w_t,\ u_t,\ a_{t-1})\in\mathbb{R}^5$ with
+$g_t=\overline{\mathrm{RTT}}_t/\mathrm{RTT}_{\min}-1$ (queueing-delay growth),
+$\ell_t$ the fraction of packets sent in the interval that were retransmitted (loss proxy),
+$w_t$ the window, $u_t$ the interval's delivery rate relative to the best rate seen so far, and $a_{t-1}$ the previous action.
+\textbf{Action.} $a_t\in\{0.5,\,0.85,\,1.0,\,1.15,\,1.5\}$ and $w_{t+1}=\min\{W_{\max},\max\{1,\,a_t w_t\}\}$ with $W_{\max}=128$.
+\textbf{Reward.} With $\tilde u_t$ the normalised delivery rate,
+\begin{equation}
+r_t=\min\Bigl\{1.5,\ \sqrt{\tilde u_t}\;-\;0.5\,\max(0,\ \rho_t-1)\;-\;4\,\ell_t\Bigr\},\qquad \rho_t=\overline{\mathrm{RTT}}_t/\mathrm{RTT}_{\min}.
+\end{equation}
+The policy is a $5\!\to\!32\!\to\!32\!\to\!5$ ReLU network (1{,}413 parameters) that scores the five actions, trained offline in a simulator and run greedily in the C sender [measured: weights in \texttt{results/dqn\_chat.txt}].
+Three engineering rules wrap the network: slow start to 64 packets before the policy takes over, pacing at $2w/\mathrm{SRTT}$, and a hand-over to AIMD while an interval's loss is at least $10\%$.
+
+\subsection{Extended formulation (not implemented)}
+\label{sec:mdp-ext}
+\emph{The following is a proposed extension. It has not been implemented, trained or evaluated, and no result in this paper depends on it.}
+A richer state would add a bottleneck-bandwidth estimate $\widehat{B}_t=\max_{\tau\le W}\mathrm{delivered}_\tau/\Delta_\tau$ (windowed maximum, as in BBR), the bandwidth-delay product estimate $\widehat{\mathrm{BDP}}_t=\widehat{B}_t\,\mathrm{RTT}_{\min}$, the RTT gradient $\dot g_t$, and a queue-occupancy derivative $\dot q_t\approx(w_t-\widehat{\mathrm{BDP}}_t)$ differenced across intervals.
+The action would become a continuous multiplier $a_t\in[a_{\min},a_{\max}]$ produced by a squashed output unit, which requires a continuous-action learner (e.g.\ DDPG or SAC) rather than the present value-based network.
+
+\subsection{Safety shield and what it does and does not guarantee}
+\label{sec:safety}
+Let $q_t$ denote the standing queue at the bottleneck. A \emph{shield} projects the proposed window onto
+\begin{equation}
+w_{t+1}\le w^{\mathrm{safe}}_t=\min\{W_{\max},\ \beta\,\widehat{\mathrm{BDP}}_t+Q_{\mathrm{allow}}\},
+\end{equation}
+and hands control to AIMD whenever loss exceeds a threshold. \textbf{Proposition 1 (bounded standing queue).} If the shield is applied at every interval and $\widehat{\mathrm{BDP}}_t\le \mathrm{BDP}$ (the estimator does not overestimate), then the bytes in flight never exceed $\beta\,\mathrm{BDP}+Q_{\mathrm{allow}}$, hence the standing queue never exceeds $(\beta-1)\mathrm{BDP}+Q_{\mathrm{allow}}$.
+\emph{Proof.} In-flight data is at most the window, and the queue is in-flight data minus the pipe capacity. $\square$
+The proof is a one-line consequence of the projection, and the condition on the estimator is an assumption that can fail when the path's capacity changes faster than the max-filter window. Its value is therefore as a \emph{bound by construction}, not as a stability theorem for the learned policy.
+A Lyapunov drift-plus-penalty analysis with $L(q)=\tfrac12 q^2$ would give $\mathbb{E}[L(q_{t+1})-L(q_t)\mid q_t]\le B-\epsilon q_t$ only under an explicit arrival/service model for which the learned map is a contraction; \emph{we do not claim such a guarantee for the neural policy}, and we have not proved one. The shield and the AIMD hand-over are the only safety mechanisms we evaluate, and only the hand-over exists in the current implementation.
+
+\section{Forward Error Correction and Reliability Mechanics}
+\label{sec:fec}
+\subsection{Scheme}
+After every group of $K$ consecutive data packets the sender transmits one parity packet whose payload is the bytewise XOR of the group (padded with zeros) and whose length field carries the XOR of the payload lengths. The receiver keeps the last 512 payloads; when exactly one packet of a group is missing and the parity has arrived, it reconstructs the missing packet and feeds it to the Selective Repeat logic as if it had arrived, so the cumulative acknowledgement advances without a retransmission. The overhead is $1/K$ ($12.5\%$ for $K=8$).
+
+\subsection{Residual loss under independent loss}
+With independent loss probability $p$ per packet, a data packet in a group of $K$ is unrecoverable iff it is lost and at least one of the other $K$ packets (the $K-1$ other data packets and the parity) is also lost:
+\begin{equation}
+P_{\mathrm{res}}(p,K)=p\,\bigl[1-(1-p)^{K}\bigr].
+\end{equation}
+For $K=8$: $P_{\mathrm{res}}(0.02)=0.0030$ against $0.02$ (a $6.7\times$ reduction), and $P_{\mathrm{res}}(0.10)=0.057$ against $0.10$ (a $1.8\times$ reduction). XOR parity is weak against bursts (two losses in one group are unrecoverable), and the model above ignores the loss of the acknowledgement path. We implement XOR only; Reed--Solomon erasure codes, which recover up to $m$ losses per group at overhead $m/K$, and adaptive choice of $K$ from observed loss are \emph{not implemented}.
+
+\subsection{Latency}
+A retransmission recovers a loss after roughly one RTT plus detection delay (three duplicate acknowledgements or a timeout). FEC recovery completes when the parity packet arrives, at most $K$ serialisation times after the first packet of the group. FEC therefore helps most when timeouts are expensive, which is why its measured effect is much larger at $10\%$ loss than at $2\%$ (Section~\ref{sec:eval}).
+
+\section{Empirical Evaluation and Fairness Analysis}
+\label{sec:eval}
+\subsection{Method and limits}
+All v2 numbers below are produced by \texttt{run\_all\_tests.py} through a UDP impairment proxy on one machine: 25 ms one-way delay, uniform jitter $\pm J$, random forward loss, a rate-limited drop-tail bottleneck of 420\,kB/s with a 26\,kB queue, 1{,}200-byte payloads, a 256\,kB transfer, and a byte-for-byte check of the delivered file. The proxy does not reorder, does not lose acknowledgements, and its jitter is uniform rather than Gaussian. The kernel-netem backend and kernel TCP were \emph{not} run for v2. A 1\,GB transfer is not supported by the current sender (limit about 78\,MB) and was not attempted.
+
+\subsection{Effect of FEC}
+\begin{table}[t]\centering\small
+\caption{Completion time (ms), 256\,kB, mean $\pm$ s.d.\ over $n$ runs [measured, \texttt{results/orch\_2loss}, \texttt{results/orch\_10loss\_postfix}, \texttt{results/orch\_10loss}].}
+\label{tab:fec}
+\begin{tabular}{lcc}\toprule
+Policy & 2\% loss, $\pm10$\,ms ($n{=}10$) & 10\% loss, $\pm35$\,ms\\\midrule
+Tuned AIMD & $1495\pm415$ & $6535\pm3118$ ($n{=}20$)\\
+Tuned AIMD + FEC ($K{=}8$) & $1374\pm511$ & $3620\pm976$ ($n{=}20$)\\
+Neural & $1270\pm562$ & $5385\pm1782$ ($n{=}10$)\\
+Neural + FEC ($K{=}8$) & $1086\pm250$ & $2122\pm515$ ($n{=}10$)\\\bottomrule
+\end{tabular}
+\end{table}
+At $2\%$ loss FEC changes mean completion time by $-8\%$ for AIMD (Welch $t=0.58$, $p=0.57$) and $-14\%$ for the neural agent ($t=0.94$, $p=0.36$); neither is distinguishable from run-to-run noise, so we claim no effect at this loss rate. An earlier four-run pilot suggested a $55\%$ gain for AIMD; the ten-run study does not support it and the pilot should be disregarded.
+At $10\%$ loss the effect is large and significant. FEC reduces AIMD completion time by $45\%$ ($6.5\to3.6$\,s; Welch $t=3.99$, $p=0.0006$, $n=20$ per arm) and neural-agent time by $61\%$ ($5.4\to2.1$\,s; $t=5.56$, $p=0.0002$, $n=10$ per arm; the unprotected neural arm is summarised from its mean and standard deviation because its raw log was overwritten). With FEC the neural agent is faster than AIMD with FEC ($2.1$ against $3.6$\,s), but without FEC the two are statistically indistinguishable in these runs ($5.4\pm1.8$ against $6.5\pm3.1$\,s), so most of the measured gain at this loss rate comes from FEC rather than from the policy.
+On a clean path FEC is pure overhead: in a two-run pilot it was slower for both policies. The trade-off is therefore that FEC is a safety net under heavy loss, up to $61\%$ shorter completion time at $10\%$ loss, but costs bandwidth that a clean link does not need; a fixed $K{=}8$ pays $12.5\%$ extra packets everywhere, which is why adaptive redundancy is future work.
+
+\subsection{Connection-teardown defect and fix}
+\label{sec:fin}
+The orchestrator's byte-for-byte check exposed a defect in the original sender: the closing FIN was transmitted once and the sender then waited $200$\,ms for any reply before exiting. If that single packet was lost, the receiver never left the established state and never flushed its output file, so a transfer whose data had all been acknowledged could end with the last stdio buffer (up to $4$\,KiB) missing. Five of about $150$ orchestrator runs failed this way, all at $10\%$ loss, matching the $\approx\!10\%$ chance that one forward packet is dropped. The sender now retransmits the FIN every $150$\,ms until it sees an ACK whose acknowledgement number is the FIN's sequence number plus one, for at most twelve attempts. After the change all $40$ subsequent runs at $10\%$ loss were byte-identical. The same fix was applied to the original (v1) sender, which affects only teardown and not the timed transfer.
+
+\subsection{Kernel TCP baseline (to be populated)}
+\label{sec:tcp}
+Kernel TCP under Linux \texttt{tc netem} has not been measured for the v2 changes in the environment where this draft was produced. The benchmark scripts (\texttt{setup\_netem\_benchmarks.sh} and the \texttt{netem} backend of \texttt{run\_all\_tests.py}) write the TCP rows in the same CSV schema as the RUDP policies and generate the comparison table automatically; Table~\ref{tab:tcp} is a placeholder for that output and contains no numbers.
+\begin{table*}[t]\centering\small
+\caption{Completion time (ms) for kernel TCP and RUDP policies under netem; generated file, mean/median/p95/p99. Not yet populated.}
+\label{tab:tcp}
+% \input{results/orch/tables.tex}   % uncomment after running: sudo bash setup_netem_benchmarks.sh all
+\end{table*}
+
+\subsection{Fairness and convergence}
+Fairness results are from the earlier virtual-time evaluation (v1) and were not re-run in v2 [measured, v1 report]. Two flows of the same policy sharing a bottleneck with a $150$\,ms RTT difference reached Jain's index $0.64$ for AIMD and $0.84$ for the neural agent (short-RTT shares $88\%$ and $71\%$). Next to a kernel TCP flow on a loopback bottleneck, the neural agent took $24$--$34\%$ of the link and tuned AIMD $5$--$16\%$, from three runs per cell, so shares are good to about ten points. The requested comparison against competing CUBIC and BBR flows under Jain's index, and a convergence-time measurement, have \emph{not} been performed.
+
+\subsection{Threats to validity}
+The safety bound of Section~\ref{sec:safety} holds only if the bandwidth-delay-product estimate does not overestimate the path, which we have not tested under abrupt capacity changes, and only the AIMD hand-over is implemented. The agent was trained on a simulator with 512-byte packets and evaluated on paths from the same generator; the v2 numbers use a single path family, one transfer size and ten to twenty runs per cell; the proxy is not a real network; and kernel TCP, which was $1.5$--$1.7\times$ faster than the neural agent in v1 netem runs, has not been compared against the v2 changes.
