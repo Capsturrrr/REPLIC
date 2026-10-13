@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# execute_wsl_benchmarks.sh -- run the RUDP / Poise-RUDP kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
+# execute_wsl_benchmarks.sh -- run the RUDP / Poise kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
 #
 #   sudo bash execute_wsl_benchmarks.sh --check            # preflight only, changes nothing permanent
 #   sudo bash execute_wsl_benchmarks.sh --quick            # ~10 min smoke run: 3 profiles, 2 reps, 100 kB + scale matrix with n=3

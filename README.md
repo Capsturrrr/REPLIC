@@ -124,7 +124,7 @@ diagram `network/topology_final.png`. `network/rudp.lua` is a Wireshark dissecto
 
 ## Status
 
-Phases 0 to 7 (handshake, Go-Back-N, AIMD, netem, benchmarks), then Poise-RUDP, Selective Repeat, performance work, hardening and the real-socket and
+Phases 0 to 7 (handshake, Go-Back-N, AIMD, netem, benchmarks), then Poise, Selective Repeat, performance work, hardening and the real-socket and
 virtual-time validation described in the report. Case study and video due 21 Oct 2026.
 
 ## Setup (one-time, per machine)
@@ -256,7 +256,7 @@ The BBR-style policy is a simplification (no ProbeRTT, no BBRv3 loss response), 
 
 ## RUDP Drop: an application built on the library
 
-`make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent v1, Poise-RUDP). Each transfer runs through the real C stack (librudp sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time with retransmit and timer-expiry markers and the pipe-capacity line, with a download link for the verified copy. The page explains each phase (handshake, slow start, steady state, loss recovery, hash check), describes each policy and network, shows the best possible time on the chosen link, and writes a short per-run story from the sender's own trace. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.
+`make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent v1, Poise). Each transfer runs through the real C stack (librudp sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time with retransmit and timer-expiry markers and the pipe-capacity line, with a download link for the verified copy. The page explains each phase (handshake, slow start, steady state, loss recovery, hash check), describes each policy and network, shows the best possible time on the chosen link, and writes a short per-run story from the sender's own trace. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.
 
 ## Multi-machine run (two laptops, internet path)
 One run, 5 reps, 2 MB each, over a Tailscale relay (~79 ms RTT, no direct connection): see `results/multihost_summary.txt` and `results/multihost_mylabel.txt` (transcribed from the client terminal). The path degraded mid-run (TCP 2 s to 51 s) and 4 of 20 RUDP runs timed out, so this is a demonstration that RUDP works between real machines, not a statistically valid comparison. On the clean reps kernel TCP was 2-6x faster than every RUDP policy; in rep 1 the neural agent beat tuned AIMD (4.7 s vs 14.2 s). Repeat on a direct LAN path for stronger numbers.

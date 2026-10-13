@@ -2,7 +2,7 @@
  * librudp: the RUDP sender (reliability machinery plus a pluggable congestion controller). The public API is in rudp.h; the command-line
  * front end is smart_client.c. Original notes follow.
  *
- * Poise-RUDP client: RUDP sender with a pluggable congestion controller.
+ * Poise client: RUDP sender with a pluggable congestion controller.
  *   --mode aimd : rule-based slow start + AIMD (the original RUDP policy)
  *   --mode rl   : Q-learning cwnd controller (rl_cc.h)
  *   --mode rl2  : the chat-style table agent (no-shrink rule, window cap 32, decisions every 100-500 ms)

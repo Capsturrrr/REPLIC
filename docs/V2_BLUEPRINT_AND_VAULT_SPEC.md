@@ -1,4 +1,4 @@
-# Poise-RUDP v2: blueprint, status, and the RUDP-Vault specification
+# Poise v2: blueprint, status, and the RUDP-Vault specification
 
 Status key: **BUILT** (code exists and was run), **FORMULATED** (math written, not implemented), **SPEC** (design only).
 

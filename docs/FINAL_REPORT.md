@@ -1,4 +1,4 @@
-# Poise-RUDP: final project report
+# Poise: final project report
 
 Harshavardhan Mallela (24BAI0274), Rohit Arya (24BCE0819), Shloak Sinha (24BDS0378). Computer Networks, VIT Vellore. Faculty: Anuradha G.
 Report date: 13 October 2026. Every number below is regenerated from the raw CSVs by `make_report_figures.py`; figures are in `docs/figures_v2/`.

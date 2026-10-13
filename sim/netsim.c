@@ -1,5 +1,5 @@
 /*
- * netsim.c - packet-level dumbbell simulator used to TRAIN the Poise-RUDP agent (driven from Python via ctypes).
+ * netsim.c - packet-level dumbbell simulator used to TRAIN the Poise agent (driven from Python via ctypes).
  *
  * One bottleneck (service rate mu pkt/s, drop-tail buffer, forward random loss), base round-trip delay, ACK jitter,
  * 1 ms ticks. Up to 8 flows share the bottleneck. Flow types:

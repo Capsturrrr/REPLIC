@@ -1,4 +1,4 @@
-# Poise-RUDP Studio
+# Poise Studio
 
 A browser dashboard around the real C sender, receiver and impairment proxy.
 

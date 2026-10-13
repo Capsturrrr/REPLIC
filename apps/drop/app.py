@@ -26,13 +26,13 @@ ARMS = {
     "aimd32":  dict(label="AIMD, window 32",    args="--mode aimd --init 10 --maxcwnd 32"),
     "aimd128": dict(label="Tuned AIMD, 128",    args="--mode aimd --init 10 --maxcwnd 128 --ssthresh 128"),
     "deep":    dict(label="Neural agent (v1)",  args="--mode deep --init 10 --dfile results/dqn_chat.txt"),
-    "smart":   dict(label="Poise-RUDP (PPO)",   args="--mode smart --init 10"),     # weights compiled in from src/neural_weights.h
+    "smart":   dict(label="Poise (PPO)",   args="--mode smart --init 10"),     # weights compiled in from src/neural_weights.h
 }
 EXPLAIN = {
     "aimd32":  "Classic additive-increase, multiplicative-decrease. The window grows by one packet per round trip and halves on loss. Capped at 32 packets, so on a long fat link it can never fill the pipe.",
     "aimd128": "The same AIMD rule with the cap raised to 128 packets. Fairer to AIMD: it can use big pipes, but it still halves its window on every loss, even random loss that is not congestion.",
     "deep":    "Our first learned agent (DQN, Neural v1). It looks at recent loss and delay and picks from a few fixed window changes. Good on some links, brittle on others.",
-    "smart":   "Poise-RUDP, a small PPO-trained neural network (8 inputs, two layers of 32). Every 100 ms or so it reads RTT, loss and delivery rate, then scales the window by a factor between 0.5 and 2. A fairness term in training stops it from crowding out other flows.",
+    "smart":   "Poise, a small PPO-trained neural network (8 inputs, two layers of 32). Every 100 ms or so it reads RTT, loss and delivery rate, then scales the window by a factor between 0.5 and 2. A fairness term in training stops it from crowding out other flows.",
 }
 jobs, lock, busy = {}, threading.Lock(), [False]
 

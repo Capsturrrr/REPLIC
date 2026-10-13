@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_all_tests.py -- one-command experimental matrix for RUDP / Poise-RUDP (v2).
+run_all_tests.py -- one-command experimental matrix for RUDP / Poise (v2).
 
     python3 run_all_tests.py --quick            # about 2 minutes: 3 scenarios, 6 policies, 2 reps, 256 kB
     python3 run_all_tests.py                    # full matrix (see MATRIX below), 5 reps, 100 kB / 1 MB / 8 MB

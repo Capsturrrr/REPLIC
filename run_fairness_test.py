@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-run_fairness_test.py - multi-flow coexistence test for Poise-RUDP.
+run_fairness_test.py - multi-flow coexistence test for Poise.
 
-One subject flow (Poise-RUDP neural agent, optionally with the courtesy guard --polite) shares ONE bottleneck with
+One subject flow (Poise neural agent, optionally with the courtesy guard --polite) shares ONE bottleneck with
 k = 1..3 background flows (CUBIC or BBR). Output: Jain's fairness index, the subject's share relative to its fair
 share 1/n, and a starvation metric (smallest flow's share relative to 1/n).
 
@@ -135,7 +135,7 @@ def netem_ready():
 
 
 def run_netem(subject, bg_arm, k, packets, seed, bn=BOTTLENECK, window=15.0):
-    """Subject = Poise-RUDP over lo (netem delay/jitter/loss + tbf); background = k kernel TCP senders (cubic/bbr).
+    """Subject = Poise over lo (netem delay/jitter/loss + tbf); background = k kernel TCP senders (cubic/bbr).
     Shares = bytes moved in the common `window` seconds (RUDP: bytes from the server's receive counter is not exposed,
     so we use packets*1200 reported by the sender; TCP: bytes accepted by send() minus nothing - approximation)."""
     why = netem_ready()
@@ -177,7 +177,7 @@ def run_netem(subject, bg_arm, k, packets, seed, bn=BOTTLENECK, window=15.0):
 
 
 def run_proxy_netem_subject(subject, packets, seed, window):
-    """Run the Poise-RUDP subject over lo (netem impairs it). Bytes moved = size of the server's output file at the end
+    """Run the Poise subject over lo (netem impairs it). Bytes moved = size of the server's output file at the end
     of the window (the server appends delivered payloads; it flushes in 4 kB blocks, so +-4 kB)."""
     outp = tempfile.mktemp()
     env = dict(os.environ, RUDP_QUIET="1", RUDP_OUT=outp, RUDP_PORT=str(BASE_PORT))

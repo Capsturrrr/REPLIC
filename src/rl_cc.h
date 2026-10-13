@@ -1,7 +1,7 @@
 #ifndef RL_CC_H
 #define RL_CC_H
 /*
- * Poise-RUDP: tabular Q-learning congestion-window controller.
+ * Poise: tabular Q-learning congestion-window controller.
  *
  * State  (80) = RTT-ratio bucket (4) x loss bucket (4) x cwnd bucket (5)
  * Action (5)  = multiply cwnd by {0.5, 0.85, 1.0, 1.15, 1.5}

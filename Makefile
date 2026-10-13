@@ -21,7 +21,7 @@ clean:
 
 .PHONY: all clean
 
-# Poise-RUDP (RL congestion control) -- needs -lm; server is built per port
+# Poise (RL congestion control) -- needs -lm; server is built per port
 $(BIN_DIR)/smart_client: $(SRC_DIR)/smart_client.c $(SRC_DIR)/rudp_sender.c $(SRC_DIR)/rudp.h $(SRC_DIR)/rl_cc.h $(SRC_DIR)/deep_cc.h $(COMMON_SRC) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -D_GNU_SOURCE -o $@ $(SRC_DIR)/smart_client.c $(SRC_DIR)/rudp_sender.c $(COMMON_SRC) -lm
 

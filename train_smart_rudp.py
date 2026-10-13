@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-train_smart_rudp.py - train the Poise-RUDP congestion controller with PPO and export it to C.
+train_smart_rudp.py - train the Poise congestion controller with PPO and export it to C.
 
 What is trained
   * policy  pi(a | s):  tanh MLP 8 -> 32 -> 32 -> 1 (mean of a Gaussian over a in (-1,1) via tanh); window factor C = 2**a in [0.5, 2.0]

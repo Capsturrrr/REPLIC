@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train the chat's Poise-RUDP Q-table on simulated paths, then evaluate on held-out paths and seeds.
+"""Train the chat's Poise Q-table on simulated paths, then evaluate on held-out paths and seeds.
    python3 web/train.py            -> writes results/q_chat.txt and prints the comparison table"""
 import os, random, statistics as st, sys, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

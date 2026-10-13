@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Poise-RUDP Studio - backend.
+Poise Studio - backend.
 
 FastAPI app that wraps the real C core (src/*.c, built into studio/bin) and the impairment proxy. Nothing here is
 simulated in Python: every race starts real server / proxy / sender processes over UDP on 127.0.0.1, and the numbers
@@ -325,7 +325,7 @@ class Race:
                     groups=self.group_view() if self.mode == "coexist" else None, elapsed=round(time.time() - self.t0, 2))
 
 
-app = FastAPI(title="Poise-RUDP Studio")
+app = FastAPI(title="Poise Studio")
 CUR = {"race": None}
 HISTORY = collections.OrderedDict()
 

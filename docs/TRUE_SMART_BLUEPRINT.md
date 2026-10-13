@@ -1,4 +1,4 @@
-# Poise-RUDP: natively multi-objective, PPO-trained congestion control
+# Poise: natively multi-objective, PPO-trained congestion control
 
 ## Pipeline
 
