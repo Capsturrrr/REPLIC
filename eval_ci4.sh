@@ -1,10 +1,10 @@
 #!/bin/bash
 # Equal-window-cap comparison in the C transport: AIMD (cap 128, as originally), AIMD (cap 32, same as the agents),
 # the first neural agent (trained in the permissive simulator) and the retrained one (realistic fast-retransmit rule).
-# (Go-Back-N era: the transport was Go-Back-N when this was run; the script now pins it with -DRUDP_GBN and --gbn.)
+# (Go-Back-N era: the transport was Go-Back-N when this was run; the script now pins it with -DPOISE_GBN and --gbn.)
 # usage: bash eval_ci4.sh [runs] -> results/eval_ci4_<scenario>.csv ; summarise with python3 ci_summary4.py
-export RUDP_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
-export RUDP_CLASSIC=1
+export POISE_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
+export POISE_CLASSIC=1
 cd "$(dirname "$0")"; RUNS=${1:-10}
 declare -A P
 P[5g]="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60"
@@ -12,7 +12,7 @@ P[lossy]="--delay 25 --jitter 10 --loss 2 --rate 800 --queue 50"
 P[sat]="--delay 150 --jitter 10 --loss 0.3 --rate 400 --queue 100"
 port=9700
 for sc in 5g lossy sat; do
-  port=$((port+1)); gcc -DRUDP_GBN -DSERVER_PORT=$port -o bin/server_$port src/server.c src/common.c
+  port=$((port+1)); gcc -DPOISE_GBN -DSERVER_PORT=$port -o bin/server_$port src/server.c src/common.c
   ( ./bin/server_$port >/dev/null 2>&1 & SP=$!; sleep 0.3; rm -f results/eval_ci4_$sc.csv
     for i in $(seq 1 $RUNS); do
       for arm in aimd128 aimd32 deep deeprg; do

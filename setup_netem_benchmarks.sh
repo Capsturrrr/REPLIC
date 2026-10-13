@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# setup_netem_benchmarks.sh -- WSL2 / Linux helper for the kernel-netem and kernel-TCP benchmarks of RUDP v2.
+# setup_netem_benchmarks.sh -- WSL2 / Linux helper for the kernel-netem and kernel-TCP benchmarks of Poise v2.
 #
 #   sudo bash setup_netem_benchmarks.sh check              # is tc/netem/iperf3 usable here? (changes nothing permanent)
 #   sudo bash setup_netem_benchmarks.sh install            # apt install iproute2 iperf3 (needs network)
@@ -18,7 +18,7 @@ set -u
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; cd "$HERE"
 PROFILES="$HERE/netem_profiles.tsv"; PORT=9971
 need_root() { [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }; }
-mtu_file=/tmp/rudp_lo_mtu.orig
+mtu_file=/tmp/poise_lo_mtu.orig
 
 get_profile() {   # sets NAME DELAY JITTER LOSS RATE QUEUE NOTE
   local line; line=$(awk -F'\t' -v n="$1" 'NR>1 && $1==n {print}' "$PROFILES")
@@ -96,4 +96,4 @@ esac
 #    Do not mix the two backends in one comparison table without saying so (run_all_tests.py writes the backend into tables.tex and BACKEND.txt).
 #  * WSL2 without sch_netem: build a kernel with CONFIG_NET_SCH_NETEM=m (and CONFIG_NET_SCH_TBF=m), or run this on a normal Linux VM / cloud instance.
 #  * Kernel TCP retransmissions come from the system-wide Tcp RetransSegs counter: close other network-heavy programs while the benchmark runs.
-#  * iperf3 is optional. Its numbers are not used because the collector times the same bytes and the same end condition as RUDP.
+#  * iperf3 is optional. Its numbers are not used because the collector times the same bytes and the same end condition as Poise.

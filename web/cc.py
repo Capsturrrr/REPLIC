@@ -42,8 +42,8 @@ LAG = 1
 MASK = True
 DELAY_W = 0.5          # weight of the RTT-inflation penalty in the reward
 RANDOM_LOSS_RATIO = 0.0   # >0: loss with RTT inflation below this ratio is treated as non-congestive (no shrink)
-HYBRID = float(os.environ.get("RUDP_HYBRID", "0"))     # deep mode: hand control to AIMD while the per-interval loss fraction is >= this (0 = off, 0.10 recommended)
-TIMEOUT_CUT = float(os.environ.get("RUDP_TCUT", "0"))        # deep/smart modes: on a retransmission timeout multiply the window by this (0 = off). Safety net borrowed from AIMD.
+HYBRID = float(os.environ.get("POISE_HYBRID", "0"))     # deep mode: hand control to AIMD while the per-interval loss fraction is >= this (0 = off, 0.10 recommended)
+TIMEOUT_CUT = float(os.environ.get("POISE_TCUT", "0"))        # deep/smart modes: on a retransmission timeout multiply the window by this (0 = off). Safety net borrowed from AIMD.
 FEAT_ZERO = ()         # feature indices blanked out (ablation studies only)
 
 def deep_feat(ratio, loss, cwnd, thr, last_a):

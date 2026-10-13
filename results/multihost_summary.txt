@@ -1,6 +1,6 @@
 MULTI-MACHINE RUN (2026-10-11 20:14Z, ~34 min): two laptops, internet path via Tailscale DERP relay (Bangalore), no direct connection.
-Ping 10/10 received, rtt min/avg/max 64.7/78.8/96.5 ms. 2 MB (4000 x 512 B) per transfer, 5 reps, TCP then 4 RUDP arms each rep.
-Completion time in seconds (blank = no result, hit 300 s timeout or failed; 4 of 20 RUDP runs):
+Ping 10/10 received, rtt min/avg/max 64.7/78.8/96.5 ms. 2 MB (4000 x 512 B) per transfer, 5 reps, TCP then 4 Poise arms each rep.
+Completion time in seconds (blank = no result, hit 300 s timeout or failed; 4 of 20 Poise runs):
 rep   TCP     AIMD    CUBIC   BBR     neural
 1     2.47    14.23   12.44   6.35    4.70
 2     2.02    11.98   -       -       -
@@ -8,7 +8,7 @@ rep   TCP     AIMD    CUBIC   BBR     neural
 4     11.37   86.95   218.17  68.90   110.81
 5     50.89   143.13  167.07  43.53   32.01
 HONEST READING: the path was NOT stationary (TCP alone ranged 2.0 s to 50.9 s; RTT inflated to 190-490 ms in reps 3-5).
-Only reps 1-2 are on a clean path; there kernel TCP is 2-6x faster than any RUDP arm, and in rep 1 neural (4.70 s) beats tuned AIMD (14.23 s) and BBR (6.35 s).
+Only reps 1-2 are on a clean path; there kernel TCP is 2-6x faster than any Poise arm, and in rep 1 neural (4.70 s) beats tuned AIMD (14.23 s) and BBR (6.35 s).
 Reps 3-5 (degraded relay): neural vs AIMD 1.27x slower (rep 4), 0.22x (rep 5); neural vs BBR 1.32x, 1.61x slower, 0.74x. No consistent winner; n is far too small and
-the 4 failed runs mean no confidence intervals or significance claims are made. What the run does show: RUDP completes real 2 MB transfers (4000/4000 packets) between
+the 4 failed runs mean no confidence intervals or significance claims are made. What the run does show: Poise completes real 2 MB transfers (4000/4000 packets) between
 two physical machines over the internet with all four policies; kernel TCP stays faster. Cause of the 4 empty cells is unknown (path outage vs server stuck after a killed run).

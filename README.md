@@ -1,6 +1,6 @@
-# RUDP: reliable UDP in C, with a learned congestion controller
+# Poise: reliable UDP in C, with a learned congestion controller
 
-[![ci](https://github.com/Capsturrrr/rudp/actions/workflows/ci.yml/badge.svg)](https://github.com/Capsturrrr/rudp/actions/workflows/ci.yml)
+[![ci](https://github.com/Capsturrrr/poise/actions/workflows/ci.yml/badge.svg)](https://github.com/Capsturrrr/poise/actions/workflows/ci.yml)
 
 A reliable, congestion-controlled transport over UDP, written in C: handshake, Selective Repeat with a 256-packet window,
 CRC-16, adaptive retransmission timer, pluggable congestion control (AIMD, CUBIC, tabular Q-learning, a small neural network),
@@ -18,7 +18,7 @@ tooling to test all of it honestly.
 ## Headline results
 
 Completion time of a transfer, neural agent against **tuned** baselines (AIMD with window cap 128, CUBIC with cap 128), same transport,
-same timers, paired seeds, 95% intervals. Details and caveats in `docs/RUDP_Final_Project_Report.pdf`, Section 8.11 to 8.13.
+same timers, paired seeds, 95% intervals. Details and caveats in `docs/POISE_Final_Project_Report.pdf`, Section 8.11 to 8.13.
 
 | Path | AIMD tuned | CUBIC tuned | Neural agent | vs AIMD |
 |---|---|---|---|---|
@@ -52,7 +52,7 @@ make repro                     # reproduce the headline table in virtual time, a
 ./bench_loopback.sh            # raw sender speed on loopback
 
 # a transfer by hand
-RUDP_OUT=/tmp/out.bin ./bin/server &                     # receiver writes the file, prints length and hash
+POISE_OUT=/tmp/out.bin ./bin/server &                     # receiver writes the file, prints length and hash
 ./bin/smart_client --mode deep --emu 0 --file big.bin    # sender (deep = neural agent; aimd, cubic, rl2 also available)
 ```
 
@@ -68,21 +68,21 @@ python3 web/vt_calib.py        # virtual time vs real clock
 
 ## Use it as a library
 
-The sender is a C library (`lib/librudp.a`, header `src/rudp.h`); `smart_client` is just a command-line wrapper around it.
+The sender is a C library (`lib/libpoise.a`, header `src/poise.h`); `smart_client` is just a command-line wrapper around it.
 
 ```c
-#include "rudp.h"
-rudp_options_t o; rudp_options_default(&o);
+#include "poise.h"
+poise_options_t o; poise_options_default(&o);
 o.port = 8888; o.mode = "deep"; o.weights_file = "results/dqn_chat.txt";   // or "aimd", "cubic"
-rudp_stats_t st;
-int rc = rudp_send(&o, buf, len, &st);          // blocks until every byte is acknowledged; rudp_send_file() for a file
-if (rc != RUDP_OK) fprintf(stderr, "%s\n", rudp_strerror(rc));
+poise_stats_t st;
+int rc = poise_send(&o, buf, len, &st);          // blocks until every byte is acknowledged; poise_send_file() for a file
+if (rc != POISE_OK) fprintf(stderr, "%s\n", poise_strerror(rc));
 ```
 
 ```bash
-make lib examples                 # lib/librudp.a and bin/example_send
-RUDP_OUT=/tmp/out.bin ./bin/server &  ./bin/example_send 8888 some_file
-sudo make install                 # librudp.a, rudp.h, rudp-server, rudp-send under /usr/local
+make lib examples                 # lib/libpoise.a and bin/example_send
+POISE_OUT=/tmp/out.bin ./bin/server &  ./bin/example_send 8888 some_file
+sudo make install                 # libpoise.a, poise.h, poise-server, poise-send under /usr/local
 ```
 
 Limits: one transfer per call (connect, send, close), up to 32 MB, not thread-safe (process-global state), IPv4 only. The refactor from the old
@@ -105,22 +105,22 @@ gateway, training, virtual-time harness, studies), `tests/`, `network/` (Packet 
 | Evolution-strategy training in C | `web/es_train.py` | `results/es/` |
 | History: Go-Back-N era, tuning steps | `eval_ci*.sh`, `eval_perf*.sh` | `results/` |
 
-Selective Repeat is the default; Go-Back-N is kept for comparison (`--gbn`, `RUDP_GBN=1`, `make server_gbn`). The original settings of the neural agent
-(cap 32, no pacing, no slow start, no hand-over) are available with `RUDP_CLASSIC=1`.
+Selective Repeat is the default; Go-Back-N is kept for comparison (`--gbn`, `POISE_GBN=1`, `make server_gbn`). The original settings of the neural agent
+(cap 32, no pacing, no slow start, no hand-over) are available with `POISE_CLASSIC=1`.
 
 ## Chat
 
 ```bash
 ./bin/chat 9001 9002 Alice 30        # terminal chat: my_port peer_port name loss%
 ./bin/chat 9002 9001 Bob   30
-python3 web/rudp_web.py --udp 9001 --peer 127.0.0.1:9002 --http 8080     # web gateway with live dashboard (see docs/CHAT_ONLINE.txt)
+python3 web/poise_web.py --udp 9001 --peer 127.0.0.1:9002 --http 8080     # web gateway with live dashboard (see docs/CHAT_ONLINE.txt)
 ```
 The gateway and the terminal chat speak the same protocol and are tested against each other at 20% loss in both directions.
 
 ## Network design and Wireshark
 
 Four routers (R1 to R4), OSPF area 0, two VLANs, DHCP, an extended ACL, tested failover (70 of 71 pings during a link shutdown): configs in `network/cfg/`,
-diagram `network/topology_final.png`. `network/rudp.lua` is a Wireshark dissector (`wireshark -X lua_script:network/rudp.lua`); see `network/WIRESHARK_STEPS.txt`.
+diagram `network/topology_final.png`. `network/poise.lua` is a Wireshark dissector (`wireshark -X lua_script:network/poise.lua`); see `network/WIRESHARK_STEPS.txt`.
 
 ## Status
 
@@ -155,8 +155,8 @@ sudo apt install -y tshark   # say Yes to the "non-superusers capture packets" p
 ## Clone and build
 
 ```bash
-git clone https://github.com/Capsturrrr/rudp.git ~/projects/rudp
-cd ~/projects/rudp
+git clone https://github.com/Capsturrrr/poise.git ~/projects/poise
+cd ~/projects/poise
 make
 ```
 
@@ -238,9 +238,9 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 
 ## Kernel check (tc/netem)
 
-> **Correction (12 Oct 2026):** the first kernel runs sent RUDP's *synthetic 40-byte* packets while TCP and UDP sent 512-byte payloads. The scripts now send a real 512-byte-per-packet file and every kernel run was repeated; the text below uses the corrected numbers (`results/netem_corrected.txt`, `results/netem_coexist_summary.txt`).
+> **Correction (12 Oct 2026):** the first kernel runs sent Poise's *synthetic 40-byte* packets while TCP and UDP sent 512-byte payloads. The scripts now send a real 512-byte-per-packet file and every kernel run was repeated; the text below uses the corrected numbers (`results/netem_corrected.txt`, `results/netem_coexist_summary.txt`).
 
-`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and RUDP (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 71% faster (lossy), 65% (5G-like) and 83% (satellite), all significant, and 60% faster with reordering (not significant, p=0.09). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 1.7x.** `sudo bash netem_coexist.sh 5g|lossy|sat` puts a kernel TCP flow and one RUDP transfer on the same bottleneck: **the neural agent does not starve TCP** (it takes 24% to 34% of the link; tuned AIMD only 5% to 17%), 3 runs per cell. Raw numbers, and an account of four mistakes in the first runs, are in `results/netem_summary.txt`.
+`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and Poise (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 71% faster (lossy), 65% (5G-like) and 83% (satellite), all significant, and 60% faster with reordering (not significant, p=0.09). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 1.7x.** `sudo bash netem_coexist.sh 5g|lossy|sat` puts a kernel TCP flow and one Poise transfer on the same bottleneck: **the neural agent does not starve TCP** (it takes 24% to 34% of the link; tuned AIMD only 5% to 17%), 3 runs per cell. Raw numbers, and an account of four mistakes in the first runs, are in `results/netem_summary.txt`.
 
 ## Research-gap tests (all in virtual time unless noted; paired seeds, 95% intervals)
 
@@ -254,9 +254,9 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 
 The BBR-style policy is a simplification (no ProbeRTT, no BBRv3 loss response), so no claim is made about the Linux BBR. Earlier versions of it stalled at 10% loss and took 163 s after a delay jump; both defects are fixed and described in the report (Section 8.19).
 
-## RUDP Drop: an application built on the library
+## Poise Drop: an application built on the library
 
-`make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent v1, Poise). Each transfer runs through the real C stack (librudp sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time with retransmit and timer-expiry markers and the pipe-capacity line, with a download link for the verified copy. The page explains each phase (handshake, slow start, steady state, loss recovery, hash check), describes each policy and network, shows the best possible time on the chosen link, and writes a short per-run story from the sender's own trace. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.
+`make drop` starts a small local web app (http://localhost:8800). Drop in any file (up to 12 MB), pick a network (5G, lossy Wi-Fi, satellite, long fast link, terrible link) and the policies to race (AIMD window 32, tuned AIMD, neural agent v1, Poise). Each transfer runs through the real C stack (libpoise sender, `bin/server`, `bin/impair` proxy), the receiver's copy is compared byte for byte (SHA-256), and the page shows time, goodput, retransmissions and the congestion window over time with retransmit and timer-expiry markers and the pipe-capacity line, with a download link for the verified copy. The page explains each phase (handshake, slow start, steady state, loss recovery, hash check), describes each policy and network, shows the best possible time on the chosen link, and writes a short per-run story from the sender's own trace. Policies run one after another, one run each, so small gaps are noise. Python is standard library only.
 
 ## Multi-machine run (two laptops, internet path)
-One run, 5 reps, 2 MB each, over a Tailscale relay (~79 ms RTT, no direct connection): see `results/multihost_summary.txt` and `results/multihost_mylabel.txt` (transcribed from the client terminal). The path degraded mid-run (TCP 2 s to 51 s) and 4 of 20 RUDP runs timed out, so this is a demonstration that RUDP works between real machines, not a statistically valid comparison. On the clean reps kernel TCP was 2-6x faster than every RUDP policy; in rep 1 the neural agent beat tuned AIMD (4.7 s vs 14.2 s). Repeat on a direct LAN path for stronger numbers.
+One run, 5 reps, 2 MB each, over a Tailscale relay (~79 ms RTT, no direct connection): see `results/multihost_summary.txt` and `results/multihost_mylabel.txt` (transcribed from the client terminal). The path degraded mid-run (TCP 2 s to 51 s) and 4 of 20 Poise runs timed out, so this is a demonstration that Poise works between real machines, not a statistically valid comparison. On the clean reps kernel TCP was 2-6x faster than every Poise policy; in rep 1 the neural agent beat tuned AIMD (4.7 s vs 14.2 s). Repeat on a direct LAN path for stronger numbers.

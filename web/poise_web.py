@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-RUDP Web Chat: a browser front end for the RUDP chat.
-Browsers cannot send raw UDP, so this small gateway speaks RUDP (same 13-byte
+Poise Web Chat: a browser front end for the Poise chat.
+Browsers cannot send raw UDP, so this small gateway speaks Poise (same 13-byte
 header, checksum, Go-Back-N, cumulative ACKs, fast retransmit as src/chat.c)
 to the peer over UDP and serves a chat page over HTTP on localhost.
 It interoperates with ./bin/chat on the other side.
 
-  python3 web/rudp_web.py --udp 9001 --peer 100.88.28.25:9001 --name Harsh --http 8080
+  python3 web/poise_web.py --udp 9001 --peer 100.88.28.25:9001 --name Harsh --http 8080
   then open http://localhost:8080
 Standard library only.
 """
@@ -306,5 +306,5 @@ if __name__ == "__main__":
     chat = Chat(a.udp, a.peer, a.name, a.loss, a.delay)
     chat.adaptive_rto = a.rto == "adaptive"; chat.gbn = a.gbn
     threading.Thread(target=chat.loop, daemon=True).start()
-    print(f"RUDP Web Chat: open http://localhost:{a.http}   (UDP {a.udp} -> {a.peer})")
+    print(f"Poise Web Chat: open http://localhost:{a.http}   (UDP {a.udp} -> {a.peer})")
     ThreadingHTTPServer(("0.0.0.0", a.http), make_handler(chat, html)).serve_forever()

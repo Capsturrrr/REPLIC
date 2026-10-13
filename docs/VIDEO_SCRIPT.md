@@ -1,4 +1,4 @@
-# RUDP Video Script (3 speakers, updated for the final 34-slide deck)
+# Poise Video Script (3 speakers, updated for the final 34-slide deck)
 
 Computer Networks, VIT Vellore. Faculty: Anuradha G. Team: Harshavardhan Mallela (24BAI0274), Rohit Arya (24BCE0819), Shloak Sinha (24BDS0378). Due 21 October 2026. Target length about 14 minutes.
 
@@ -14,13 +14,13 @@ Spoken lines are meant to be said aloud: change the wording to suit your voice, 
 
 **Harshavardhan:** Hello, I'm Harshavardhan Mallela. **Rohit:** I'm Rohit Arya. **Shloak:** And I'm Shloak Sinha.
 
-**Harshavardhan:** This is our Computer Networks project, guided by Anuradha G. We built RUDP, a reliable transport protocol, from scratch in C on top of UDP. Then we added a learned congestion controller, designed a four-router OSPF network, and tested all of it.
+**Harshavardhan:** This is our Computer Networks project, guided by Anuradha G. We built Poise, a reliable transport protocol, from scratch in C on top of UDP. Then we added a learned congestion controller, designed a four-router OSPF network, and tested all of it.
 
 (slide 2) Packets get lost, duplicated and reordered, and nobody tells you. UDP behaves exactly like that. TCP fixes it, but it lives inside the kernel. In 1986 the internet suffered its first congestion collapse: one path fell from 32 kilobits per second to 40 bits per second. A sender that only retransmits makes congestion worse. So we asked: can we rebuild TCP's guarantees ourselves, and prove they work?
 
 ## 2. What we built (Harshavardhan, 1:15 to 3:00), slides 4-6
 
-**Harshavardhan:** (slide 4) RUDP has a handshake, sequence numbers, a checksum, retransmission by timeout and by fast retransmit, a sliding window, and congestion control. It runs on plain UDP sockets.
+**Harshavardhan:** (slide 4) Poise has a handshake, sequence numbers, a checksum, retransmission by timeout and by fast retransmit, a sliding window, and congestion control. It runs on plain UDP sockets.
 
 (slide 5) Every packet starts with a 13-byte header: sequence number, acknowledgment number, a flags byte, a checksum and a length. The checksum is a CRC-16. Our first version was a simple byte sum, and a fuzzing test showed that about two percent of corrupted packets slipped through it, so we replaced it. After that, a million random corrupted packets produced zero accepted.
 
@@ -46,7 +46,7 @@ Spoken lines are meant to be said aloud: change the wording to suit your voice, 
 
 ## 7. Wireshark (Shloak, 7:15 to 8:00), slides 18-19
 
-**Shloak:** We wrote a Wireshark dissector in Lua for the RUDP header. Filtering on one sequence number shows every copy of that packet, so retransmissions are visible: the same segment appears again after the timeout.
+**Shloak:** We wrote a Wireshark dissector in Lua for the Poise header. Filtering on one sequence number shows every copy of that packet, so retransmissions are visible: the same segment appears again after the timeout.
 
 ## 8. Poise (Harshavardhan, 8:00 to 9:30), slides 15-17
 
@@ -74,10 +74,10 @@ Run, in this order: `./bin/server` and `./bin/client 20` (loss recovery), then `
 
 **Harshavardhan:** We learned that measuring honestly matters more than winning. Some early margins were inflated by a timer bug that hurt the baseline more, and we corrected them. **Rohit:** A learned controller helps when the path is lossy or long, ties when loss is heavy, and needs a safety net. **Shloak:** Next steps are kernel netem and multi-machine tests, a fairness-aware training objective, and online adaptation.
 
-**All:** The code is on GitHub at Capsturrrr/rudp. Thank you.
+**All:** The code is on GitHub at Capsturrrr/poise. Thank you.
 
 ## Recording checklist
 
 * Run `make test` once before recording so the green output is ready if you want to show it.
-* Use the 34-slide deck `RUDP_Presentation.pptx`; the numbers above match slides 26-31.
+* Use the 34-slide deck `POISE_Presentation.pptx`; the numbers above match slides 26-31.
 * Do not claim the agent is fair or tested on a real network; say what the evidence shows.

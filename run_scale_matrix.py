@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_scale_matrix.py -- high-sample (default n = 30 seeds per cell) multi-path evaluation for RUDP / Poise.
+run_scale_matrix.py -- high-sample (default n = 30 seeds per cell) multi-path evaluation for Poise / Poise.
 
     python3 run_scale_matrix.py                         # proxy backend, 3 path families x 6 policies x 30 seeds (1 MB each), resumable
     python3 run_scale_matrix.py --n 3 --families dc_microburst --policies cubic,smart --out /tmp/x      # smoke test
@@ -184,7 +184,7 @@ def write_tables(cells, pairs, out_dir, backend_note, n_seeds, tag=''):
         for ref in REFS:
             sel = [b for b in pairs if b["ref"] == ref and b["policy"] in ("smart", "smart+fec", "neural")]
             if not sel: continue
-            label = {"cubic": "CUBIC running over RUDP", "tcp_cubic": "kernel TCP CUBIC"}[ref]
+            label = {"cubic": "CUBIC running over Poise", "tcp_cubic": "kernel TCP CUBIC"}[ref]
             f.write(f"\\paragraph{{Versus {label}.}} ")
             parts = []
             for b in sel:

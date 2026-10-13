@@ -1,9 +1,9 @@
 #!/bin/bash
-# Interop test: the Python web gateway and the C terminal chat speak the same RUDP (256-packet Selective Repeat window,
+# Interop test: the Python web gateway and the C terminal chat speak the same Poise (256-packet Selective Repeat window,
 # 32-byte ACK bitmap, CRC-16) and deliver 100 messages each way, in order, through 20% loss on both sides.
 cd "$(dirname "$0")/.."; make chat >/dev/null 2>&1
 rm -f /tmp/ci_chat.out; mkfifo /tmp/ci_chat.in 2>/dev/null
-python3 web/rudp_web.py --udp 7301 --peer 127.0.0.1:7302 --http 8391 --loss 20 --name gw >/tmp/ci_gw.log 2>&1 & GW=$!
+python3 web/poise_web.py --udp 7301 --peer 127.0.0.1:7302 --http 8391 --loss 20 --name gw >/tmp/ci_gw.log 2>&1 & GW=$!
 ( exec 3<>/tmp/ci_chat.in; exec stdbuf -oL ./bin/chat 7302 7301 cc 20 <&3 > /tmp/ci_chat.out 2>&1 ) & CH=$!
 sleep 1.5
 for i in $(seq 1 100); do curl -s -X POST -d "{\"text\":\"gw-msg-$i\"}" localhost:8391/send >/dev/null; done

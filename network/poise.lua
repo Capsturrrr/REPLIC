@@ -1,25 +1,25 @@
--- RUDP dissector for Wireshark (protocol name "smartrudp": Wireshark already has a built-in "rudp" so the name must differ). Install: copy to the Wireshark plugins folder
+-- Poise dissector for Wireshark (protocol name "smartpoise": Wireshark already has a built-in "poise" so the name must differ). Install: copy to the Wireshark plugins folder
 -- (Help > About Wireshark > Folders > Personal Lua Plugins) and restart, or:
---   wireshark -X lua_script:rudp.lua capture.pcap
+--   wireshark -X lua_script:poise.lua capture.pcap
 -- Header (13 bytes): seq(4) ack(4) flags(1) checksum(2) payload_len(2)
-local p = Proto("smartrudp", "Reliable UDP (course project)")
+local p = Proto("smartpoise", "Reliable UDP (course project)")
 local f = {
-  seq   = ProtoField.uint32("smartrudp.seq", "Sequence number"),
-  ack   = ProtoField.uint32("smartrudp.ack", "Acknowledgement number"),
-  flags = ProtoField.uint8("smartrudp.flags", "Flags", base.HEX),
-  syn   = ProtoField.bool("smartrudp.flags.syn", "SYN", 8, nil, 0x01),
-  ackf  = ProtoField.bool("smartrudp.flags.ack", "ACK", 8, nil, 0x02),
-  fin   = ProtoField.bool("smartrudp.flags.fin", "FIN", 8, nil, 0x04),
-  data  = ProtoField.bool("smartrudp.flags.data", "DATA", 8, nil, 0x08),
-  csum  = ProtoField.uint16("smartrudp.checksum", "Checksum", base.HEX),
-  plen  = ProtoField.uint16("smartrudp.payload_len", "Payload length"),
-  pl    = ProtoField.bytes("smartrudp.payload", "Payload"),
+  seq   = ProtoField.uint32("smartpoise.seq", "Sequence number"),
+  ack   = ProtoField.uint32("smartpoise.ack", "Acknowledgement number"),
+  flags = ProtoField.uint8("smartpoise.flags", "Flags", base.HEX),
+  syn   = ProtoField.bool("smartpoise.flags.syn", "SYN", 8, nil, 0x01),
+  ackf  = ProtoField.bool("smartpoise.flags.ack", "ACK", 8, nil, 0x02),
+  fin   = ProtoField.bool("smartpoise.flags.fin", "FIN", 8, nil, 0x04),
+  data  = ProtoField.bool("smartpoise.flags.data", "DATA", 8, nil, 0x08),
+  csum  = ProtoField.uint16("smartpoise.checksum", "Checksum", base.HEX),
+  plen  = ProtoField.uint16("smartpoise.payload_len", "Payload length"),
+  pl    = ProtoField.bytes("smartpoise.payload", "Payload"),
 }
 p.fields = { f.seq, f.ack, f.flags, f.syn, f.ackf, f.fin, f.data, f.csum, f.plen, f.pl }
 function p.dissector(buf, pinfo, tree)
   if buf:len() < 13 then return 0 end
-  pinfo.cols.protocol = "RUDP"
-  local t = tree:add(p, buf(0, buf:len()), "RUDP")
+  pinfo.cols.protocol = "Poise"
+  local t = tree:add(p, buf(0, buf:len()), "Poise")
   t:add(f.seq, buf(0, 4)); t:add(f.ack, buf(4, 4))
   local ft = t:add(f.flags, buf(8, 1))
   ft:add(f.syn, buf(8, 1)); ft:add(f.ackf, buf(8, 1)); ft:add(f.fin, buf(8, 1)); ft:add(f.data, buf(8, 1))

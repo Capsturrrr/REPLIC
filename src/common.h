@@ -30,7 +30,7 @@
 #define MAX_CWND 32.0          /* cap so a lossless run doesn't grow unbounded */
 
 /*
- * RUDP packet header, sent on the wire in this exact byte layout:
+ * Poise packet header, sent on the wire in this exact byte layout:
  *   seq_num      4 bytes
  *   ack_num      4 bytes
  *   flags        1 byte
@@ -40,7 +40,7 @@
  *
  * We do NOT send this struct directly with sizeof() — struct padding
  * differs across compilers/platforms. Instead we manually serialize
- * each field into a flat byte buffer (see rudp_pack / rudp_unpack).
+ * each field into a flat byte buffer (see poise_pack / poise_unpack).
  */
 typedef struct {
     uint32_t seq_num;
@@ -49,14 +49,14 @@ typedef struct {
     uint16_t checksum;
     uint16_t payload_len;
     uint8_t  payload[MAX_PAYLOAD];
-} rudp_packet_t;
+} poise_packet_t;
 
 /* Fixed size of the header on the wire (excludes payload) */
-#define RUDP_HEADER_SIZE 13  /* 4 + 4 + 1 + 2 + 2 */
+#define POISE_HEADER_SIZE 13  /* 4 + 4 + 1 + 2 + 2 */
 
-int rudp_pack(const rudp_packet_t *pkt, uint8_t *buf, size_t buf_size);
-int rudp_unpack(const uint8_t *buf, size_t len, rudp_packet_t *pkt);
-uint16_t rudp_checksum(const rudp_packet_t *pkt);
-void rudp_print_packet(const char *label, const rudp_packet_t *pkt);
+int poise_pack(const poise_packet_t *pkt, uint8_t *buf, size_t buf_size);
+int poise_unpack(const uint8_t *buf, size_t len, poise_packet_t *pkt);
+uint16_t poise_checksum(const poise_packet_t *pkt);
+void poise_print_packet(const char *label, const poise_packet_t *pkt);
 
 #endif /* COMMON_H */

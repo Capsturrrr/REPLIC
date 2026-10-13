@@ -18,14 +18,14 @@ em{color:#555}
 <h2>Order</h2>
 <ol>
 <li><strong>Idea (1 min), slides 2-3.</strong> UDP is unreliable, TCP is locked in the kernel, so we rebuilt TCP's core ideas over UDP: handshake, Selective Repeat with a 256-packet window, CRC-16, adaptive timer, pluggable congestion control.</li>
-<li><strong>RUDP live (1 min).</strong> Terminal 1 <code>./bin/server</code>, terminal 2 <code>./bin/client 20</code> (20% simulated loss). Point at TIMEOUT / FAST RETRANSMIT lines, then the reassembled message.</li>
-<li><strong>Chat (2 min).</strong> <code>./bin/chat 9001 9002 Alice 30</code> and <code>./bin/chat 9002 9001 Bob 30</code>. Start both terminals before typing. Messages arrive in order despite the "network lost" lines. Optional web version: <code>python3 web/rudp_web.py --udp 9001 --peer 127.0.0.1:9002 --http 8080</code>.</li>
+<li><strong>Poise live (1 min).</strong> Terminal 1 <code>./bin/server</code>, terminal 2 <code>./bin/client 20</code> (20% simulated loss). Point at TIMEOUT / FAST RETRANSMIT lines, then the reassembled message.</li>
+<li><strong>Chat (2 min).</strong> <code>./bin/chat 9001 9002 Alice 30</code> and <code>./bin/chat 9002 9001 Bob 30</code>. Start both terminals before typing. Messages arrive in order despite the "network lost" lines. Optional web version: <code>python3 web/poise_web.py --udp 9001 --peer 127.0.0.1:9002 --http 8080</code>.</li>
 <li><strong>File transfer (1.5 min).</strong> <code>./filetransfer_demo.sh 2 lossy</code> sends a 2 MB random file over an impaired path with three policies and checks that the received hash matches. Expected: about 27 s, 24 s and 12 s (AIMD cap 32, AIMD tuned, neural), all byte-identical.</li>
 <li><strong>Poise (2 min).</strong> Virtual time makes this fast and repeatable:
    <code>./bin/smart_client --vt 1 --mode deep --delay 25 --jitter 10 --loss 2 --rate 800 --queue 50 --packets 1200 --seed 1</code>
    then <code>python3 web/vt_named.py</code> (five named paths, 100 paired seeds). Show the headline table: neural beats tuned AIMD by 15% to 52% on four paths and ties on the 10%-loss path. Show <code>results/vt_ablation.txt</code> if asked what matters.</li>
 <li><strong>Network (2 min).</strong> Packet Tracer, four routers R1-R4, OSPF area 0. R2 <code>show ip ospf neighbor</code> (three neighbours FULL); PC <code>tracert 192.168.30.10</code>; ACL block (<code>ping 192.168.20.11</code> fails); failover (<code>ping -t</code>, shut R1 Gi0/2, tracert now goes via R2, restore with <code>no shutdown</code>). Measured: 70 of 71 pings survived the shutdown.</li>
-<li><strong>Wireshark (1 min).</strong> <code>wireshark -X lua_script:network/rudp.lua network/smart_lossy_aimd.pcap</code>; filter <code>smartrudp.flags.data == 1</code>; pick a seq with several copies to show a retransmission.</li>
+<li><strong>Wireshark (1 min).</strong> <code>wireshark -X lua_script:network/poise.lua network/smart_lossy_aimd.pcap</code>; filter <code>smartpoise.flags.data == 1</code>; pick a seq with several copies to show a retransmission.</li>
 </ol>
 <h2>Backup plan</h2>
 <ul>

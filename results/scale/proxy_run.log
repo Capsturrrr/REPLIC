@@ -539,4 +539,4 @@
 [539/540] cellular_highlat   neural     seed 29 ok=1 ms=8218.9  eta 0 min
 [540/540] cellular_highlat   cubic      seed 29 ok=1 ms=30710.3  eta 0 min
 
-done in 33.4 min: 540/540 byte-identical; outputs in /home/claude/rudp2/results/scale/proxy
+done in 33.4 min: 540/540 byte-identical; outputs in /home/claude/poise2/results/scale/proxy

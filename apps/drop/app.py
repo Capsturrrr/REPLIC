@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""RUDP Drop: send a file over RUDP across an emulated network and watch the congestion-control policies race.
+"""Poise Drop: send a file over Poise across an emulated network and watch the congestion-control policies race.
 
 Everything runs locally with the real C code: bin/server (receiver), bin/impair (delay / jitter / loss / bottleneck proxy)
-and bin/smart_client (sender, linked against librudp). Python only starts the processes and serves the page.
+and bin/smart_client (sender, linked against libpoise). Python only starts the processes and serves the page.
 
     python3 apps/drop/app.py          then open http://localhost:8800   (needs python3 and gcc; nothing else)
 """
@@ -13,7 +13,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRV_PORT, PX_PORT, WEB_PORT = 9961, 9962, int(os.environ.get("PORT", "8800"))
 MAX_BYTES = 12 * 1000 * 1000
-WORK = tempfile.mkdtemp(prefix="rudpdrop_")
+WORK = tempfile.mkdtemp(prefix="poisedrop_")
 
 PROFILES = {
     "5g":    dict(label="5G",            note="10 ms one way, light loss, fast link",        args="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60"),
@@ -43,12 +43,12 @@ def build():
     cflags = ["-O2", "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-D_GNU_SOURCE", "-w"]
     targets = {
         "server_drop":  (src("server.c", "common.c"), ["-DSERVER_PORT=%d" % SRV_PORT], []),
-        "smart_client": (src("smart_client.c", "rudp_sender.c", "common.c"), [], ["-lm"]),
+        "smart_client": (src("smart_client.c", "poise_sender.c", "common.c"), [], ["-lm"]),
         "impair":       (src("impair.c"), [], ["-lm"]),
     }
     for name, (files, defs, libs) in targets.items():
         out = os.path.join(bindir, name)
-        deps = files + src("common.h", "rudp.h", "rl_cc.h", "deep_cc.h", "smart_cc.h", "neural_weights.h")
+        deps = files + src("common.h", "poise.h", "rl_cc.h", "deep_cc.h", "smart_cc.h", "neural_weights.h")
         if os.path.exists(out) and all(os.path.getmtime(out) >= os.path.getmtime(f) for f in deps if os.path.exists(f)): continue
         print("compiling", name, flush=True)
         try: subprocess.check_call(["gcc"] + cflags + defs + ["-o", out] + files + libs, cwd=ROOT)
@@ -109,7 +109,7 @@ def run_job(job):
             st = job["state"][arm]; st["status"] = "running"; st["t0"] = time.time()
             d = os.path.join(WORK, job["id"]); out = os.path.join(d, arm + ".out"); trace = os.path.join(d, arm + ".trace")
             log = open(os.path.join(d, arm + ".srv.log"), "w")
-            env = dict(os.environ, RUDP_OUT=out, RUDP_QUIET="1")
+            env = dict(os.environ, POISE_OUT=out, POISE_QUIET="1")
             srv = subprocess.Popen([os.path.join(ROOT, "bin/server_drop")], env=env, stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
             px = subprocess.Popen([os.path.join(ROOT, "bin/impair"), str(PX_PORT), str(SRV_PORT)] + PROFILES[job["profile"]]["args"].split(),
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT)
@@ -195,7 +195,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     build()
-    print("RUDP Drop on http://localhost:%d  (work dir %s)" % (WEB_PORT, WORK))
+    print("Poise Drop on http://localhost:%d  (work dir %s)" % (WEB_PORT, WORK))
     host = os.environ.get("HOST", "127.0.0.1")
     if host != "127.0.0.1": print("WARNING: listening on %s; anyone who can reach this port can upload files and start transfers" % host)
     try: ThreadingHTTPServer((host, WEB_PORT), H).serve_forever()

@@ -56,13 +56,13 @@ static void log_cwnd(const char *event, double cwnd, double ssthresh) {
     fflush(cwnd_log);
 }
 
-static void send_packet(int sockfd, const rudp_packet_t *pkt,
+static void send_packet(int sockfd, const poise_packet_t *pkt,
                          const struct sockaddr_in *addr, socklen_t addr_len,
                          int allow_drop) {
     uint8_t buf[BUFFER_SIZE];
-    int len = rudp_pack(pkt, buf, sizeof(buf));
+    int len = poise_pack(pkt, buf, sizeof(buf));
     if (len < 0) {
-        fprintf(stderr, "rudp_pack failed\n");
+        fprintf(stderr, "poise_pack failed\n");
         return;
     }
     if (allow_drop && should_drop()) {
@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
     uint32_t server_seq = 0;
 
     /* --- Handshake (unchanged) --- */
-    rudp_packet_t syn;
+    poise_packet_t syn;
     memset(&syn, 0, sizeof(syn));
     syn.seq_num = client_seq;
     syn.flags = FLAG_SYN;
@@ -124,16 +124,16 @@ int main(int argc, char *argv[]) {
         printf("Sending SYN (attempt %d)...\n", attempt);
         send_packet(sockfd, &syn, &server_addr, server_len, 0);
 
-        rudp_packet_t reply;
+        poise_packet_t reply;
         ssize_t n = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0, NULL, NULL);
         if (n < 0) { printf("Timed out, retrying...\n"); continue; }
-        if (rudp_unpack(recv_buf, (size_t)n, &reply) != 0) continue;
+        if (poise_unpack(recv_buf, (size_t)n, &reply) != 0) continue;
 
         if ((reply.flags & FLAG_SYN) && (reply.flags & FLAG_ACK) &&
             reply.ack_num == client_seq + 1) {
             server_seq = reply.seq_num;
 
-            rudp_packet_t ack;
+            poise_packet_t ack;
             memset(&ack, 0, sizeof(ack));
             ack.seq_num = client_seq + 1;
             ack.ack_num = server_seq + 1;
@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
     char message[4096];
     message[0] = '\0';
     const char *phrase =
-        "RUDP congestion control test data block. AIMD drives cwnd growth. ";
+        "Poise congestion control test data block. AIMD paces cwnd growth. ";
     while (strlen(message) + strlen(phrase) < sizeof(message) - 1 &&
            strlen(message) < 2400) {
         strcat(message, phrase);
@@ -169,10 +169,10 @@ int main(int argc, char *argv[]) {
     if (total_packets > MAX_CHUNKS) total_packets = MAX_CHUNKS;
 
     uint32_t base_seq = client_seq + 1;
-    rudp_packet_t packets[MAX_CHUNKS];
+    poise_packet_t packets[MAX_CHUNKS];
 
     for (int i = 0; i < total_packets; i++) {
-        memset(&packets[i], 0, sizeof(rudp_packet_t));
+        memset(&packets[i], 0, sizeof(poise_packet_t));
         size_t offset = (size_t)i * chunk_size;
         size_t len = (offset + chunk_size <= msg_len) ? chunk_size : (msg_len - offset);
         packets[i].seq_num = base_seq + (uint32_t)i;
@@ -192,9 +192,9 @@ int main(int argc, char *argv[]) {
     uint32_t last_ack_seen = 0;
     int dup_ack_count = 0;
     /* Selective Repeat (default): the server buffers out-of-order packets and returns a bitmap of them in every ACK;
-       the client keeps one timer per packet and resends only what is missing. Set RUDP_GBN=1 (and build the server
-       with -DRUDP_GBN) for the original Go-Back-N behaviour. */
-    int selective = getenv("RUDP_GBN") == NULL;
+       the client keeps one timer per packet and resends only what is missing. Set POISE_GBN=1 (and build the server
+       with -DPOISE_GBN) for the original Go-Back-N behaviour. */
+    int selective = getenv("POISE_GBN") == NULL;
     long sent_ms[MAX_CHUNKS]; uint8_t sacked[MAX_CHUNKS]; memset(sacked, 0, sizeof sacked); memset(sent_ms, 0, sizeof sent_ms);
 
     double cwnd = INITIAL_CWND;
@@ -215,10 +215,10 @@ int main(int argc, char *argv[]) {
             next_seq++;
         }
 
-        rudp_packet_t ack;
+        poise_packet_t ack;
         ssize_t n = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0, NULL, NULL);
 
-        if (n > 0 && rudp_unpack(recv_buf, (size_t)n, &ack) == 0 && (ack.flags & FLAG_ACK)) {
+        if (n > 0 && poise_unpack(recv_buf, (size_t)n, &ack) == 0 && (ack.flags & FLAG_ACK)) {
             uint32_t acked_seq = ack.ack_num;
             uint32_t base_pkt_seq = packets[base].seq_num;
             if (selective && ack.payload_len == 32) {
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
     log_cwnd("DONE", cwnd, ssthresh);
 
     /* --- Teardown --- */
-    rudp_packet_t fin;
+    poise_packet_t fin;
     memset(&fin, 0, sizeof(fin));
     fin.seq_num = base_seq + (uint32_t)total_packets;
     fin.flags = FLAG_FIN;

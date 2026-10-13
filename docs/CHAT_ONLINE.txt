@@ -1,4 +1,4 @@
-RUDP CHAT OVER THE INTERNET (two people, two machines)
+Poise CHAT OVER THE INTERNET (two people, two machines)
 
 Build once:   git pull && make chat
 
@@ -22,7 +22,7 @@ Same machine, two terminals still works:
    ./bin/chat 9001 9002 Alice 30     ./bin/chat 9002 9001 Bob 30
 
 WEB VERSION (browser UI, same protocol, talks to ./bin/chat or another web copy)
-   python3 web/rudp_web.py --udp 9001 --peer FRIEND_IP:9001 --name Harsh --http 8080
+   python3 web/poise_web.py --udp 9001 --peer FRIEND_IP:9001 --name Harsh --http 8080
    open http://localhost:8080
    Right panel: live packet-loss slider, sent/lost/resent counters, in-flight window, protocol log.
 
@@ -49,7 +49,7 @@ Live dashboard and adaptive timeout (web chat)
    The gateway now uses an RFC 6298 retransmission timer with backoff by default (--rto adaptive);
    --rto fixed restores the old fixed 300 ms timeout.
 
-Selective Repeat is the default in the web chat and in ./bin/chat. Add --gbn (gateway) or set RUDP_GBN=1 (./bin/chat)
+Selective Repeat is the default in the web chat and in ./bin/chat. Add --gbn (gateway) or set POISE_GBN=1 (./bin/chat)
 to get the old Go-Back-N behaviour. Both ends should use the same mode.
 
 Window and agent settings (gateway): the receive window and ACK bitmap are 256 packets / 32 bytes, the same as the C transport and ./bin/chat, so

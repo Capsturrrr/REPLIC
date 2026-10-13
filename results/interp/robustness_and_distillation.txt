@@ -1,4 +1,4 @@
-# 20 paired seeds; completion time in seconds, mean ±95% CI (RUDP_TREE = distilled tree, RUDP_NOISE = Gaussian noise on the 4 measured inputs)
+# 20 paired seeds; completion time in seconds, mean ±95% CI (POISE_TREE = distilled tree, POISE_NOISE = Gaussian noise on the 4 measured inputs)
 scenario        network        tree d8        tree d5      noise .02      noise .05       noise .1       noise .2
 5g           2.21± 0.03    2.26± 0.05    2.41± 0.06    2.25± 0.05    2.25± 0.05    2.32± 0.05    2.47± 0.07
 lossy        9.76± 0.58   10.19± 0.40    9.24± 0.47   10.76± 1.14   10.77± 0.71   10.28± 0.66    9.93± 0.64

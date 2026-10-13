@@ -2,12 +2,12 @@
 
 ## Pipeline
 
-    train_smart_rudp.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
+    train_smart_poise.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
             │                              │ both call the SAME feature code
             │                              ▼
             │                       src/smart_cc.h   state features + tanh-MLP forward pass
             ▼                              ▲
-    results/smart/smart_final.{npz,txt} ──export──> src/neural_weights.h ──compiled into──> src/rudp_sender.c  (--mode smart)
+    results/smart/smart_final.{npz,txt} ──export──> src/neural_weights.h ──compiled into──> src/poise_sender.c  (--mode smart)
 
 * **State (8)**: SRTT gradient, queue-delay derivative, queue-delay level, loss ratio (last window), in-flight/BDP,
   competing-traffic pressure (Fano factor of ACK counts in 10 ms bins), previous action, log2(cwnd).
@@ -21,11 +21,11 @@
 
 ## Reproduce
 
-    python3 train_smart_rudp.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
-    python3 train_smart_rudp.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
-    python3 train_smart_rudp.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
+    python3 train_smart_poise.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
+    python3 train_smart_poise.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
+    python3 train_smart_poise.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
     cp results/smart/smart_fa_best.npz results/smart/smart_final.npz
-    python3 train_smart_rudp.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
+    python3 train_smart_poise.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
     python3 tests/check_smart_export.py                                                    # C forward == numpy forward
     python3 run_fairness_test.py --subjects smart_fair,smart_nofair --reps 5               # real UDP stack, shared bottleneck
     python3 studio/app.py                                                                  # live dashboard, Coexistence arena tab
@@ -51,6 +51,6 @@ Not significant: Poise vs the guard on J (p=0.11-0.30); all BBR comparisons.
   than the simulated one. A retrain against randomised aggressive simulated BBR was worse in validation and was dropped.
 * A first version without log2(cwnd) in the state could not learn fairness (a multiplicative policy cannot realise additive increase); kept as an ablation
   (`results/smart/ablation_nocwnd_*.csv`).
-* Competitors are user-space CUBIC/BBR inside RUDP; the kernel-TCP backend of `run_fairness_test.py` has not been executed (no `tc`/`ip` here).
+* Competitors are user-space CUBIC/BBR inside Poise; the kernel-TCP backend of `run_fairness_test.py` has not been executed (no `tc`/`ip` here).
 * Slow start, pacing, retransmission timers and window bounds are fixed rules, not learned.
 * Single-flow cost (256 kB, n=8): faster than tuned AIMD on a clean path (527 vs 599 ms, p<0.001), equal at 2% and 10% loss; static agent + FEC is still best at 10% loss.

@@ -1,5 +1,5 @@
 /*
- * smart_client: command-line front end of librudp (src/rudp_sender.c, API in src/rudp.h).
+ * smart_client: command-line front end of libpoise (src/poise_sender.c, API in src/poise.h).
  *   --mode aimd|cubic|rl|rl2|deep   congestion-control policy (deep = neural agent, needs --dfile)
  *   --file PATH                     send a real file instead of synthetic test packets
  *   --emu 0                         use the real network (default: emulate the path in this process)
@@ -10,10 +10,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "rudp.h"
+#include "poise.h"
 
 int main(int argc, char **argv) {
-    rudp_options_t o; rudp_options_default(&o);
+    poise_options_t o; poise_options_default(&o);
     o.emulate = 1;                      /* the CLI emulates the path by default (the library default is the real network) */
     const char *fpath = NULL; int use_sack = 1;
     for (int i = 1; i < argc; i++) {
@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
         else if (ARG("--dyn")) o.dyn = argv[++i];
         else if (ARG("--reorder")) o.reorder = atoi(argv[++i]);
         else if (ARG("--sack")) use_sack = atoi(argv[++i]);
-        else if (ARG("--gbn")) use_sack = 0;   /* old Go-Back-N behaviour (use with a server built with -DRUDP_GBN) */
+        else if (ARG("--gbn")) use_sack = 0;   /* old Go-Back-N behaviour (use with a server built with -DPOISE_GBN) */
         else if (ARG("--init")) o.init_cwnd = atof(argv[++i]);
         else if (ARG("--tcut")) o.tcut = atof(argv[++i]);
         else if (ARG("--ssthresh")) o.ssthresh = atof(argv[++i]);   /* initial slow-start threshold (default 16, the original value) */
@@ -59,9 +59,9 @@ int main(int argc, char **argv) {
         else { fprintf(stderr, "bad arg %s\n", argv[i]); return 2; }
     }
     o.go_back_n = !use_sack;
-    rudp_stats_t st;
-    int rc = fpath ? rudp_send_file(&o, fpath, &st) : rudp_send_test_pattern(&o, &st);
-    if (rc != RUDP_OK) return -rc;      /* exit codes 1 (I/O), 2 (arguments), 3 (stuck), as before the library split */
+    poise_stats_t st;
+    int rc = fpath ? poise_send_file(&o, fpath, &st) : poise_send_test_pattern(&o, &st);
+    if (rc != POISE_OK) return -rc;      /* exit codes 1 (I/O), 2 (arguments), 3 (stuck), as before the library split */
     if (fpath) printf("FILE bytes=%ld fnv1a=%016llx packets=%d\n", st.bytes, (unsigned long long)st.fnv1a, st.packets);
     if (st.link_share >= 0) printf("VTSHARE,%ld,%ld,%.4f\n", st.share_ours, st.share_comp, st.link_share);
     printf("RESULT,%s,%s,%.1f,%d,%ld,%ld,%ld,%ld,%.2f,%.2f,%.1f,%.2f,%.4f\n",

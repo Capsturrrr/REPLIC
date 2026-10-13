@@ -38,8 +38,8 @@ Runs that fail the byte-for-byte check are counted ($n_{ok}/n$) and excluded fro
 \subsection{Results: kernel TCP under Linux netem ($n=30$ per cell)}
 \label{sec:kerneltcp}
 This backend replaces the user-space proxy with \texttt{tc netem} and \texttt{tbf} on the loopback device and adds native kernel TCP (CUBIC and BBR) as
-baselines. Kernel TCP sends the same random payload, over the same bottleneck, with its timer started after \texttt{connect()} (the RUDP timer starts after
-its handshake) and stopped when the receiver has all bytes and answers, which is the same end condition as the RUDP client. Netem impairs both directions of
+baselines. Kernel TCP sends the same random payload, over the same bottleneck, with its timer started after \texttt{connect()} (the Poise timer starts after
+its handshake) and stopped when the receiver has all bytes and answers, which is the same end condition as the Poise client. Netem impairs both directions of
 \texttt{lo}, whereas the proxy impairs the forward path only, so \textbf{the two backends are never mixed in one table}. The synthetic cross-traffic bursts of the proxy have
 no netem counterpart; under netem \texttt{dc\_microburst} keeps only its shallow buffer, delay and rate.
 \inputif{\texpath/netem_scale_table.tex}
@@ -67,7 +67,7 @@ at the cost of its own throughput. We make no fairness claim against BBR beyond 
 
 \subsection{Threats to validity}
 (i) The path families are our own parameter ranges, not measurements of deployed networks. (ii) Intervals describe sampling error over our families, not any particular real path.
-(iii) On \texttt{dc\_microburst} a 1\,MB transfer ends within a few round-trips, so handshake and slow start, which are fixed rules shared by all RUDP policies, dominate
+(iii) On \texttt{dc\_microburst} a 1\,MB transfer ends within a few round-trips, so handshake and slow start, which are fixed rules shared by all Poise policies, dominate
 the comparison. (iv) The learned policies were trained on a simulator with simplified CUBIC and BBR; no result here should be read as evidence about real BBR deployments.
 (v) A single machine with two cores runs sender, receiver and bottleneck emulation; the order randomisation limits, but does not remove, load-dependent timing noise.
 (vi) Kernel-TCP retransmission counts come from a system-wide counter and are only meaningful on an otherwise idle host.

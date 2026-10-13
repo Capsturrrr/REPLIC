@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RUDP Drop</title>
-<meta name="description" content="Send a file over RUDP, our reliable-UDP protocol, across an emulated bad network and watch congestion-control policies race. The receiver checks every byte.">
-<meta property="og:title" content="RUDP Drop"><meta property="og:description" content="Race congestion-control policies on a real reliable-UDP transfer.">
+<title>Poise Drop</title>
+<meta name="description" content="Send a file over Poise, our reliable-UDP protocol, across an emulated bad network and watch congestion-control policies race. The receiver checks every byte.">
+<meta property="og:title" content="Poise Drop"><meta property="og:description" content="Race congestion-control policies on a real reliable-UDP transfer.">
 <meta name="theme-color" content="#0c0f0e">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c0f0e'/%3E%3Cpath d='M7 21h6l3-10 3 10h6' fill='none' stroke='%23a8d672' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -147,7 +147,7 @@ code{font:14px var(--mono);background:var(--s2);padding:1px 6px;border-radius:5p
 <body>
 <a class="skip" href="#main">Skip to content</a>
 <main id="main">
-  <p class="eyebrow">RUDP / Drop</p>
+  <p class="eyebrow">Poise / Drop</p>
   <h1>Send a file across a bad network.</h1>
   <p class="lede">Your file travels over our own reliable-UDP protocol through an emulated link. Congestion-control policies take turns, and the receiver checks every byte against the original.</p>
 
@@ -201,7 +201,7 @@ code{font:14px var(--mono);background:var(--s2);padding:1px 6px;border-radius:5p
     </section>
   </div>
 
-  <footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Kernel TCP is not in this race because it cannot pass through a UDP proxy; the netem results in the report cover that comparison. One run per policy, so treat small gaps as noise. The report&rsquo;s numbers come from 30 paths per policy, not from this page.</footer>
+  <footer>Real C code throughout: the sender is libpoise, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Kernel TCP is not in this race because it cannot pass through a UDP proxy; the netem results in the report cover that comparison. One run per policy, so treat small gaps as noise. The report&rsquo;s numbers come from 30 paths per policy, not from this page.</footer>
 </main>
 
 <script>

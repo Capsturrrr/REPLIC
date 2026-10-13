@@ -1,5 +1,5 @@
 #!/bin/bash
-# File transfer over RUDP through an impaired network (real UDP sockets, independent impairment process).
+# File transfer over Poise through an impaired network (real UDP sockets, independent impairment process).
 #   ./filetransfer_demo.sh [size_MB] [profile]      profiles: 5g lossy sat fast bad   (default: 2 MB over "lossy")
 # Sends a random file with AIMD (cap 32), tuned AIMD (cap 128) and the neural agent, then checks that the received
 # file is byte-identical (FNV-1a hash of sender and receiver) and prints the goodput.
@@ -15,7 +15,7 @@ echo "sending ${MB} MB over the '$PROF' path (${P[$PROF]})"
 printf "%-26s %9s %10s %8s   %s\n" policy "time" "goodput" "retx" integrity
 for arm in aimd_32 aimd_128 deep; do
   case $arm in aimd_32) A="--mode aimd --init 10 --maxcwnd 32";; aimd_128) A="--mode aimd --init 10 --maxcwnd 128 --ssthresh 128";; deep) A="--mode deep --init 10 --dfile results/dqn_chat.txt";; esac
-  RUDP_OUT=$OUT RUDP_QUIET=1 ./bin/server_ft > /tmp/ft_srv.log 2>&1 & SP=$!
+  POISE_OUT=$OUT POISE_QUIET=1 ./bin/server_ft > /tmp/ft_srv.log 2>&1 & SP=$!
   ./bin/impair $PX_PORT $SP_PORT ${P[$PROF]} >/dev/null 2>&1 & PX=$!; sleep 0.3
   R=$(timeout 600 ./bin/smart_client $A --emu 0 --port $PX_PORT --file $IN)
   sleep 0.4; kill $PX $SP 2>/dev/null; wait $PX $SP 2>/dev/null

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Window cap for the neural agent (Selective Repeat transport): 64 / 128 / 250 on high-BDP paths, plus the hostile 10% loss path.
-export RUDP_CLASSIC=1   # these runs used cap 32 / no hand-over unless a flag says otherwise
+export POISE_CLASSIC=1   # these runs used cap 32 / no hand-over unless a flag says otherwise
 cd "$(dirname "$0")"; RUNS=${1:-5}
 declare -A P
 P[sat]="--delay 150 --jitter 10 --loss 0.3 --rate 400 --queue 100 --packets 1200"

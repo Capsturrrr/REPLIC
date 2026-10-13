@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Interpretability and verification study of the 5-32-32-5 neural congestion controller.
-Inputs: /tmp/sl_train.csv, /tmp/sl_test.csv (states logged by RUDP_STATELOG: x0..x4,lo,act).
-Outputs: results/interp/*.txt, results/interp/tree.txt (RUDP_TREE format)."""
+Inputs: /tmp/sl_train.csv, /tmp/sl_test.csv (states logged by POISE_STATELOG: x0..x4,lo,act).
+Outputs: results/interp/*.txt, results/interp/tree.txt (POISE_TREE format)."""
 import numpy as np, sys
 from sklearn.tree import DecisionTreeClassifier, export_text
 v = np.array(open("results/dqn_chat.txt").read().split(), float); o = 0

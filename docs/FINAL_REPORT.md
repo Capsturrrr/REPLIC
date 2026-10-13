@@ -5,12 +5,12 @@ Report date: 13 October 2026. Every number below is regenerated from the raw CSV
 
 ## 1. Summary
 
-RUDP is a reliable transport built on UDP in C. Poise is its learned congestion controller: a small neural network (8 inputs, two hidden layers of 32, one output) trained with PPO and compiled into a C header, so it needs no runtime dependencies.
+Poise is a reliable transport built on UDP in C. Poise is its learned congestion controller: a small neural network (8 inputs, two hidden layers of 32, one output) trained with PPO and compiled into a C header, so it needs no runtime dependencies.
 
 What the evidence shows, strongest first:
 
-- **High-latency lossy (cellular-like) paths.** Poise moves 1 MB in 6.1 s on average. Original AIMD (window 32) needs 14.9 s, tuned AIMD (window 128) 12.9 s, RUDP-CUBIC 12.5 s and the RUDP BBR-style baseline 6.6 s. Poise with FEC needs 5.2 s. Paired on the same 30 paths, Poise finishes in 0.41x the time of original AIMD and 0.50x that of tuned AIMD, and wins on 30 of 30 paths against each.
-- **Worst case.** The 95th-percentile transfer takes 8.5 s with Poise and 29.8 s with RUDP-CUBIC.
+- **High-latency lossy (cellular-like) paths.** Poise moves 1 MB in 6.1 s on average. Original AIMD (window 32) needs 14.9 s, tuned AIMD (window 128) 12.9 s, user-space CUBIC 12.5 s and the Poise BBR-style baseline 6.6 s. Poise with FEC needs 5.2 s. Paired on the same 30 paths, Poise finishes in 0.41x the time of original AIMD and 0.50x that of tuned AIMD, and wins on 30 of 30 paths against each.
+- **Worst case.** The 95th-percentile transfer takes 8.5 s with Poise and 29.8 s with user-space CUBIC.
 - **Fairness.** Against CUBIC competitors the Jain index is 0.974 (one competitor) and 0.958 (two), against 0.942 and 0.881 for the static agent. The same network trained without the fairness term takes up to 1.72x its fair share.
 - **Recovery upgrade.** A SACK scoreboard, tail-loss probe and jitter-aware slow-start exit cut transfer time by 9 to 30 percent when ACKs are also lost, and removed a 2.6x slowdown on datacenter micro-bursts (499 ms to 185 ms, level with CUBIC at 194 ms).
 - **Correctness.** 870 proxy-matrix runs, every one byte-identical to the source file. Testing found and fixed a real protocol bug (lost SYN-ACK).
@@ -26,8 +26,8 @@ What it does not show: **kernel TCP is faster than Poise on Linux netem in every
 | Poise | PPO-trained MLP 8-32-32-1, about 1,300 multiplications per decision, action = window x 2^tanh(o), reward with a Jain-fairness term |
 | Baselines | AIMD (window 32 and tuned 128), CUBIC, a simplified BBR, the first neural agent (DQN, "Neural v1") |
 | Studio | Web dashboard that races policies on an impaired link |
-| Drop | File-transfer app on RUDP with a byte-exact SHA-256 check |
-| Network lab | Wireshark dissector for the RUDP header and a Packet Tracer OSPF topology |
+| Drop | File-transfer app on Poise with a byte-exact SHA-256 check |
+| Network lab | Wireshark dissector for the Poise header and a Packet Tracer OSPF topology |
 
 ## 3. Method
 
@@ -50,7 +50,7 @@ What it does not show: **kernel TCP is faster than Poise on Linux netem in every
 | 8 | `08_recovery_upgrade.png` | 9 to 30% faster with ACK loss (4 runs per cell) |
 | 9 | `09_fairness.png` | Jain index 0.974 and 0.958 with Poise against 0.942 and 0.881 for the static agent |
 | 10 | `10_netem_vs_kernel.png` | Linux netem: kernel TCP faster than Poise on all four profiles |
-| 11 | `11_netem_poise_speedup.png` | Linux netem: Poise 1.8 to 3.3x faster than RUDP-AIMD, 2.9 to 3.9x faster than RUDP-CUBIC, 0.9 to 1.3x against the RUDP BBR-style baseline |
+| 11 | `11_netem_poise_speedup.png` | Linux netem: Poise 1.8 to 3.3x faster than user-space AIMD, 2.9 to 3.9x faster than user-space CUBIC, 0.9 to 1.3x against the Poise BBR-style baseline |
 | 12 | `12_evidence.png` | 870 byte-verified runs |
 
 Paired statistics, cellular family, ratio of completion time (95% CI):
@@ -95,4 +95,4 @@ bash tests/test_synack_loss.sh         # regression test for the lost SYN-ACK bu
 
 ## 8. Next steps
 
-Re-run the RUDP policies on netem with the upgraded sender; try a 20 to 30 ms control interval and stricter pacing; retrain with netem-like impairment; add the Packet Tracer file to `network/`; write the case study and record the video by 21 October.
+Re-run the Poise policies on netem with the upgraded sender; try a 20 to 30 ms control interval and stricter pacing; retrain with netem-like impairment; add the Packet Tracer file to `network/`; write the case study and record the video by 21 October.

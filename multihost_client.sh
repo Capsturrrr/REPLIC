@@ -1,7 +1,7 @@
 #!/bin/bash
 # Run on the CLIENT machine (the sending end), with multihost_server.sh running on the other machine.
 #   bash multihost_client.sh SERVER_IP [REPS] [LABEL]      e.g.  bash multihost_client.sh 100.101.102.103 5 tailscale_laptop_phone
-# Sends the same 2 MB (4000 x 512 B) with kernel TCP and with RUDP (tuned AIMD, CUBIC, BBR-style, neural), alternating, REPS times.
+# Sends the same 2 MB (4000 x 512 B) with kernel TCP and with Poise (tuned AIMD, CUBIC, BBR-style, neural), alternating, REPS times.
 # Output: results/multihost_LABEL.txt  (send it back). No root needed.
 HOST=${1:?server ip}; REPS=${2:-5}; LABEL=${3:-run}; PK=4000
 cd "$(dirname "$0")"; make smart >/dev/null 2>&1
@@ -25,7 +25,7 @@ for i in $(seq $REPS); do
       deep)  a="--mode deep --dfile results/dqn_chat.txt" ;;
     esac
     r=$(timeout 180 ./bin/smart_client $a --emu 0 --host $HOST --scenario mh --file /tmp/mh_payload.bin 2>&1 | grep RESULT)
-    log "rep $i RUDP $m: ${r:-NO_RESULT(timeout/fail)}"
+    log "rep $i Poise $m: ${r:-NO_RESULT(timeout/fail)}"
   done
 done
 log "== done: send results/multihost_$LABEL.txt back =="

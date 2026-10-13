@@ -7,7 +7,7 @@ gcc -DSERVER_PORT=9951 -o bin/server_x src/server.c src/common.c
 arm() { case $1 in aimd_32) echo "--mode aimd --init 10 --maxcwnd 32";; aimd_128) echo "--mode aimd --init 10 --maxcwnd 128 --ssthresh 128";; cubic_128) echo "--mode cubic --init 10 --maxcwnd 128 --ssthresh 128";; deep) echo "--mode deep --init 10 --dfile results/dqn_chat.txt";; polite) echo "--mode deep --init 10 --dfile results/dqn_chat.txt --polite 1.3";; esac; }
 rm -f results/eval_cross.csv
 for i in $(seq 1 $RUNS); do for a in aimd_32 aimd_128 cubic_128 deep polite; do
-  RUDP_QUIET=1 ./bin/server_x >/dev/null 2>&1 & S=$!
+  POISE_QUIET=1 ./bin/server_x >/dev/null 2>&1 & S=$!
   ./bin/impair 9952:9951 $PATHARGS --seed $i >/dev/null 2>&1 & PX=$!; sleep 0.3
   R=$(timeout 200 ./bin/smart_client $(arm $a) --emu 0 --port 9952 --packets 2500 --seed $i 2>&1 | grep RESULT)
   kill $PX $S 2>/dev/null; wait $PX $S 2>/dev/null

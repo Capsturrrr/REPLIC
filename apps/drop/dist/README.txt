@@ -1,11 +1,11 @@
-RUDP DROP  -  send a file over our reliable-UDP protocol across a simulated bad network and watch the congestion-control
+Poise DROP  -  send a file over our reliable-UDP protocol across a simulated bad network and watch the congestion-control
 policies race (AIMD vs the neural agent). The receiver checks every byte.
 
 WHAT YOU NEED
   Linux, macOS, or Windows with WSL (Ubuntu), plus python3 and gcc.  (Ubuntu/WSL: sudo apt install python3 build-essential)
 
 RUN IT
-  unzip rudp-drop.zip && cd rudp-drop
+  unzip poise-drop.zip && cd poise-drop
   ./start.sh
   then open http://localhost:8800   (it also tries to open your browser)
 
@@ -21,6 +21,6 @@ NOTES
     loss and a drop-tail bottleneck. Nothing is sent over the internet.
   * One run per policy, so small differences are noise. Kernel TCP is not in this race (it cannot run through a UDP proxy).
   * Only one transfer at a time. Do not expose the port to the internet: it accepts file uploads.
-  * Docker instead:  docker build -t rudp-drop . && docker run --rm -p 8800:8800 rudp-drop
-  * Source and report: github.com/Capsturrrr/rudp   (MIT licence)
+  * Docker instead:  docker build -t poise-drop . && docker run --rm -p 8800:8800 poise-drop
+  * Source and report: github.com/Capsturrrr/poise   (MIT licence)
   * Different port: PORT=8801 ./start.sh

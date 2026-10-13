@@ -11,7 +11,7 @@ static uint16_t crc16_byte(uint16_t crc, uint8_t b) {
     return crc;
 }
 
-uint16_t rudp_checksum(const rudp_packet_t *pkt) {
+uint16_t poise_checksum(const poise_packet_t *pkt) {
     uint16_t crc = 0xFFFF;
     for (int sh = 24; sh >= 0; sh -= 8) crc = crc16_byte(crc, (uint8_t)(pkt->seq_num >> sh));
     for (int sh = 24; sh >= 0; sh -= 8) crc = crc16_byte(crc, (uint8_t)(pkt->ack_num >> sh));
@@ -22,14 +22,14 @@ uint16_t rudp_checksum(const rudp_packet_t *pkt) {
     return crc;
 }
 
-int rudp_pack(const rudp_packet_t *pkt, uint8_t *buf, size_t buf_size) {
+int poise_pack(const poise_packet_t *pkt, uint8_t *buf, size_t buf_size) {
     if (buf == NULL || pkt == NULL) return -1;
 
-    size_t total = RUDP_HEADER_SIZE + pkt->payload_len;
+    size_t total = POISE_HEADER_SIZE + pkt->payload_len;
     if (buf_size < total) return -1;
     if (pkt->payload_len > MAX_PAYLOAD) return -1;
 
-    uint16_t chk = rudp_checksum(pkt);
+    uint16_t chk = poise_checksum(pkt);
 
     size_t off = 0;
 
@@ -59,9 +59,9 @@ int rudp_pack(const rudp_packet_t *pkt, uint8_t *buf, size_t buf_size) {
     return (int)off;
 }
 
-int rudp_unpack(const uint8_t *buf, size_t len, rudp_packet_t *pkt) {
+int poise_unpack(const uint8_t *buf, size_t len, poise_packet_t *pkt) {
     if (buf == NULL || pkt == NULL) return -1;
-    if (len < RUDP_HEADER_SIZE) return -1;
+    if (len < POISE_HEADER_SIZE) return -1;
 
     size_t off = 0;
 
@@ -86,13 +86,13 @@ int rudp_unpack(const uint8_t *buf, size_t len, rudp_packet_t *pkt) {
     off += 2;
 
     if (pkt->payload_len > MAX_PAYLOAD) return -1;
-    if (len < (size_t)RUDP_HEADER_SIZE + pkt->payload_len) return -1;
+    if (len < (size_t)POISE_HEADER_SIZE + pkt->payload_len) return -1;
 
     if (pkt->payload_len > 0) {
         memcpy(pkt->payload, buf + off, pkt->payload_len);
     }
 
-    uint16_t computed_checksum = rudp_checksum(pkt);
+    uint16_t computed_checksum = poise_checksum(pkt);
     if (computed_checksum != recv_checksum) {
         return -2;
     }
@@ -100,7 +100,7 @@ int rudp_unpack(const uint8_t *buf, size_t len, rudp_packet_t *pkt) {
     return 0;
 }
 
-void rudp_print_packet(const char *label, const rudp_packet_t *pkt) {
+void poise_print_packet(const char *label, const poise_packet_t *pkt) {
     printf("[%s] seq=%u ack=%u flags=0x%02X (%s%s%s%s) len=%u\n",
            label,
            pkt->seq_num,

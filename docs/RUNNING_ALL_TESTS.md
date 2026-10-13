@@ -1,12 +1,12 @@
 # Running every test (current as of 12 Oct 2026)
 
-All commands run from the repository root (`cd ~/rudp`). Linux or WSL. Times are rough, on 2 CPU cores.
+All commands run from the repository root (`cd ~/poise`). Linux or WSL. Times are rough, on 2 CPU cores.
 
 ## 0. One-time setup
 ```
 sudo apt update && sudo apt install -y build-essential python3 python3-numpy git
 sudo apt install -y iproute2 iperf3          # only for the kernel (tc/netem) tests
-git clone https://github.com/Capsturrrr/rudp && cd rudp
+git clone https://github.com/Capsturrrr/poise && cd poise
 make all smart chat impair
 ```
 
@@ -51,8 +51,8 @@ Note: `interpret.py` overwrites `results/interp/*`. Re-generated logs give numbe
 
 ## 5. Real Linux kernel (needs root and tc; WSL is fine)
 ```
-sudo bash netem_full.sh lossy 5       # also: 5g, sat, reorder.  TCP, plain UDP, RUDP (AIMD, CUBIC, neural), REPS runs each
-sudo bash netem_coexist.sh 5g 3       # also: lossy, sat.  Kernel TCP and one RUDP flow share the bottleneck
+sudo bash netem_full.sh lossy 5       # also: 5g, sat, reorder.  TCP, plain UDP, Poise (AIMD, CUBIC, neural), REPS runs each
+sudo bash netem_coexist.sh 5g 3       # also: lossy, sat.  Kernel TCP and one Poise flow share the bottleneck
 ```
 Each takes several minutes per path. If a run is interrupted: `sudo pkill -f tcp_bulk.py; sudo pkill server; sudo pkill smart_client; sudo tc qdisc del dev lo root`.
 Results are in `results/netem_corrected.txt` and `results/netem_coexist_summary.txt`.
@@ -65,8 +65,8 @@ Use the server's real address (Tailscale `100.x.x.x` or LAN IP, never a WSL `172
 | What | How |
 |---|---|
 | Chat | `make chat`, then see `docs/CHAT_ONLINE.txt` |
-| Wireshark | Dissector `network/rudp.lua`, steps in `network/WIRESHARK_STEPS.txt`, sample captures `network/*.pcap` |
-| Packet Tracer OSPF network | build guide in your outputs folder (`Packet_Tracer_OSPF_Build_Guide.pdf`), router configs in `network/cfg`; save your file as `network/RUDP_OSPF_Network.pkt` |
+| Wireshark | Dissector `network/poise.lua`, steps in `network/WIRESHARK_STEPS.txt`, sample captures `network/*.pcap` |
+| Packet Tracer OSPF network | build guide in your outputs folder (`Packet_Tracer_OSPF_Build_Guide.pdf`), router configs in `network/cfg`; save your file as `network/POISE_OSPF_Network.pkt` |
 | Demo for the review | `docs/DEMO_RUNBOOK.md` |
 
 ## 8. Where the answers are written

@@ -1,7 +1,7 @@
-# RUDP architecture
+# Poise architecture
 
-RUDP is a reliable, congestion-controlled transport over UDP, written in C, with a learned congestion controller and the tooling
-to evaluate it honestly. This page is the map; `README.md` has the commands and `docs/RUDP_Final_Project_Report.pdf` the full evidence.
+Poise is a reliable, congestion-controlled transport over UDP, written in C, with a learned congestion controller and the tooling
+to evaluate it honestly. This page is the map; `README.md` has the commands and `docs/POISE_Final_Project_Report.pdf` the full evidence.
 
 ## Layers
 
@@ -22,15 +22,15 @@ to evaluate it honestly. This page is the map; `README.md` has the commands and 
 | Path | What it is |
 |---|---|
 | `src/common.[ch]` | Wire format: pack / unpack, CRC-16/CCITT-FALSE. Fuzzed (`make fuzz`) and unit tested. |
-| `src/server.c` | Receiver. Handshake, Selective Repeat reassembly, ACK + bitmap, file output (`RUDP_OUT`), integrity hash. `-DRUDP_GBN` builds the Go-Back-N receiver for comparison. |
+| `src/server.c` | Receiver. Handshake, Selective Repeat reassembly, ACK + bitmap, file output (`POISE_OUT`), integrity hash. `-DPOISE_GBN` builds the Go-Back-N receiver for comparison. |
 | `src/client.c` | The original teaching client (AIMD, 62 packets). |
-| `src/rudp.h`, `src/rudp_sender.c` | **librudp**: the sender as a library with a small public API (`rudp_send`, `rudp_send_file`, options and stats structs). Holds the reliability machinery, the congestion controllers, the in-process path emulation and the virtual-time simulator. Process-global state, one transfer at a time. |
+| `src/poise.h`, `src/poise_sender.c` | **libpoise**: the sender as a library with a small public API (`poise_send`, `poise_send_file`, options and stats structs). Holds the reliability machinery, the congestion controllers, the in-process path emulation and the virtual-time simulator. Process-global state, one transfer at a time. |
 | `src/smart_client.c` | Command-line front end of the library; the evaluation scripts drive this program. Output is one `RESULT` line. |
 | `src/deep_cc.h`, `src/rl_cc.h` | Neural (5-32-32-5) and tabular agents, inference only. Weights are plain text in `results/`. |
 | `src/impair.c` | User-space network impairment proxy (delay, jitter, loss, shared bottleneck with drop-tail queue) for tests over real sockets without root. |
-| `src/chat.c`, `web/rudp_web.py` | Chat over the same transport (terminal and web gateway with live dashboard). Interoperate with each other (`tests/chat_interop.sh`). |
+| `src/chat.c`, `web/poise_web.py` | Chat over the same transport (terminal and web gateway with live dashboard). Interoperate with each other (`tests/chat_interop.sh`). |
 | `web/` (Python) | Training (`train_deep.py`, `es_train.py`), simulators, statistics, the virtual-time harness (`vt.py`, `vt_random.py`). |
-| `network/` | Cisco Packet Tracer design (four-router OSPF), Wireshark dissector `rudp.lua`, exported traces. |
+| `network/` | Cisco Packet Tracer design (four-router OSPF), Wireshark dissector `poise.lua`, exported traces. |
 | `tests/` | `make test`: wire format, end-to-end delivery (both receivers), handshake regression, file integrity through the proxy, gateway/chat interop, simulator. |
 
 ## One send cycle (smart_client)

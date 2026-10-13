@@ -1,4 +1,4 @@
-# Implementation Guide: Custom Reliable Transport Protocol over UDP (RUDP)
+# Implementation Guide: Custom Reliable Transport Protocol over UDP (Poise)
 
 This guide breaks the project into phases so you can build incrementally, test
 as you go, and always have something working to demo — even if you run out of

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# execute_wsl_benchmarks.sh -- run the RUDP / Poise kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
+# execute_wsl_benchmarks.sh -- run the Poise / Poise kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
 #
 #   sudo bash execute_wsl_benchmarks.sh --check            # preflight only, changes nothing permanent
 #   sudo bash execute_wsl_benchmarks.sh --quick            # ~10 min smoke run: 3 profiles, 2 reps, 100 kB + scale matrix with n=3
@@ -25,7 +25,7 @@
 # Why `lo` and not eth0: both endpoints run on this machine, so their packets only ever cross lo; shaping eth0 would not affect them.
 #
 # Kernel TCP uses the same payload bytes (random, sha256-checked), the same netem+tbf bottleneck, the same timer start (after connect/handshake)
-# and the same end condition (receiver has every byte and answers) as the RUDP client; see run_all_tests.py:run_tcp.
+# and the same end condition (receiver has every byte and answers) as the Poise client; see run_all_tests.py:run_tcp.
 #
 # STATUS: written in a sandbox without tc/ip. Verified there with `bash -n` and with a stub-`tc` dry run of the control flow (see tests/test_wsl_script.sh);
 # the first real kernel run is yours -- start with --check, then --quick.
@@ -149,13 +149,13 @@ STATUS=0
 # ------------------------------------------------------------------------------------------------ 1. profile matrix (clean, loss 1-20 %, jitter, WAN, LTE, satellite)
 if [ "$SKIP_MATRIX" != 1 ]; then
   SC=""; [ "$QUICK" = 1 ] && SC="--scenarios clean,loss2_j10,loss10_j35"
-  step "Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs RUDP policies, $REPS reps, sizes $SIZES" \
+  step "Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs Poise policies, $REPS reps, sizes $SIZES" \
     "$PYTHON" run_all_tests.py --backend netem --out "$OUT/matrix" --reps "$REPS" --sizes "$SIZES" --policies "$KPOL" $SC || STATUS=1
 fi
 
 # ------------------------------------------------------------------------------------------------ 2. multi-path, multi-seed scale matrix
 if [ "$SKIP_SCALE" != 1 ]; then
-  step "Scale matrix on lo (netem + tbf): 3 path families x $NSEEDS seeds, kernel TCP + RUDP" \
+  step "Scale matrix on lo (netem + tbf): 3 path families x $NSEEDS seeds, kernel TCP + Poise" \
     "$PYTHON" run_scale_matrix.py --backend netem --n "$NSEEDS" --out "$OUT/scale" || STATUS=1
 fi
 

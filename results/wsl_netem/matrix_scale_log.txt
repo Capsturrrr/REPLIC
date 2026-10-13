@@ -558,11 +558,11 @@ wan_hi        1000000 neural      vs kernel tcp_bbr: x1.71 the time of TCP, Welc
 wan_hi        1000000 smart       vs kernel tcp_cubic: x1.33 the time of TCP, Welch p=0.0641
 wan_hi        1000000 smart       vs kernel tcp_bbr: x1.88 the time of TCP, Welch p=0.0006
 
-done in 21281s: 662/700 runs byte-identical; backend = netem; outputs in /home/Harsh/rudp2/results/wsl_netem/matrix
+done in 21281s: 662/700 runs byte-identical; backend = netem; outputs in /home/Harsh/poise2/results/wsl_netem/matrix
 NOT OK: [('loss10_j35', 'cubic', 5), ('loss20_j50', 'tcp_cubic', 0), ('loss20_j50', 'tcp_cubic', 2), ('loss20_j50', 'tcp_cubic', 3), ('loss20_j50', 'tcp_cubic', 4), ('loss20_j50', 'tcp_cubic', 6), ('loss20_j50', 'tcp_cubic', 8), ('loss20_j50', 'tcp_cubic', 9), ('loss20_j50', 'aimd', 0), ('loss20_j50', 'aimd', 1), ('loss20_j50', 'aimd', 2), ('loss20_j50', 'aimd', 3), ('loss20_j50', 'aimd', 4), ('loss20_j50', 'aimd', 5), ('loss20_j50', 'aimd', 6), ('loss20_j50', 'aimd', 7), ('loss20_j50', 'aimd', 8), ('loss20_j50', 'aimd', 9), ('loss20_j50', 'cubic', 7), ('loss20_j50', 'bbr', 1), ('loss20_j50', 'bbr', 2), ('loss20_j50', 'bbr', 4), ('loss20_j50', 'bbr', 7), ('loss20_j50', 'bbr', 9), ('loss20_j50', 'neural', 0), ('loss20_j50', 'neural', 1), ('loss20_j50', 'neural', 2), ('loss20_j50', 'neural', 6), ('loss20_j50', 'smart', 0), ('loss20_j50', 'smart', 1), ('loss20_j50', 'smart', 2), ('loss20_j50', 'smart', 3), ('loss20_j50', 'smart', 4), ('loss20_j50', 'smart', 5), ('loss20_j50', 'smart', 6), ('loss20_j50', 'smart', 7), ('loss20_j50', 'smart', 8), ('loss20_j50', 'smart', 9)]
--- Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs RUDP policies, 10 reps, sizes 1000000: ok
+-- Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs Poise policies, 10 reps, sizes 1000000: ok
 
-== Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + RUDP
+== Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + Poise
 + python3 run_scale_matrix.py --backend netem --n 30 --out results/wsl_netem/scale
 resuming: 72 rows already in results/wsl_netem/scale/raw.csv
 [73/720] dc_microburst      smart+fec  seed  3 ok=1 ms=367.0  eta 8 min
@@ -1215,7 +1215,7 @@ resuming: 72 rows already in results/wsl_netem/scale/raw.csv
 [720/720] cellular_highlat   aimd       seed 29 ok=1 ms=18583.6  eta 0 min
 
 done in 54.3 min: 720/720 byte-identical; outputs in results/wsl_netem/scale
--- Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + RUDP: ok
+-- Scale matrix on lo (netem + tbf): 3 path families x 30 seeds, kernel TCP + Poise: ok
 
 == Package results
 proxy scale: 540 rows, n=30 seeds

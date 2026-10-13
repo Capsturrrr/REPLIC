@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.10.2)  12 OCT 2026 20:00
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023/Debian) (preloaded format=pdflatex 2026.10.2)  13 OCT 2026 10:56
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -402,6 +402,8 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Liv
 e
 ))
 Package hyperref Info: Link coloring OFF on input line 9.
+
+(./paper.out) (./paper.out)
 \@outlinefile=\write3
 \openout3 = `paper.out'.
 
@@ -445,24 +447,17 @@ Overfull \hbox (9.53607pt too wide) in paragraph at lines 44--50
 LaTeX2e <2023-11-01> patch level 1
 L3 programming layer <2024-01-22>
  ***********
-
-
-Package rerunfilecheck Warning: File `paper.out' has changed.
-(rerunfilecheck)                Rerun to get outlines right
-(rerunfilecheck)                or use package `bookmark'.
-
-Package rerunfilecheck Info: Checksums for `paper.out':
-(rerunfilecheck)             Before: <no file>
-(rerunfilecheck)             After:  B1119E3FC089D7651795916E6D88C8EE;668.
+Package rerunfilecheck Info: File `paper.out' has not changed.
+(rerunfilecheck)             Checksum: B1119E3FC089D7651795916E6D88C8EE;668.
  ) 
 Here is how much of TeX's memory you used:
- 11630 strings out of 476106
- 180348 string characters out of 5793933
+ 11642 strings out of 476106
+ 180478 string characters out of 5793933
  1949975 words of memory out of 5000000
- 33366 multiletter control sequences out of 15000+600000
+ 33374 multiletter control sequences out of 15000+600000
  570037 words of font info for 135 fonts, out of 8000000 for 9000
  59 hyphenation exceptions out of 8191
- 75i,11n,79p,1267b,523s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,11n,79p,1268b,523s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></us
 r/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/shar
 e/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/share/texli
@@ -475,10 +470,10 @@ fonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/
 cm/cmti10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmt
 i9.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb
 ></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb>
-Output written on paper.pdf (3 pages, 187271 bytes).
+Output written on paper.pdf (3 pages, 187896 bytes).
 PDF statistics:
- 119 PDF objects out of 1000 (max. 8388607)
- 87 compressed objects within 1 object stream
+ 139 PDF objects out of 1000 (max. 8388607)
+ 106 compressed objects within 2 object streams
  20 named destinations out of 1000 (max. 500000)
- 31745 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 31793 words of extra memory for PDF output out of 35830 (max. 10000000)
 

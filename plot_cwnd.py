@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-RUDP Phase 7 — plot congestion window over time from logs/cwnd_log.csv
+Poise Phase 7 — plot congestion window over time from logs/cwnd_log.csv
 Usage: python3 plot_cwnd.py [csv_path] [output_png]
 """
 import csv
@@ -34,7 +34,7 @@ for t, c, e in zip(times, cwnds, events):
 
 ax.set_xlabel('Time (ms)')
 ax.set_ylabel('Window size (packets)')
-ax.set_title('RUDP AIMD Congestion Window Over Time')
+ax.set_title('Poise AIMD Congestion Window Over Time')
 ax.legend(loc='upper right')
 ax.grid(True, alpha=0.3)
 

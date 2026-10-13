@@ -1,9 +1,9 @@
 #!/bin/bash
-# Coexistence with kernel TCP: a bulk TCP flow and one RUDP transfer share the SAME netem + tbf bottleneck at the same time.
+# Coexistence with kernel TCP: a bulk TCP flow and one Poise transfer share the SAME netem + tbf bottleneck at the same time.
 #   sudo bash netem_coexist.sh 5g|lossy|sat [REPS]          (build first: make smart)
-# For every RUDP arm the script reports goodput of each flow over the window in which both were running
-# (TCP bytes counted by its receiver; RUDP = packets*512 B / completion time), and the RUDP share of the sum.
-# Controls: TCP+TCP (a second kernel TCP flow instead of RUDP) and TCP alone / RUDP alone. NO_TC=1 skips tc (script self-test, no bottleneck).
+# For every Poise arm the script reports goodput of each flow over the window in which both were running
+# (TCP bytes counted by its receiver; Poise = packets*512 B / completion time), and the Poise share of the sum.
+# Controls: TCP+TCP (a second kernel TCP flow instead of Poise) and TCP alone / Poise alone. NO_TC=1 skips tc (script self-test, no bottleneck).
 sc=${1:-5g}; REPS=${2:-3}; PKTS=${PKTS:-4000}
 case $sc in
   5g)   D=10;  J=3;  L=0.2; R=12mbit; Q=60  ;;
@@ -14,8 +14,8 @@ esac
 [ -n "$NO_TC" ] || [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
 cd "$(dirname "$0")"
 for f in bin/server bin/smart_client results/dqn_chat.txt web/tcp_bulk.py; do [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }; done
-# RUDP must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
-PL=/tmp/rudp_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
+# Poise must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
+PL=/tmp/poise_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL
 pkill -f web/tcp_bulk.py 2>/dev/null; pkill -x server 2>/dev/null; pkill -x smart_client 2>/dev/null; sleep 0.5   # clear leftovers from an interrupted earlier run
 OUT=results/netem_coexist_$sc.txt; : > $OUT
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536); SP=""; TP=""; TP2=""
@@ -28,7 +28,7 @@ if [ -z "$NO_TC" ]; then
   tc qdisc add dev lo root handle 1: netem delay ${D}ms ${J}ms loss ${L}% limit 100000 || { echo "tc netem failed"; exit 1; }
   tc qdisc add dev lo parent 1:1 handle 10: tbf rate $R burst 16kb limit $((Q*600+16000)) || { echo "tc tbf failed"; exit 1; }
 fi
-log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R queue=${Q}pkts; RUDP transfer=$PKTS packets of 512 B; reps=$REPS; kernel TCP congestion control: $(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null)"
+log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R queue=${Q}pkts; Poise transfer=$PKTS packets of 512 B; reps=$REPS; kernel TCP congestion control: $(cat /proc/sys/net/ipv4/tcp_congestion_control 2>/dev/null)"
 tcp_bytes() { # LOGFILE T0 T1 -> bytes received between T0 and T1
   python3 - "$1" "$2" "$3" <<'P'
 import sys
@@ -57,13 +57,13 @@ run_pair() { # ARM-ARGS or "tcp" -> prints "tcp_mbps other_mbps"
   b1=$(tcp_bytes /tmp/coex_tcp.log $T0 $T1); kill $TP 2>/dev/null; wait $TP 2>/dev/null; TP=""
   python3 -c "w=($T1-$T0); print(f'{$b1*8/w/1e6:.2f} {$pk*512*8/($ms/1000)/1e6:.2f}')"
 }
-log "== link capacity: TCP alone, then RUDP alone (Mbit/s goodput) =="
+log "== link capacity: TCP alone, then Poise alone (Mbit/s goodput) =="
 rm -f /tmp/coex_tcp.log; python3 web/tcp_bulk.py 9861 /tmp/coex_tcp.log 512 & TP=$!; sleep 1.5; T0=$(date +%s.%N); sleep 6; T1=$(date +%s.%N)
 log "TCP alone: $(python3 -c "print(f'{$(tcp_bytes /tmp/coex_tcp.log $T0 $T1)*8/($T1-$T0)/1e6:.2f}')") Mbit/s"; kill $TP; wait $TP 2>/dev/null; TP=""
 for m in aimd deep; do
   case $m in aimd) a="--mode aimd --maxcwnd 128 --ssthresh 128" ;; deep) a="--mode deep --dfile results/dqn_chat.txt" ;; esac
   R=$(./bin/smart_client $a --emu 0 --scenario coex --file $PL 2>&1 | grep RESULT); ms=$(echo "$R" | cut -d, -f4)
-  log "RUDP $m alone: $(python3 -c "print(f'{$PKTS*512*8/($ms/1000)/1e6:.2f}')") Mbit/s"
+  log "Poise $m alone: $(python3 -c "print(f'{$PKTS*512*8/($ms/1000)/1e6:.2f}')") Mbit/s"
 done
 log "== together (columns: TCP Mbit/s, other flow Mbit/s, other flow's share of the sum) =="
 for arm in tcp aimd deep; do

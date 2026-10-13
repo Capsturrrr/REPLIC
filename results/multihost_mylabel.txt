@@ -2,27 +2,27 @@
 # RESULT,scenario,mode,elapsed_ms,packets,transmissions,retrans,timeouts,fast_retx,avg_rtt_ms,min_rtt_ms,goodput_pps,final_cwnd,reward
 multi-machine run: client MSI -> server 100.119.211.94 (Tailscale, relayed via DERP blr, ping avg 78.8 ms), 4000 x 512 B, 5 reps, 2026-10-11T20:14:09Z
 rep 1 TCP seconds: 2.467
-rep 1 RUDP aimd: RESULT,mh,aimd,14233.5,4000,4199,199,7,8,81.62,59.48,281.0,41.57,0.0000
-rep 1 RUDP cubic: RESULT,mh,cubic,12439.4,4000,4034,34,6,5,82.22,59.94,321.6,23.35,0.0000
-rep 1 RUDP bbr: RESULT,mh,bbr,6351.2,4000,4499,499,11,4,85.80,59.61,629.8,119.70,0.0000
-rep 1 RUDP deep: RESULT,mh,deep,4703.3,4000,4297,297,6,6,92.19,63.46,850.5,128.00,0.0000
+rep 1 Poise aimd: RESULT,mh,aimd,14233.5,4000,4199,199,7,8,81.62,59.48,281.0,41.57,0.0000
+rep 1 Poise cubic: RESULT,mh,cubic,12439.4,4000,4034,34,6,5,82.22,59.94,321.6,23.35,0.0000
+rep 1 Poise bbr: RESULT,mh,bbr,6351.2,4000,4499,499,11,4,85.80,59.61,629.8,119.70,0.0000
+rep 1 Poise deep: RESULT,mh,deep,4703.3,4000,4297,297,6,6,92.19,63.46,850.5,128.00,0.0000
 rep 2 TCP seconds: 2.017
-rep 2 RUDP aimd: RESULT,mh,aimd,11976.3,4000,4047,47,9,4,83.16,58.85,334.0,34.90,0.0000
-rep 2 RUDP cubic:
-rep 2 RUDP bbr:
-rep 2 RUDP deep:
+rep 2 Poise aimd: RESULT,mh,aimd,11976.3,4000,4047,47,9,4,83.16,58.85,334.0,34.90,0.0000
+rep 2 Poise cubic:
+rep 2 Poise bbr:
+rep 2 Poise deep:
 rep 3 TCP seconds: 39.265
-rep 3 RUDP aimd:
-rep 3 RUDP cubic: RESULT,mh,cubic,240415.4,4000,7512,3512,69,48,328.39,62.98,16.6,6.76,0.0000
-rep 3 RUDP bbr: RESULT,mh,bbr,53373.7,4000,7284,3284,27,19,193.36,59.87,74.9,46.17,0.0000
-rep 3 RUDP deep: RESULT,mh,deep,70559.9,4000,7282,3282,18,11,249.84,70.02,56.7,41.16,0.0000
+rep 3 Poise aimd:
+rep 3 Poise cubic: RESULT,mh,cubic,240415.4,4000,7512,3512,69,48,328.39,62.98,16.6,6.76,0.0000
+rep 3 Poise bbr: RESULT,mh,bbr,53373.7,4000,7284,3284,27,19,193.36,59.87,74.9,46.17,0.0000
+rep 3 Poise deep: RESULT,mh,deep,70559.9,4000,7282,3282,18,11,249.84,70.02,56.7,41.16,0.0000
 rep 4 TCP seconds: 11.371
-rep 4 RUDP aimd: RESULT,mh,aimd,86949.6,4000,4350,350,57,30,188.80,84.80,46.0,8.01,0.0000
-rep 4 RUDP cubic: RESULT,mh,cubic,218172.4,4000,4420,420,130,47,161.50,78.58,18.3,4.49,0.0000
-rep 4 RUDP bbr: RESULT,mh,bbr,68898.4,4000,4493,493,36,9,260.85,89.36,58.1,48.65,0.0000
-rep 4 RUDP deep: RESULT,mh,deep,110807.6,4000,5617,1617,39,17,485.82,86.25,36.1,79.77,0.0000
+rep 4 Poise aimd: RESULT,mh,aimd,86949.6,4000,4350,350,57,30,188.80,84.80,46.0,8.01,0.0000
+rep 4 Poise cubic: RESULT,mh,cubic,218172.4,4000,4420,420,130,47,161.50,78.58,18.3,4.49,0.0000
+rep 4 Poise bbr: RESULT,mh,bbr,68898.4,4000,4493,493,36,9,260.85,89.36,58.1,48.65,0.0000
+rep 4 Poise deep: RESULT,mh,deep,110807.6,4000,5617,1617,39,17,485.82,86.25,36.1,79.77,0.0000
 rep 5 TCP seconds: 50.888
-rep 5 RUDP aimd: RESULT,mh,aimd,143125.3,4000,4594,594,71,50,202.87,91.78,27.9,2.87,0.0000
-rep 5 RUDP cubic: RESULT,mh,cubic,167070.6,4000,5520,1520,83,38,193.86,70.12,23.9,4.07,0.0000
-rep 5 RUDP bbr: RESULT,mh,bbr,43532.7,4000,4249,249,23,5,404.33,81.09,91.9,60.86,0.0000
-rep 5 RUDP deep: RESULT,mh,deep,32013.3,4000,4804,804,31,12,205.52,64.27,124.9,13.97,0.0000
+rep 5 Poise aimd: RESULT,mh,aimd,143125.3,4000,4594,594,71,50,202.87,91.78,27.9,2.87,0.0000
+rep 5 Poise cubic: RESULT,mh,cubic,167070.6,4000,5520,1520,83,38,193.86,70.12,23.9,4.07,0.0000
+rep 5 Poise bbr: RESULT,mh,bbr,43532.7,4000,4249,249,23,5,404.33,81.09,91.9,60.86,0.0000
+rep 5 Poise deep: RESULT,mh,deep,32013.3,4000,4804,804,31,12,205.52,64.27,124.9,13.97,0.0000

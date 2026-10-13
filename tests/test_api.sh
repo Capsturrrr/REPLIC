@@ -1,9 +1,9 @@
 #!/bin/bash
-# librudp: two consecutive transfers from one process through the public API; the server's hash must match the sender's, and the file must be intact.
+# libpoise: two consecutive transfers from one process through the public API; the server's hash must match the sender's, and the file must be intact.
 cd "$(dirname "$0")/.."; D=$(mktemp -d); trap 'kill $SP 2>/dev/null; rm -rf $D' EXIT
 make lib bin/test_api >/dev/null 2>&1 || { echo "FAIL: library build"; exit 1; }
 gcc -DSERVER_PORT=9961 -o $D/srv src/server.c src/common.c || exit 1
-RUDP_OUT=$D/out.bin RUDP_QUIET=1 $D/srv > $D/srv.log 2>&1 & SP=$!; sleep 0.3
+POISE_OUT=$D/out.bin POISE_QUIET=1 $D/srv > $D/srv.log 2>&1 & SP=$!; sleep 0.3
 ./bin/test_api 9961 > $D/api.log 2>&1; rc=$?; sleep 0.5
 cat $D/api.log | grep -v HASH
 a=$(grep "^HASH 0" $D/api.log | cut -d' ' -f3); b=$(grep "^HASH 1" $D/api.log | cut -d' ' -f3)

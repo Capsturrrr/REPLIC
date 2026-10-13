@@ -1,28 +1,28 @@
 /*
- * rudp.h - public API of the RUDP sender library (librudp).
+ * poise.h - public API of the Poise sender library (libpoise).
  *
- * RUDP is a reliable, congestion-controlled transport over UDP: handshake, Selective Repeat with a 256-packet window, CRC-16,
+ * Poise is a reliable, congestion-controlled transport over UDP: handshake, Selective Repeat with a 256-packet window, CRC-16,
  * adaptive retransmission timer, and a choice of congestion-control policies (AIMD, CUBIC, a small neural network).
- * The receiving side is the server in src/server.c (bin/server), which writes the delivered bytes to a file (RUDP_OUT) or prints them.
+ * The receiving side is the server in src/server.c (bin/server), which writes the delivered bytes to a file (POISE_OUT) or prints them.
  *
- *   rudp_options_t o; rudp_options_default(&o);
+ *   poise_options_t o; poise_options_default(&o);
  *   o.port = 8888; o.mode = "deep"; o.weights_file = "results/dqn_chat.txt";
- *   rudp_stats_t st;
- *   int rc = rudp_send(&o, buf, len, &st);          // blocks until every byte is acknowledged
- *   if (rc != RUDP_OK) fprintf(stderr, "%s\n", rudp_strerror(rc));
+ *   poise_stats_t st;
+ *   int rc = poise_send(&o, buf, len, &st);          // blocks until every byte is acknowledged
+ *   if (rc != POISE_OK) fprintf(stderr, "%s\n", poise_strerror(rc));
  *
  * Limits and caveats: one transfer per call (connect, send, close); up to 32 MB per call; payloads are cut into 512-byte packets;
  * not thread-safe (state is process-global, call from one thread at a time); calls may be made one after another in one process.
  */
-#ifndef RUDP_H
-#define RUDP_H
+#ifndef POISE_H
+#define POISE_H
 #include <stddef.h>
 #include <stdint.h>
 
-#define RUDP_VERSION "1.0.0"
-#define RUDP_MAX_BYTES (32u * 1024u * 1024u)
+#define POISE_VERSION "1.0.0"
+#define POISE_MAX_BYTES (32u * 1024u * 1024u)
 
-enum { RUDP_OK = 0, RUDP_ERR_IO = -1, RUDP_ERR_ARGS = -2, RUDP_ERR_STUCK = -3 };
+enum { POISE_OK = 0, POISE_ERR_IO = -1, POISE_ERR_ARGS = -2, POISE_ERR_STUCK = -3 };
 
 typedef struct {
     /* where to send */
@@ -36,7 +36,7 @@ typedef struct {
     double init_cwnd;            /* initial window; < 0 = mode default (10 for the learned modes, 1 otherwise) */
     double ssthresh;             /* initial slow-start threshold (default 16) */
     double polite;               /* neural agent: back off when the RTT ratio is at least this (0 = off, 1.3 = recommended) */
-    int go_back_n;               /* 1 = old Go-Back-N behaviour (pair with a server built with -DRUDP_GBN); default 0 = Selective Repeat */
+    int go_back_n;               /* 1 = old Go-Back-N behaviour (pair with a server built with -DPOISE_GBN); default 0 = Selective Repeat */
     /* advanced neural-agent settings (negative = default) */
     double pace;                 /* pacing factor, 0 = mode default, -1 = off */
     double slow_start_to;        /* slow-start phase up to this window (-1 = default 64, 0 = off) */
@@ -55,7 +55,7 @@ typedef struct {
     const char *dyn;             /* virtual time: time-varying path "T_MS:RATE_PPS:DELAY_MS;..." */
     int vcomp; double vcomp_timeout; double vcross_on, vcross_off, vcross_pps;   /* virtual-time competitors */
     int train; double eps; double tcut; double ref_rate;                    /* Q-learning training and legacy options */
-} rudp_options_t;
+} poise_options_t;
 
 typedef struct {
     double elapsed_ms;           /* time from the first send to the last acknowledgment */
@@ -67,14 +67,14 @@ typedef struct {
     double avg_rtt_ms, min_rtt_ms, goodput_pps, final_cwnd, avg_reward;
     double link_share;           /* virtual time with vcomp: this flow's share of the bottleneck (else -1) */
     long share_ours, share_comp;
-} rudp_stats_t;
+} poise_stats_t;
 
-void rudp_options_default(rudp_options_t *o);
-/* Send len bytes (1 .. RUDP_MAX_BYTES) to the server. Returns RUDP_OK or a negative RUDP_ERR_* code. stats may be NULL. */
-int rudp_send(const rudp_options_t *o, const void *data, size_t len, rudp_stats_t *stats);
-int rudp_send_file(const rudp_options_t *o, const char *path, rudp_stats_t *stats);
+void poise_options_default(poise_options_t *o);
+/* Send len bytes (1 .. POISE_MAX_BYTES) to the server. Returns POISE_OK or a negative POISE_ERR_* code. stats may be NULL. */
+int poise_send(const poise_options_t *o, const void *data, size_t len, poise_stats_t *stats);
+int poise_send_file(const poise_options_t *o, const char *path, poise_stats_t *stats);
 /* Send o->packets synthetic 40-byte test packets (used by the evaluation scripts). */
-int rudp_send_test_pattern(const rudp_options_t *o, rudp_stats_t *stats);
-const char *rudp_strerror(int code);
+int poise_send_test_pattern(const poise_options_t *o, poise_stats_t *stats);
+const char *poise_strerror(int code);
 
 #endif

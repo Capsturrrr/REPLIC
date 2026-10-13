@@ -11,7 +11,7 @@ A browser dashboard around the real C sender, receiver and impairment proxy.
 * REST: `GET /api/config`, `POST /api/race`, `GET /api/race/{id}`, `POST /api/stop`, `GET /api/fairness`.
 
 What is and is not real
-* cwnd/RTT come from the sender's `--trace` file, goodput and the dissector from its `--pcap` file (`RUDP_LIVE=1` makes the sender flush each line).
+* cwnd/RTT come from the sender's `--trace` file, goodput and the dissector from its `--pcap` file (`POISE_LIVE=1` makes the sender flush each line).
 * "Loss rate" is the share of TIMEOUT/FAST_RETX events among trace events in the last second, not the link's configured loss.
 * FEC is a fixed XOR parity packet per 8 data packets. It is not adaptive.
 * One race is one sample; use `run_all_tests.py` and `run_fairness_test.py` for statistics.

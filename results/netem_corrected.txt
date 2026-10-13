@@ -1,4 +1,4 @@
-# Corrected kernel netem results (RUDP sends a real 512-byte-per-packet file; 500 packets; seconds; mean ± sd; n)
+# Corrected kernel netem results (Poise sends a real 512-byte-per-packet file; 500 packets; seconds; mean ± sd; n)
 lossy    n=5 tcp=0.88±0.48 aimd0=4.69±0.22 aimd=4.75±0.30 aimd10=4.21±1.20 deep=1.35±0.76 | deep/aimd=0.29 p=0.0002 | deep/tcp=1.5x
 5g       n=5 tcp=0.28±0.06 aimd0=1.26±0.21 aimd=1.23±0.16 aimd10=1.36±0.15 deep=0.43±0.09 | deep/aimd=0.35 p=0.0000 | deep/tcp=1.5x
 sat      n=3 tcp=1.91±0.12 aimd0=15.90±3.52 aimd=16.72±2.39 aimd10=15.36±1.92 deep=2.92±0.56 | deep/aimd=0.17 p=0.0072 | deep/tcp=1.5x

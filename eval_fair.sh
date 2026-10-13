@@ -9,7 +9,7 @@ rm -f results/eval_fair.csv
 for pair in aimd_128:aimd_128 deep:deep deep:aimd_128 deep:aimd_32 cubic_128:aimd_128; do
   A=${pair%%:*}; B=${pair##*:}
   for i in $(seq 1 $RUNS); do
-    RUDP_QUIET=1 ./bin/server_fa >/dev/null 2>&1 & S1=$!; RUDP_QUIET=1 ./bin/server_fb >/dev/null 2>&1 & S2=$!
+    POISE_QUIET=1 ./bin/server_fa >/dev/null 2>&1 & S1=$!; POISE_QUIET=1 ./bin/server_fb >/dev/null 2>&1 & S2=$!
     ./bin/impair 9923:9921 9924:9922 $BOT --seed $i > /tmp/fair_share.txt 2>/dev/null & PX=$!; sleep 0.3
     timeout 200 ./bin/smart_client $(arm $A) --emu 0 --port 9923 --packets 2500 --seed $i > /tmp/fair_a.txt 2>&1 & C1=$!
     timeout 200 ./bin/smart_client $(arm $B) --emu 0 --port 9924 --packets 2500 --seed $((i+50)) > /tmp/fair_b.txt 2>&1 & C2=$!

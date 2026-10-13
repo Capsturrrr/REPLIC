@@ -8,7 +8,7 @@ rm -f results/eval_fair_rtt.csv
 for XD in 0 60 150; do for pair in aimd_128:aimd_128 deep:deep; do
   A=${pair%%:*}; B=${pair##*:}
   for i in $(seq 1 $RUNS); do
-    RUDP_QUIET=1 ./bin/server_fa >/dev/null 2>&1 & S1=$!; RUDP_QUIET=1 ./bin/server_fb >/dev/null 2>&1 & S2=$!
+    POISE_QUIET=1 ./bin/server_fa >/dev/null 2>&1 & S1=$!; POISE_QUIET=1 ./bin/server_fb >/dev/null 2>&1 & S2=$!
     ./bin/impair 9933:9931 9934:9932 $BOT --xdelay $XD --seed $i > /tmp/fr_share.txt 2>/dev/null & PX=$!; sleep 0.3
     timeout 200 ./bin/smart_client $(arm $A) --emu 0 --port 9933 --packets 2500 --seed $i > /tmp/fr_a.txt 2>&1 & C1=$!
     timeout 200 ./bin/smart_client $(arm $B) --emu 0 --port 9934 --packets 2500 --seed $((i+50)) > /tmp/fr_b.txt 2>&1 & C2=$!

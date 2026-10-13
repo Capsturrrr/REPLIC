@@ -17,7 +17,7 @@ def load(p, fam=None):
         if r["ok"] == "1" and r["ms"]: d[(r["scenario"], r["policy"])][int(r["rep"])] = float(r["ms"]) / 1000
     return d
 D = load(f"{R}/scale/proxy_v2a/raw.csv")
-NAME = {"aimd32": "AIMD (window 32)", "aimd": "Tuned AIMD (128)", "cubic": "RUDP-CUBIC", "bbr": "RUDP-BBR", "smart": "Poise", "smart+fec": "Poise + FEC"}
+NAME = {"aimd32": "AIMD (window 32)", "aimd": "Tuned AIMD (128)", "cubic": "user-space CUBIC", "bbr": "user-space BBR", "smart": "Poise", "smart+fec": "Poise + FEC"}
 COL = {"aimd32": GREY, "aimd": GREY, "cubic": GREY, "bbr": GREY, "smart": TEAL, "smart+fec": "#0f6b5a"}
 def ci(v): m = st.mean(v); h = stats.t.ppf(.975, len(v) - 1) * st.stdev(v) / math.sqrt(len(v)); return m, h
 def save(n): plt.tight_layout(); plt.savefig(f"{O}/{n}.png", dpi=170); plt.close(); print("fig", n)
@@ -58,7 +58,7 @@ for fam, lab in [("dc_microburst", "Datacenter"), ("enterprise_campus", "Campus"
 for i, (lab, (m, lo, hi)) in enumerate(rows):
     c = TEAL if hi < 1 else (RED if lo > 1 else MUTE); ax.plot([lo, hi], [i, i], color=c, lw=3); ax.plot(m, i, "o", color=c, ms=10); ax.text(1.62, i, f"{m:.2f}×", va="center", fontweight="bold", color=c)
 ax.axvline(1, color=INK, lw=1.5); ax.set_yticks(range(len(rows))); ax.set_yticklabels([r[0] for r in rows]); ax.invert_yaxis(); ax.set_xlim(0.3, 1.8)
-ax.set_xlabel("Completion time ÷ RUDP-CUBIC time on the same paths (below 1 = faster)"); ax.set_title("Paired ratio versus CUBIC, geometric mean with 95% CI"); save("03_paired_forest")
+ax.set_xlabel("Completion time ÷ user-space CUBIC time on the same paths (below 1 = faster)"); ax.set_title("Paired ratio versus CUBIC, geometric mean with 95% CI"); save("03_paired_forest")
 
 # 4 tails: box + p95
 fig, ax = plt.subplots(figsize=(10, 4.8)); data = [list(D[(C, p)].values()) for p in order]
@@ -86,7 +86,7 @@ for i, p in enumerate(dcp):
 axs[1].set_xticks(range(len(dcp))); axs[1].set_xticklabels([NAME[p] for p in dcp], rotation=25, ha="right"); axs[1].set_title("Datacenter micro-bursts", fontsize=12); save("06_campus_datacenter")
 
 # 7 datacenter fix before/after
-fig, ax = plt.subplots(figsize=(8, 4.4)); labs = ["RUDP-CUBIC", "Poise\n(before upgrade)", "Poise\n(after upgrade)"]
+fig, ax = plt.subplots(figsize=(8, 4.4)); labs = ["user-space CUBIC", "Poise\n(before upgrade)", "Poise\n(after upgrade)"]
 vals = [st.mean(Ddc[("dc_microburst", "cubic")].values()) * 1000, st.mean(D1[("dc_microburst", "smart")].values()) * 1000, st.mean(Ddc[("dc_microburst", "smart")].values()) * 1000]
 ax.bar(labs, vals, color=[GREY, AMB, TEAL]); [ax.text(i, v + 6, f"{v:.0f} ms", ha="center", fontweight="bold") for i, v in enumerate(vals)]; ax.set_ylabel("Mean time (ms), 30 paths"); ax.set_title("Datacenter micro-bursts: slowdown removed"); save("07_datacenter_fix")
 
@@ -108,17 +108,17 @@ t = open(f"{R}/wsl_netem/matrix_scale_log.txt").read() if os.path.exists(f"{R}/w
 N = collections.defaultdict(list)
 for _, sc, p, sz, rep, ok, ms in re.findall(r'\[(\d+)/700\] (\S+)\s+(\S+)\s+(\d+) rep(\d+) ok=(\d) ms=([\d.]+)', t):
     if ok == "1": N[(sc, p)].append(float(ms) / 1000)
-profs = [("lte", "LTE"), ("wan", "WAN"), ("wan_hi", "WAN, high RTT"), ("sat", "Satellite")]; pol = [("aimd", "RUDP-AIMD", GREY), ("cubic", "RUDP-CUBIC", "#8a9299"), ("smart", "Poise", TEAL), ("tcp_cubic", "Kernel CUBIC", AMB), ("tcp_bbr", "Kernel BBR", RED)]
+profs = [("lte", "LTE"), ("wan", "WAN"), ("wan_hi", "WAN, high RTT"), ("sat", "Satellite")]; pol = [("aimd", "user-space AIMD", GREY), ("cubic", "user-space CUBIC", "#8a9299"), ("smart", "Poise", TEAL), ("tcp_cubic", "Kernel CUBIC", AMB), ("tcp_bbr", "Kernel BBR", RED)]
 if N:
     fig, ax = plt.subplots(figsize=(11, 4.8)); w = .16
     for j, (p, lab, c) in enumerate(pol): ax.bar(np.arange(4) + (j - 2) * w, [st.mean(N[(s, p)]) for s, _ in profs], w, color=c, label=lab)
-    ax.set_xticks(range(4)); ax.set_xticklabels([l for _, l in profs]); ax.set_ylabel("Mean time (s), 10 runs"); ax.set_ylim(0, 38); ax.legend(frameon=False, ncol=5, loc="upper left"); ax.set_title("Linux netem: Poise beats our RUDP baselines, kernel TCP is still faster"); save("10_netem_vs_kernel")
-    # 11 netem poise speedup vs RUDP baselines
+    ax.set_xticks(range(4)); ax.set_xticklabels([l for _, l in profs]); ax.set_ylabel("Mean time (s), 10 runs"); ax.set_ylim(0, 38); ax.legend(frameon=False, ncol=5, loc="upper left"); ax.set_title("Linux netem: Poise beats our user-space baselines, kernel TCP is still faster"); save("10_netem_vs_kernel")
+    # 11 netem poise speedup vs user-space baselines
     fig, ax = plt.subplots(figsize=(9, 4.4)); w = .25
-    for j, (p, lab) in enumerate([("aimd", "RUDP-AIMD"), ("cubic", "RUDP-CUBIC"), ("bbr", "RUDP-BBR")]):
+    for j, (p, lab) in enumerate([("aimd", "user-space AIMD"), ("cubic", "user-space CUBIC"), ("bbr", "user-space BBR")]):
         vals = [st.mean(N[(s, p)]) / st.mean(N[(s, "smart")]) for s, _ in profs]; ax.bar(np.arange(4) + (j - 1) * w, vals, w, color=[GREY, "#8a9299", "#6e767d"][j], label=lab)
         [ax.text(i + (j - 1) * w, v + .05, f"{v:.1f}×", ha="center", fontsize=9) for i, v in enumerate(vals)]
-    ax.axhline(1, color=INK, lw=1); ax.set_xticks(range(4)); ax.set_xticklabels([l for _, l in profs]); ax.set_ylabel("How many times faster Poise is"); ax.set_ylim(0, 4.8); ax.legend(frameon=False, ncol=3, loc="upper left"); ax.set_title("Linux netem: speed-up of Poise over each RUDP baseline"); save("11_netem_poise_speedup")
+    ax.axhline(1, color=INK, lw=1); ax.set_xticks(range(4)); ax.set_xticklabels([l for _, l in profs]); ax.set_ylabel("How many times faster Poise is"); ax.set_ylim(0, 4.8); ax.legend(frameon=False, ncol=3, loc="upper left"); ax.set_title("Linux netem: speed-up of Poise over each user-space baseline"); save("11_netem_poise_speedup")
 
 # 12 evidence ledger
 fig, ax = plt.subplots(figsize=(8.5, 3.8)); lab = ["Proxy matrix, first n=30 run", "Re-run with upgraded sender", "Untuned-AIMD add-on (cellular)", "-"]
