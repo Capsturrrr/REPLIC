@@ -3,7 +3,7 @@
 set -e; OUT=$(realpath -m "${1:-rudp-drop.zip}"); cd "$(dirname "$0")/../../.."; T=$(mktemp -d); D=$T/rudp-drop
 mkdir -p $D/apps/drop $D/src $D/results
 cp apps/drop/app.py apps/drop/index.html $D/apps/drop/
-cp src/server.c src/common.c src/common.h src/smart_client.c src/rudp_sender.c src/rudp.h src/rl_cc.h src/deep_cc.h src/impair.c $D/src/
+cp src/server.c src/common.c src/common.h src/smart_client.c src/rudp_sender.c src/rudp.h src/rl_cc.h src/deep_cc.h src/smart_cc.h src/neural_weights.h src/impair.c $D/src/
 cp results/dqn_chat.txt $D/results/; cp LICENSE $D/ 2>/dev/null || true
 cp apps/drop/dist/start.sh apps/drop/dist/Dockerfile apps/drop/dist/README.txt $D/; chmod +x $D/start.sh
 (cd $T && rm -f "$OUT" && zip -qr "$OUT" rudp-drop); rm -rf $T; echo "wrote $OUT"
