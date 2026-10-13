@@ -20,12 +20,19 @@ for variant in "sr:./bin/server" "gbn:./bin/server_gbn"; do
   name=${variant%%:*}; srv=${variant##*:}; port=$((9600 + RANDOM % 300))
   gcc -DSERVER_PORT=$port $( [ $name = gbn ] && echo -DPOISE_GBN ) -o bin/server_t src/server.c src/common.c
   ./bin/server_t >/dev/null 2>&1 & SP=$!; sleep 0.3
-  for m in aimd rl2 deep; do
-    R=$(timeout 120 ./bin/smart_client --mode $m --port $port --delay 20 --jitter 5 --loss 3 --rate 800 --queue 50 --packets 300 --qfile results/q_chat.txt --dfile results/dqn_chat.txt --sack $([ $name = sr ] && echo 1 || echo 0) --seed 2 | grep RESULT)
+  for m in aimd rl2 deep smart; do
+    R=$(timeout 120 ./bin/smart_client --mode $m --port $port --delay 20 --jitter 5 --loss 3 --rate 800 --queue 50 --packets 300 --qfile results/q_chat.txt $([ $m = smart ] || echo --dfile results/dqn_chat.txt) --sack $([ $name = sr ] && echo 1 || echo 0) --seed 2 | grep RESULT)
     [ -n "$R" ] && echo "ok:   $m with $name server finished: $(echo $R | cut -d, -f4) ms" || { echo "FAIL: $m with $name server"; fail=1; }
   done
   kill $SP 2>/dev/null; wait $SP 2>/dev/null
 done
+step "Poise PPO controller (weights, bounds, simulator, fairness, C vs NumPy)"; python3 tests/test_ppo.py || fail=1
+step "file transfer with the Poise PPO controller through the impairment proxy (5% loss): received file is byte-identical"
+gcc -DSERVER_PORT=9941 -o bin/server_t3 src/server.c src/common.c
+head -c 400000 /dev/urandom > /tmp/t_in3.bin
+POISE_OUT=/tmp/t_out3.bin POISE_QUIET=1 ./bin/server_t3 >/tmp/t_srv3.log 2>&1 & SP=$!; ./bin/impair 9942 9941 --delay 25 --jitter 5 --loss 5 --rate 2000 --queue 60 2>/dev/null & PX=$!; sleep 0.4
+timeout 120 ./bin/smart_client --mode smart --init 10 --emu 0 --port 9942 --file /tmp/t_in3.bin >/tmp/t_cli3.log 2>&1; sleep 0.4; kill $PX $SP 2>/dev/null; wait 2>/dev/null
+cmp -s /tmp/t_in3.bin /tmp/t_out3.bin && echo "ok:   400 kB received intact through 5% loss with Poise PPO" || { echo "FAIL: PPO file transfer corrupted or incomplete"; fail=1; }
 step "handshake with a lost final ACK"; python3 tests/test_handshake.py || fail=1
 step "file transfer through the impairment proxy (real sockets, 5% loss, 25 ms delay): received file is byte-identical"
 gcc -DSERVER_PORT=9931 -o bin/server_t2 src/server.c src/common.c; make impair >/dev/null 2>&1
