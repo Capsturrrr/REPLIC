@@ -238,7 +238,7 @@ function build(m){
 }
 const sid=s=>s.replace(/\W/g,'_');
 function verdict(g,v){
-  if(v.status==='queued') return `<span style="color:var(--mut)">queued: starts when the previous policy has finished (one policy at a time, so CPU load does not distort the test)</span>`;
+  if(v.status==='queued') return `<span style="color:var(--mut)">queued: starts when a CPU core is free (racers run on identical links, so the comparison stays fair and a crowded machine does not distort it)</span>`;
   const f=v.frozen, subjIdx=0;
   const n=v.flows.length, sh=f?f.subject_rel:(v.shares[0]*n);
   const J=f?f.J:v.live_jain; if(J==null) return '';

@@ -225,6 +225,7 @@ class Race:
         for (key, gid, role, cfg, label, color) in plan:
             a = Arm(len(self.arms), key, cfg, self.dir, role, gid, label, color); self.arms[key] = a
             i = idx_in_group[gid]; idx_in_group[gid] += 1
+            if self.mode == "race": i = a.idx % 8     # race arms run side by side, so each needs its own server and proxy ports
             a.sp, a.pp = SRV0 + i, PRX0 + i          # ports are reused group after group in coexist mode
             groups.setdefault(gid, []).append(a)
         for gid, flows in groups.items():
@@ -232,11 +233,12 @@ class Race:
                                     flows=[f.key for f in flows], frozen=None, status="queued", impair=None)
         # race mode: every arm has its own bottleneck and all run at once. coexist mode: one policy group at a time, because
         # six or more busy-polling senders on two cores distort the very dynamics the test is about.
-        self.queue = list(groups) if self.mode == "coexist" else None
-        if self.mode == "coexist":
-            self.launch(self.queue.pop(0))
-        else:
-            for gid in groups: self.launch(gid)
+        # race mode starts as many arms at once as there are CPU cores (each arm is a busy-polling sender plus a server and a
+        # proxy); the rest wait their turn on identical links, so a crowded machine never skews the result. Same seed, same path.
+        self.queue = list(groups)
+        slots = 1 if self.mode == "coexist" else max(1, min(len(groups), os.cpu_count() or 2))
+        self.slots = slots
+        for _ in range(slots): self.launch(self.queue.pop(0))
         self.t0 = time.time()
 
     def launch(self, gid):
@@ -259,8 +261,25 @@ class Race:
             a.procs.append(subprocess.Popen(cmd, env=env, stdout=out, stderr=subprocess.STDOUT))
         g["status"] = "running"; g["t0"] = time.time()
 
+    def finish_group(self, gid):
+        g = self.groups[gid]; g["status"] = "done"
+        for k in g["flows"]:
+            for pr in self.arms[k].procs[:-1]:
+                try: pr.terminate(); pr.wait(timeout=1.0)
+                except Exception:
+                    try: pr.kill()
+                    except Exception: pass
+        try: g["impair"].terminate(); g["impair"].wait(timeout=1.0)
+        except Exception:
+            try: g["impair"].kill()
+            except Exception: pass
+        if self.queue: self.launch(self.queue.pop(0))
+
     def poll(self):
         for a in self.arms.values(): a.poll()
+        if self.mode == "race" and self.state == "running":
+            for gid, g in self.groups.items():
+                if g["status"] == "running" and all(self.arms[k].done for k in g["flows"]): self.finish_group(gid)
         if self.mode == "coexist" and self.state == "running":
             for gid, g in self.groups.items():
                 if g["status"] != "running": continue
