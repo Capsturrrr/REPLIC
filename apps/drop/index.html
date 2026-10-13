@@ -114,6 +114,32 @@ a{color:var(--acc);text-underline-offset:3px}
 .err button:hover{border-color:var(--text)}
 .skel{height:44px;border-radius:10px;background:var(--s1);margin-bottom:6px;animation:pulse 1.4s infinite}
 @keyframes pulse{50%{opacity:.45}}
+.how{margin:0 0 26px;border:1px solid var(--line);border-radius:14px;background:var(--s1)}
+.how>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:600;font-size:14px;display:flex;justify-content:space-between;gap:12px;border-radius:14px}
+.how>summary::-webkit-details-marker{display:none}
+.how>summary::after{content:"+";font:500 16px var(--mono);color:var(--acc)}
+.how[open]>summary::after{content:"\2212"}
+.how .body{padding:2px 18px 18px;display:grid;gap:14px;color:var(--mute);font-size:13.5px}
+.how ol{margin:0;padding:0;list-style:none;display:grid;gap:12px;counter-reset:s}
+.how li{counter-increment:s;display:grid;grid-template-columns:26px 1fr;gap:10px}
+.how li::before{content:counter(s);font:500 12px var(--mono);color:var(--acc);border:1px solid var(--line2);border-radius:6px;width:22px;height:22px;display:grid;place-items:center;margin-top:1px}
+.how li b{color:var(--text);font-weight:550}
+.how p{margin:0}.how h3{margin:4px 0 0;font-size:12px;font-family:var(--mono);color:var(--faint);font-weight:500;letter-spacing:.04em}
+.gl{display:grid;gap:6px 22px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}.gl div b{color:var(--text);font-weight:550}
+.linkinfo{margin:10px 0 0;padding:10px 12px;border-radius:10px;background:var(--s1);font-size:12.5px;color:var(--mute);line-height:1.5}
+.linkinfo b{color:var(--text);font-weight:550}
+.row small.ex{color:var(--faint);margin-top:3px}
+.now{margin:8px 0 0;font-size:13px;color:var(--mute)}
+.story{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:8px;font-size:13px;color:var(--mute)}
+.story li{display:grid;grid-template-columns:104px 1fr;gap:12px}
+.story li>b{font:500 11.5px var(--mono);color:var(--faint);letter-spacing:.02em;padding-top:2px}
+.story li span b{color:var(--text);font-weight:550}
+.story .bad b,.story .bad{color:var(--bad)}
+@media (max-width:560px){.story li{grid-template-columns:1fr;gap:2px}}
+.key{display:flex;gap:4px 16px;flex-wrap:wrap;font:11.5px var(--mono);color:var(--faint);margin:6px 0 0}
+.key i{display:inline-block;width:14px;height:0;border-top:2px solid var(--faint);vertical-align:middle;margin-right:6px}
+.key i.d{border-top-style:dashed}.key i.t{border-top-color:var(--bad);width:2px;height:10px;border-top:0;border-left:2px solid var(--bad)}.key i.r{width:2px;height:10px;border-top:0;border-left:2px solid var(--warn)}
+.why{margin:8px 0 6px;font-size:13px}
 footer{color:var(--mute);font-size:12.5px;margin-top:56px;padding-top:20px;border-top:1px solid var(--line);max-width:78ch;line-height:1.6}
 code{font:12.5px var(--mono);background:var(--s2);padding:1px 6px;border-radius:5px}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
@@ -124,6 +150,27 @@ code{font:12.5px var(--mono);background:var(--s2);padding:1px 6px;border-radius:
   <p class="eyebrow">RUDP / Drop</p>
   <h1>Send a file across a bad network.</h1>
   <p class="lede">Your file travels over our own reliable-UDP protocol through an emulated link. Congestion-control policies take turns, and the receiver checks every byte against the original.</p>
+
+  <details class="how" id="how" open>
+    <summary>What is happening when you press send</summary>
+    <div class="body">
+      <ol>
+        <li><span><b>Handshake.</b> The sender and receiver swap a SYN and a SYN-ACK so both agree on a starting point. Nothing is sent until this takes one round trip. On a lossy link a lost SYN-ACK costs a retry, a bug our tests found and fixed.</span></li>
+        <li><span><b>Slow start.</b> The sender begins with 10 packets in flight and doubles that every round trip, because it does not yet know how fast the link is. This ends at the first sign of trouble (a loss, or delay rising).</span></li>
+        <li><span><b>Steady state.</b> Now the policy decides how big the window should be. The window is how many 1200-byte packets may be unacknowledged at once. Too small wastes the link; too big overflows the router queue and packets are dropped. This is where the policies differ.</span></li>
+        <li><span><b>Loss and recovery.</b> The receiver reports what arrived with a SACK bitmap. A gap is repaired by a <i>fast retransmit</i> (resend just the missing packet). If no feedback arrives at all, the retransmission timer expires, the slow and costly path. Both show as ticks under each chart (amber: retransmit, red: timer expiry).</span></li>
+        <li><span><b>Finish and check.</b> After the last packet is acknowledged, the receiver closes with a FIN. We then hash the file it wrote and compare with the hash of what you sent. A match proves every byte arrived once, in order, unchanged.</span></li>
+      </ol>
+      <h3>HOW TO READ THE RESULTS</h3>
+      <div class="gl">
+        <div><b>Goodput</b>: useful file bytes per second, retransmissions excluded.</div>
+        <div><b>Retransmitted</b>: packets sent again. More means more waste, not always a slower run.</div>
+        <div><b>Avg RTT</b>: round trip time with queueing included. Above the link's base RTT means the router queue is filling.</div>
+        <div><b>Best possible</b>: file packets divided by the link's packet rate, plus one RTT. No protocol can beat it.</div>
+      </div>
+      <p>The emulator (<code>bin/impair</code>) adds delay, jitter, random loss, a fixed packet rate and a drop-tail queue. It is a model, not a real network. Each policy runs once, so a gap of a few percent is noise.</p>
+    </div>
+  </details>
 
   <div class="desk">
     <aside class="setup" aria-label="Transfer setup">
@@ -154,7 +201,7 @@ code{font:12.5px var(--mono);background:var(--s2);padding:1px 6px;border-radius:
     </section>
   </div>
 
-  <footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Kernel TCP is not in this race because it cannot pass through a UDP proxy; the netem results in the report cover that comparison. One run per policy, so treat small gaps as noise.</footer>
+  <footer>Real C code throughout: the sender is librudp, the receiver is <code>bin/server</code>, and the network is <code>bin/impair</code>, a UDP proxy that adds delay, jitter, random loss and a drop-tail bottleneck. Kernel TCP is not in this race because it cannot pass through a UDP proxy; the netem results in the report cover that comparison. One run per policy, so treat small gaps as noise. The report&rsquo;s numbers come from 30 paths per policy, not from this page.</footer>
 </main>
 
 <script>
@@ -170,18 +217,21 @@ function loadConfig(){
   fetch('/api/config').then(r=>{if(!r.ok)throw 0;return r.json()}).then(c=>{cfg=c;
     if(!c.profiles[sel.profile])sel.profile=Object.keys(c.profiles)[0];
     sel.arms=new Set([...sel.arms].filter(a=>c.arms[a]));
-    $('#profiles').innerHTML=Object.entries(c.profiles).map(([k,p])=>`<button type="button" class="row" role="radio" aria-checked="${k===sel.profile}" data-p="${k}"><span class="mk"></span><span><b>${esc(p.label)}</b><small>${esc(p.note)}</small></span></button>`).join('');
-    $('#arms').innerHTML=Object.entries(c.arms).map(([k,l])=>`<button type="button" class="row" role="checkbox" aria-checked="${sel.arms.has(k)}" data-a="${k}" style="--sw:var(${SW[k]||'--c1'})"><span class="mk"></span><span><b><i class="sw"></i>${esc(l)}</b></span></button>`).join('');
-    document.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{sel.profile=e.dataset.p;document.querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-checked',x===e))});
+    $('#profiles').innerHTML=Object.entries(c.profiles).map(([k,p])=>`<button type="button" class="row" role="radio" aria-checked="${k===sel.profile}" data-p="${k}"><span class="mk"></span><span><b>${esc(p.label)}</b><small>${esc(p.note)}</small></span></button>`).join('')+'<div class="linkinfo" id="linkinfo" aria-live="polite"></div>';
+    $('#arms').innerHTML=Object.entries(c.arms).map(([k,l])=>`<button type="button" class="row" role="checkbox" aria-checked="${sel.arms.has(k)}" data-a="${k}" style="--sw:var(${SW[k]||'--c1'})"><span class="mk"></span><span><b><i class="sw"></i>${esc(l)}</b><small class="ex">${esc((c.explain||{})[k]||'')}</small></span></button>`).join('');
+    document.querySelectorAll('[data-p]').forEach(e=>e.onclick=()=>{sel.profile=e.dataset.p;document.querySelectorAll('[data-p]').forEach(x=>x.setAttribute('aria-checked',x===e));linkInfo()});
     document.querySelectorAll('[data-a]').forEach(e=>e.onclick=()=>{const k=e.dataset.a;sel.arms.has(k)?sel.arms.delete(k):sel.arms.add(k);e.setAttribute('aria-checked',sel.arms.has(k));upd()});
-    upd();
+    linkInfo();upd();
   }).catch(()=>{$('#profiles').innerHTML='';$('#arms').innerHTML='';
     $('#results').innerHTML='<div class="err" role="alert"><span>Could not reach the Drop server. Check that <code>app.py</code> is still running.</span><button type="button" id="retry">Try again</button></div>';
     $('#retry').onclick=()=>{$('#results').innerHTML='';loadConfig()}});
 }
 loadConfig();
 
-function setFile(f){if(!f)return;file=f;$('#fname').textContent=f.name;$('#fsize').textContent=fmt(f.size)+(f.size>12e6?' is over the 12 MB limit':'');showMsg('');upd()}
+function linkInfo(){
+  const el=$('#linkinfo');if(!el||!cfg)return;const m=cfg.profiles[sel.profile].math,sz=file?file.size:1e6,pk=Math.ceil(sz/1200),best=m.rate_pps?pk/m.rate_pps+m.rtt_ms/1000:null;
+  el.innerHTML=`Round trip <b>${m.rtt_ms.toFixed(0)} ms</b>, random loss <b>${m.loss_pct}%</b>, link speed <b>${m.rate_mb_s.toFixed(2)} MB/s</b>. The pipe holds about <b>${m.bdp_pkts.toFixed(0)} packets</b>; the queue adds ${m.queue}, and beyond that the router drops.`+(best?` Your ${file?fmt(sz):'1 MB'} file needs at least <b>${best.toFixed(1)} s</b> here.`:'')}
+function setFile(f){if(!f)return;file=f;$('#fname').textContent=f.name;$('#fsize').textContent=fmt(f.size)+(f.size>12e6?' is over the 12 MB limit':'');showMsg('');linkInfo();upd()}
 function upd(){$('#go').disabled=!(cfg&&file&&sel.arms.size&&file.size>0&&!poll)}
 const d=$('#drop');d.onclick=()=>$('#file').click();$('#file').onchange=e=>setFile(e.target.files[0]);
 d.ondragover=e=>{e.preventDefault();d.classList.add('over')};d.ondragleave=()=>d.classList.remove('over');
@@ -189,7 +239,7 @@ d.ondrop=e=>{e.preventDefault();d.classList.remove('over');setFile(e.dataTransfe
 
 $('#go').onclick=async()=>{showMsg('');
   if(file.size>cfg.max_bytes){showMsg('This file is over the '+fmt(cfg.max_bytes)+' limit.');return}
-  $('#go').disabled=true;$('#stat').textContent='starting';
+  $('#go').disabled=true;$('#stat').textContent='starting';$('#how').open=false;
   try{
     const r=await fetch('/api/start',{method:'POST',body:file,headers:{'X-Filename':file.name,'X-Profile':sel.profile,'X-Arms':[...sel.arms].join(',')}});
     const j=await r.json();if(!r.ok){showMsg(j.error||'The server refused this transfer.');$('#stat').textContent='idle';upd();return}
@@ -201,19 +251,52 @@ function buildLanes(j){
   $('#results').innerHTML='<div id="sum"></div>'+j.arms.map(a=>`<article class="lane" id="arm_${a}" data-s="queued" style="--sw:var(${SW[a]||'--c1'})">
     <div class="lh"><h3>${esc(cfg.arms[a])}</h3><span class="tag" data-k="tag">waiting</span><span class="clock" data-k="clock">0.0<small>s</small></span></div>
     <div class="track"><i data-k="bar"></i></div>
-    <dl class="stats" data-k="stats"></dl><canvas aria-hidden="true"></canvas><p class="verdict" data-k="verdict"></p></article>`).join('');
+    <p class="now" data-k="now">Waiting for the previous policy to finish.</p><dl class="stats" data-k="stats"></dl><canvas role="img" aria-label="Congestion window over time" data-k="cv"></canvas><p class="key" data-k="key" hidden><span><i></i>window</span><span><i class="d"></i>pipe capacity</span><span><i class="r"></i>retransmit</span><span><i class="t"></i>timer expiry</span></p><p class="verdict" data-k="verdict"></p><ul class="story" data-k="story"></ul></article>`).join('');
   laneFor=j.id;
 }
-function spark(cv,pts,color,mx,tx){const c=cv.getContext('2d'),dpr=devicePixelRatio||1,W=cv.width=cv.clientWidth*dpr,H=cv.height=cv.clientHeight*dpr;c.clearRect(0,0,W,H);if(!pts||pts.length<2)return;
+function spark(cv,pts,color,mx,tx,evs,pipe){const c=cv.getContext('2d'),dpr=devicePixelRatio||1,W=cv.width=cv.clientWidth*dpr,H=cv.height=cv.clientHeight*dpr;c.clearRect(0,0,W,H);if(!pts||pts.length<2)return;
   const L=34*dpr,R=6*dpr,T=16*dpr,B=16*dpr,pw=W-L-R,ph=H-T-B,mute=css('--mute'),line=css('--line');
   c.font=`${10*dpr}px ${css('--mono')}`;c.lineWidth=dpr;c.strokeStyle=line;c.fillStyle=mute;
   for(let k=0;k<=4;k++){const y=T+ph*(1-k/4);c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();c.fillText(String(Math.round(mx*k/4)),2*dpr,y+3*dpr)}
   for(let k=0;k<=4;k++){const x=L+pw*k/4,t=(tx*k/4000).toFixed(tx<10000?1:0)+'s',w=c.measureText(t).width;c.fillText(t,Math.min(Math.max(2*dpr,x-8*dpr),W-w-2*dpr),H-3*dpr)}
   c.fillText('window (packets) vs time; same scale on every lane',L,10*dpr);
+  if(pipe&&pipe<mx){const y=T+ph*(1-pipe/mx);c.save();c.setLineDash([4*dpr,4*dpr]);c.strokeStyle=mute;c.beginPath();c.moveTo(L,y);c.lineTo(W-R,y);c.stroke();c.restore()}
   const path=()=>{pts.forEach((p,i)=>{const x=L+p[0]/tx*pw,y=T+ph*(1-p[1]/mx);i?c.lineTo(x,y):c.moveTo(x,y)})};
   c.beginPath();path();c.lineTo(L+pts[pts.length-1][0]/tx*pw,T+ph);c.lineTo(L,T+ph);c.closePath();c.globalAlpha=.10;c.fillStyle=color;c.fill();c.globalAlpha=1;
-  c.beginPath();path();c.strokeStyle=color;c.lineWidth=2*dpr;c.lineJoin='round';c.stroke()}
+  c.beginPath();path();c.strokeStyle=color;c.lineWidth=2*dpr;c.lineJoin='round';c.stroke();
+  (evs||[]).forEach(e=>{const x=L+e[0]/tx*pw,to=e[1]==='timer expiry';c.strokeStyle=css(to?'--bad':'--warn');c.lineWidth=(to?2:1)*dpr;c.globalAlpha=to?1:.7;c.beginPath();c.moveTo(x,T+ph);c.lineTo(x,T+ph-(to?ph*.5:ph*.2));c.stroke()});c.globalAlpha=1}
 
+const PREV={};
+function nowText(a,s,j,pct){
+  if(s.status==='queued')return 'Waiting for the previous policy to finish, so they do not disturb each other.';
+  if(s.status!=='running')return '';
+  const k=a+j.id,t=Date.now(),p=PREV[k];let rate='';
+  if(p&&t-p.t>600){const r=(s.received-p.b)/(t-p.t)*1000/1e6;if(r>=0)rate=` Arriving at about ${r.toFixed(2)} MB/s.`;PREV[k]={t,b:s.received}}else if(!p)PREV[k]={t,b:s.received||0};
+  const ph=pct<.02?'Handshake and first window: ten packets go out, then the window doubles each round trip.':pct<.97?'The receiver is writing bytes as they arrive in order; gaps from lost packets are being repaired.':'Last packets in flight; waiting for the final acknowledgement and FIN.';
+  return `${(100*pct).toFixed(0)}% of the file is at the receiver. ${ph}${rate}`}
+function storyHtml(a,s,j){
+  const L=j.link,ph=s.phases||{},ev=s.events||[],r=[],sec=x=>(x/1000).toFixed(2)+' s',cnt=ph.event_counts||{};
+  r.push(['Handshake',`Connection opened, first data acknowledged after ${ph.first_ack_ms!=null?'<b>'+ph.first_ack_ms.toFixed(0)+' ms</b>':'about one round trip'} (link round trip is ${L.rtt_ms.toFixed(0)} ms).`]);
+  if(ph.slow_start_end_ms!=null)r.push(['Slow start',`Window doubled every round trip until the first loss signal at <b>${sec(ph.slow_start_end_ms)}</b>, with the window at <b>${ev.length?ev[0][2].toFixed(0):'?'}</b> packet${ev.length&&Math.round(ev[0][2])===1?'':'s'} afterwards.`]);
+  else r.push(['Slow start','No loss signal at all: the window kept growing until the file was done.']);
+  const cap=L.bdp_pkts+L.queue;let verdict='';
+  if(ph.peak_cwnd>cap)verdict=' That is past the pipe plus queue, so the router had to drop packets.';
+  else if(ph.peak_cwnd<L.bdp_pkts*.5)verdict=' That is well under the pipe, so part of the link sat idle.';
+  else verdict=' That is close to what the link can hold.';
+  r.push(['Window',`Peaked at <b>${ph.peak_cwnd.toFixed(0)} packets</b> at ${sec(ph.peak_at_ms)}; the pipe holds about ${L.bdp_pkts.toFixed(0)} (${cap.toFixed(0)} with the queue).${verdict}`]);
+  const tm=cnt['timer expiry']||0,fr=s.fast||0;
+  r.push(['Recovery',`<b>${s.retx} of ${s.sent}</b> packets (${(100*s.retx/Math.max(1,s.sent)).toFixed(1)}%) were sent again: ${fr} repaired by fast retransmit (receiver feedback), the rest by selective (SACK) repair or by timers. `+(tm?`<span class="${tm>4?'bad':''}">The retransmission timer expired <b>${tm}</b> time${tm>1?'s':''}</span>, and each expiry means waiting out a full timeout with nothing flowing; ${s.timeouts} of those were treated as fresh congestion and shrank the window.`:`The retransmission timer never expired, so loss was always repaired quickly from receiver feedback.`)]);
+  const eff=L.best_s?100*L.best_s/(s.ms/1000):null;
+  r.push(['Result',`Finished in <b>${(s.ms/1000).toFixed(2)} s</b>`+(eff?`; the best possible on this link is ${L.best_s.toFixed(2)} s, so it ran at <b>${Math.min(100,eff).toFixed(0)}%</b> of the limit.`:'.')+` Hash of the received file equals the hash of yours.`]);
+  return r.map(([k,v])=>`<li><b>${k}</b><span>${v}</span></li>`).join('')}
+function whyText(j,done,best){
+  const b=j.state[best],w=done.filter(a=>a!==best).map(a=>j.state[a]);if(!w.length)return '';
+  const wr=w.reduce((x,y)=>x.retx/x.sent>y.retx/y.sent?x:y),wt=done.find(a=>j.state[a]===wr);
+  const bits=[];
+  if(b.timeouts<wr.timeouts)bits.push(`it had ${b.timeouts} congestion timeouts against ${wr.timeouts} for ${cfg.arms[wt]}`);
+  if(b.phases&&wr.phases&&Math.abs(b.phases.peak_cwnd-wr.phases.peak_cwnd)>4)bits.push(`its window peaked at ${b.phases.peak_cwnd.toFixed(0)} packets against ${wr.phases.peak_cwnd.toFixed(0)}`);
+  if(b.retx/b.sent<wr.retx/wr.sent*.8)bits.push(`it resent ${(100*b.retx/b.sent).toFixed(1)}% of its packets against ${(100*wr.retx/wr.sent).toFixed(1)}%`);
+  return bits.length?`<p class="why">Where the gap came from, per the logs: ${bits.join('; ')}. Policies that cap or cut the window on random loss leave the pipe empty; ones that overshoot waste time on retransmits.</p>`:'<p class="why">The policies behaved almost the same on this run; the gap is within what one run can show.</p>'}
 async function tick(id){
   let j;try{j=await (await fetch('/api/job/'+id)).json()}catch(e){return}
   if(laneFor!==id)buildLanes(j);
@@ -229,13 +312,14 @@ async function tick(id){
     q('bar').style.transform=`scaleX(${pct})`;
     q('clock').innerHTML=(s.status==='done'?(s.ms/1000).toFixed(2):(s.elapsed||0).toFixed(1))+'<small>s</small>';
     q('stats').innerHTML=s.status==='done'?`<div><dt>goodput</dt><dd>${s.goodput_mb_s.toFixed(2)} MB/s</dd></div><div><dt>retransmitted</dt><dd>${s.retx} of ${s.sent}</dd></div><div><dt>avg RTT</dt><dd>${s.avg_rtt.toFixed(0)} ms</dd></div>`:(s.status==='running'?`<div><dt>delivered</dt><dd>${(100*pct).toFixed(0)}%</dd></div>`:'');
+    q('now').textContent=nowText(a,s,j,pct);q('now').hidden=s.status==='done'||s.status==='failed';q('story').innerHTML=s.status==='done'&&s.phases?storyHtml(a,s,j):'';
     q('verdict').innerHTML=s.status==='done'?`<span class="ok">Byte-identical (SHA-256)</span><a href="/download/${j.id}/${a}">Download the received file</a>`:(s.error?`<span class="no">${esc(s.error)}</span>`:'');
-    if(s.trace)spark(el.querySelector('canvas'),s.trace,css(SW[a]||'--c1'),MX,TX);
+    if(s.trace){spark(q('cv'),s.trace,css(SW[a]||'--c1'),MX,TX,s.events,j.link.bdp_pkts);q('key').hidden=false}
   }
   $('#stat').textContent=j.finished?`finished, ${done.length} of ${j.arms.length} delivered`:`running, ${done.length} of ${j.arms.length} done`;
   if(j.finished&&done.length>1){
     const others=done.filter(a=>a!==best).map(a=>`<span>${esc(cfg.arms[a])} ${(j.state[a].ms/j.state[best].ms).toFixed(2)}×</span>`).join('');
-    $('#sum').innerHTML=`<div class="summary"><p><b>${esc(cfg.arms[best])}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s.</p><div class="ratios">${others}</div><small>Ratios are completion time relative to the fastest. One run per policy, so treat small gaps as noise.</small></div>`}
+    $('#sum').innerHTML=`<div class="summary"><p><b>${esc(cfg.arms[best])}</b> finished first in ${(j.state[best].ms/1000).toFixed(2)} s.</p><div class="ratios">${others}</div>${whyText(j,done,best)}<small>Ratios are completion time relative to the fastest. One run per policy, so treat small gaps as noise.</small></div>`}
   if(j.finished){clearInterval(poll);poll=null;upd()}
 }
 </script></body></html>
