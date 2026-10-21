@@ -1,5 +1,7 @@
 # REPLIC: Reinforcement-Learning-Engineered Protocol for Internet Congestion
 
+**Demo video:** https://youtu.be/dKFTLv3Fsh8
+
 REPLIC is a reliable UDP transport written in C with a learned (PPO) congestion controller.
 
 [![ci](https://github.com/Capsturrrr/replic/actions/workflows/ci.yml/badge.svg)](https://github.com/Capsturrrr/replic/actions/workflows/ci.yml)
