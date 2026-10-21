@@ -20,7 +20,7 @@ for sc in 5g lossy sat fast bad; do
           cubic_128) A="--mode cubic --init 10 --maxcwnd 128 --ssthresh 128";;
           deep) A="--mode deep --init 10 --dfile results/dqn_chat.txt";;
         esac
-        POISE_QUIET=1 timeout 250 ./bin/smart_client $A --port $port ${P[$sc]} --packets ${NP[$sc]} --scenario $sc --seed $((9900+i)) | grep RESULT | sed "s/RESULT,\([^,]*\),[^,]*,/RESULT,\1,$arm,/" >> results/eval_final_$sc.csv
+        REPLIC_QUIET=1 timeout 250 ./bin/smart_client $A --port $port ${P[$sc]} --packets ${NP[$sc]} --scenario $sc --seed $((9900+i)) | grep RESULT | sed "s/RESULT,\([^,]*\),[^,]*,/RESULT,\1,$arm,/" >> results/eval_final_$sc.csv
       done
     done; kill $SP ) &
 done

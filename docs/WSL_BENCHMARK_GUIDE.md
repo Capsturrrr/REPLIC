@@ -1,6 +1,6 @@
 # Running the kernel-netem and kernel-TCP benchmark on WSL2 (or any Linux)
 
-Run these inside the `poise2` folder (from `poise_v2_sandbox.zip`). Everything touches only the loopback device and is undone by `clear`.
+Run these inside the `replic2` folder (from `replic_v2_sandbox.zip`). Everything touches only the loopback device and is undone by `clear`.
 
     sudo bash setup_netem_benchmarks.sh install     # iproute2, iperf3 (optional), matplotlib, scipy
     sudo bash setup_netem_benchmarks.sh check       # must end with READY

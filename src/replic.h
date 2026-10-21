@@ -1,28 +1,28 @@
 /*
- * poise.h - public API of the Poise sender library (libpoise).
+ * replic.h - public API of the REPLIC sender library (libreplic).
  *
- * Poise is a reliable, congestion-controlled transport over UDP: handshake, Selective Repeat with a 256-packet window, CRC-16,
+ * REPLIC is a reliable, congestion-controlled transport over UDP: handshake, Selective Repeat with a 256-packet window, CRC-16,
  * adaptive retransmission timer, and a choice of congestion-control policies (AIMD, CUBIC, a small neural network).
- * The receiving side is the server in src/server.c (bin/server), which writes the delivered bytes to a file (POISE_OUT) or prints them.
+ * The receiving side is the server in src/server.c (bin/server), which writes the delivered bytes to a file (REPLIC_OUT) or prints them.
  *
- *   poise_options_t o; poise_options_default(&o);
+ *   replic_options_t o; replic_options_default(&o);
  *   o.port = 8888; o.mode = "deep"; o.weights_file = "results/dqn_chat.txt";
- *   poise_stats_t st;
- *   int rc = poise_send(&o, buf, len, &st);          // blocks until every byte is acknowledged
- *   if (rc != POISE_OK) fprintf(stderr, "%s\n", poise_strerror(rc));
+ *   replic_stats_t st;
+ *   int rc = replic_send(&o, buf, len, &st);          // blocks until every byte is acknowledged
+ *   if (rc != REPLIC_OK) fprintf(stderr, "%s\n", replic_strerror(rc));
  *
  * Limits and caveats: one transfer per call (connect, send, close); up to 32 MB per call; payloads are cut into 512-byte packets;
  * not thread-safe (state is process-global, call from one thread at a time); calls may be made one after another in one process.
  */
-#ifndef POISE_H
-#define POISE_H
+#ifndef REPLIC_H
+#define REPLIC_H
 #include <stddef.h>
 #include <stdint.h>
 
-#define POISE_VERSION "1.0.0"
-#define POISE_MAX_BYTES (32u * 1024u * 1024u)
+#define REPLIC_VERSION "1.0.0"
+#define REPLIC_MAX_BYTES (32u * 1024u * 1024u)
 
-enum { POISE_OK = 0, POISE_ERR_IO = -1, POISE_ERR_ARGS = -2, POISE_ERR_STUCK = -3 };
+enum { REPLIC_OK = 0, REPLIC_ERR_IO = -1, REPLIC_ERR_ARGS = -2, REPLIC_ERR_STUCK = -3 };
 
 typedef struct {
     /* where to send */
@@ -36,7 +36,7 @@ typedef struct {
     double init_cwnd;            /* initial window; < 0 = mode default (10 for the learned modes, 1 otherwise) */
     double ssthresh;             /* initial slow-start threshold (default 16) */
     double polite;               /* neural agent: back off when the RTT ratio is at least this (0 = off, 1.3 = recommended) */
-    int go_back_n;               /* 1 = old Go-Back-N behaviour (pair with a server built with -DPOISE_GBN); default 0 = Selective Repeat */
+    int go_back_n;               /* 1 = old Go-Back-N behaviour (pair with a server built with -DREPLIC_GBN); default 0 = Selective Repeat */
     /* advanced neural-agent settings (negative = default) */
     double pace;                 /* pacing factor, 0 = mode default, -1 = off */
     double slow_start_to;        /* slow-start phase up to this window (-1 = default 64, 0 = off) */
@@ -55,7 +55,7 @@ typedef struct {
     const char *dyn;             /* virtual time: time-varying path "T_MS:RATE_PPS:DELAY_MS;..." */
     int vcomp; double vcomp_timeout; double vcross_on, vcross_off, vcross_pps;   /* virtual-time competitors */
     int train; double eps; double tcut; double ref_rate;                    /* Q-learning training and legacy options */
-} poise_options_t;
+} replic_options_t;
 
 typedef struct {
     double elapsed_ms;           /* time from the first send to the last acknowledgment */
@@ -67,14 +67,14 @@ typedef struct {
     double avg_rtt_ms, min_rtt_ms, goodput_pps, final_cwnd, avg_reward;
     double link_share;           /* virtual time with vcomp: this flow's share of the bottleneck (else -1) */
     long share_ours, share_comp;
-} poise_stats_t;
+} replic_stats_t;
 
-void poise_options_default(poise_options_t *o);
-/* Send len bytes (1 .. POISE_MAX_BYTES) to the server. Returns POISE_OK or a negative POISE_ERR_* code. stats may be NULL. */
-int poise_send(const poise_options_t *o, const void *data, size_t len, poise_stats_t *stats);
-int poise_send_file(const poise_options_t *o, const char *path, poise_stats_t *stats);
+void replic_options_default(replic_options_t *o);
+/* Send len bytes (1 .. REPLIC_MAX_BYTES) to the server. Returns REPLIC_OK or a negative REPLIC_ERR_* code. stats may be NULL. */
+int replic_send(const replic_options_t *o, const void *data, size_t len, replic_stats_t *stats);
+int replic_send_file(const replic_options_t *o, const char *path, replic_stats_t *stats);
 /* Send o->packets synthetic 40-byte test packets (used by the evaluation scripts). */
-int poise_send_test_pattern(const poise_options_t *o, poise_stats_t *stats);
-const char *poise_strerror(int code);
+int replic_send_test_pattern(const replic_options_t *o, replic_stats_t *stats);
+const char *replic_strerror(int code);
 
 #endif

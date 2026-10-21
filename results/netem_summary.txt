@@ -1,5 +1,5 @@
 Kernel netem on loopback (WSL2), run by the user on 2026-10-11, 5 repetitions, 500 packets, transcribed from terminal screenshots.
-NOTE: TCP/UDP in this run used 1024-byte payloads, Poise 512-byte (Poise moved half the bytes). Re-run with netem_full.sh (now 512 for both).
+NOTE: TCP/UDP in this run used 1024-byte payloads, REPLIC 512-byte (REPLIC moved half the bytes). Re-run with netem_full.sh (now 512 for both).
 Mean completion time in ms (n=5):
 scenario  TCP(1024B)  AIMD   CUBIC  neural   neural/AIMD  Welch p
 lossy     1198        3755   7555   2139     0.57         0.023
@@ -7,7 +7,7 @@ lossy     1198        3755   7555   2139     0.57         0.023
 sat       3900        8799   8717   6952     0.79         0.076
 reorder   (TCP time not captured)  4734  6281  2141  0.45  <0.001
 Plain UDP delivered 11% (12% on reorder) of packets in every scenario.
-Raw Poise ms per run:
+Raw REPLIC ms per run:
 lossy aimd 3478.1 4295.9 3759.4 3306.4 3936.0 | cubic 5734.1 10044.9 7243.0 6719.7 8035.4 | deep 2352.1 1809.8 3867.0 1195.0 1469.1
 5g aimd 674.8 692.4 583.9 573.1 694.0 | cubic 815.5 825.2 930.0 815.7 989.3 | deep 458.3 423.5 514.9 392.6 509.8
 sat aimd 9919.2 7468.3 10554.7 7435.4 8616.3 | cubic 7460.3 9011.5 10493.8 7336.9 9284.9 | deep 7093.2 9103.5 6591.3 5052.1 6919.0
@@ -19,12 +19,12 @@ aimd 4787.9 6261.4 5434.2 4271.1 3465.0 (mean 4844) | cubic 5244.6 5561.6 4506.6
 neural/AIMD 0.42 (p<0.001); neural vs TCP 1.15x slower.
 Pooled over both reorder runs (n=10): AIMD 4789, neural 2090, ratio 0.44.
 
-FAIR TCP (512-byte payloads, same bytes as Poise), 5 reps, mean seconds, run 2026-10-11:
+FAIR TCP (512-byte payloads, same bytes as REPLIC), 5 reps, mean seconds, run 2026-10-11:
 lossy   0.79 0.61 0.53 0.64 0.77  mean 0.668
 5g      0.31 0.30 0.30 0.32 0.29  mean 0.304
 sat     2.33 2.32 2.34 2.32 2.34  mean 2.33
 reorder 0.84 0.89 0.79 0.56 0.75  mean 0.766
-Neural Poise (mean s): lossy 2.14, 5g 0.46, sat 6.95, reorder 2.04-2.09  => kernel TCP is 1.5x (5g) to 3.2x (lossy) faster than our best.
+Neural REPLIC (mean s): lossy 2.14, 5g 0.46, sat 6.95, reorder 2.04-2.09  => kernel TCP is 1.5x (5g) to 3.2x (lossy) faster than our best.
 The earlier 1024-byte TCP numbers in this file are superseded by this block.
 
 CAVEAT FOUND 2026-10-11: the netem runs above used UNTUNED AIMD (init cwnd 1, ssthresh 16), not the tuned AIMD (cap 128, ssthresh 128) used in the report's headline.
@@ -44,7 +44,7 @@ Raw neural ms: lossy 1228.9 1388.9 1324.2 1653.3 1286.6 | 5g 532.0 526.6 413.2 4
 Raw AIMD ms: lossy 3324.0 3361.6 3849.1 3807.7 4134.9 | 5g 852.8 584.6 575.2 676.4 701.4 | sat 7428.5 9082.6 7407.5 7482.1 7758.7 | reorder 4676.2 4983.4 5341.2 4224.6 3058.4
 Run-to-run variation is large (neural lossy 2.14 s in run 1, 1.38 s in run 2; sat 6.95 s vs 8.08 s). Under real netem the neural agent does NOT beat untuned AIMD on satellite and is 1.9-3.5x slower than kernel TCP on every path.
 
-RUN 3 (2026-10-11 20:26, netem_full.sh with all four Poise variants), 5 reps, mean ms. aimd0 = untuned AIMD, aimd = TUNED AIMD (cap 128, ssthresh 128; the report's baseline), aimd10 = tuned + initial window 10. TCP = pooled fair 512-byte runs (n=10).
+RUN 3 (2026-10-11 20:26, netem_full.sh with all four REPLIC variants), 5 reps, mean ms. aimd0 = untuned AIMD, aimd = TUNED AIMD (cap 128, ssthresh 128; the report's baseline), aimd10 = tuned + initial window 10. TCP = pooled fair 512-byte runs (n=10).
 path     TCP   aimd0  aimd   aimd10  neural  neural/aimd  p      neural/aimd10  p
 lossy    664   3820   3871   3533    1428    0.37         0.001  0.40           0.011
 5g       303    655    539    443     409    0.76         0.006  0.92           0.40 (n.s.)
@@ -70,6 +70,6 @@ Plain UDP delivered 26-36% of packets in every scenario.
 Reading: with a realistic bounded bottleneck the neural agent beats tuned AIMD by 61%/70%/83% (lossy/5g/sat, all significant) and by 33% on reorder (not significant: tuned AIMD is bimodal there). Kernel TCP is still faster than the neural agent on every path (1.5x-3.2x). Under the corrected simulator (--reorder 1) AIMD collapses on the satellite path as it does on real netem (10-15 s), which the old in-order simulator could not reproduce.
 
 === CORRECTION (11-12 Oct 2026): fourth mistake in the runs above ===
-Without --file, smart_client sends synthetic 40-byte packets, while TCP/UDP sent 512-byte payloads. All runs above therefore under-loaded Poise.
+Without --file, smart_client sends synthetic 40-byte packets, while TCP/UDP sent 512-byte payloads. All runs above therefore under-loaded REPLIC.
 netem_full.sh and netem_coexist.sh now send a real 512-byte-per-packet file. The corrected runs are in results/netem_corrected.txt
 (neural vs tuned AIMD: lossy -71%, 5g -65%, sat -83%, reorder -60% n.s.; kernel TCP 1.5x-1.7x faster than the neural agent).

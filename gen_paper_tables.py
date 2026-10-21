@@ -48,7 +48,7 @@ def main():
         for nm in ("scale_table", "scale_paired", "scale_text"): open(os.path.join(a.out_dir, f"netem_{nm}.tex"), "w").write(PENDING % "the kernel-TCP netem scale matrix")
     if a.netem_matrix and os.path.exists(a.netem_matrix):
         rows = R.read_rows([a.netem_matrix]); summ = R.summarize(rows)
-        R.write_tex(summ, os.path.join(a.out_dir, "netem_matrix.tex"), "Linux netem+tbf on lo, kernel TCP CUBIC/BBR vs Poise")
+        R.write_tex(summ, os.path.join(a.out_dir, "netem_matrix.tex"), "Linux netem+tbf on lo, kernel TCP CUBIC/BBR vs REPLIC")
         print("netem matrix: %d rows" % len(rows))
     else:
         open(os.path.join(a.out_dir, "netem_matrix.tex"), "w").write(PENDING % "the netem profile matrix")

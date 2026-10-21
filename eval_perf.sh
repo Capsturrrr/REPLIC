@@ -1,7 +1,7 @@
 #!/bin/bash
 # Performance matrix (Selective Repeat transport): which window policy and cap is fastest?
 # usage: bash eval_perf.sh [runs] -> results/eval_perf_<scenario>.csv ; python3 ci_summary_perf.py
-export POISE_CLASSIC=1   # these runs used cap 32 / no hand-over unless a flag says otherwise
+export REPLIC_CLASSIC=1   # these runs used cap 32 / no hand-over unless a flag says otherwise
 cd "$(dirname "$0")"; RUNS=${1:-5}
 declare -A P
 P[5g]="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60 --packets 1200"

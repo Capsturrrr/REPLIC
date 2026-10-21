@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-run_fairness_test.py - multi-flow coexistence test for Poise.
+run_fairness_test.py - multi-flow coexistence test for REPLIC.
 
-One subject flow (Poise neural agent, optionally with the courtesy guard --polite) shares ONE bottleneck with
+One subject flow (REPLIC neural agent, optionally with the courtesy guard --polite) shares ONE bottleneck with
 k = 1..3 background flows (CUBIC or BBR). Output: Jain's fairness index, the subject's share relative to its fair
 share 1/n, and a starvation metric (smallest flow's share relative to 1/n).
 
 Backends
   proxy  (default, runs anywhere): bin/impair is the shared bottleneck (delay, jitter, loss, rate, drop-tail queue).
-         Background flows are Poise flows running the user-space CUBIC / simplified-BBR policies of this repo.
+         Background flows are REPLIC flows running the user-space CUBIC / simplified-BBR policies of this repo.
          Share = packets each flow got through the bottleneck when the first flow finished (printed by impair).
   netem  (needs root, tc, ip): the bottleneck is kernel netem on lo + a tbf rate limiter, and the background flows
          are KERNEL TCP with TCP_CONGESTION = cubic / bbr. Share = bytes each flow moved in a common time window.
@@ -36,7 +36,7 @@ BOTTLENECK = dict(delay=30, jitter=3, loss=0.1, rate=1000, queue=60)
 ARMS = {
     "neural":        "--mode deep --init 10 --dfile %s" % WEIGHTS,
     "neural_polite": "--mode deep --init 10 --polite 1.3 --dfile %s" % WEIGHTS,
-    "smart_fair":    "--mode smart --init 10",                      # Poise, weights compiled in (src/neural_weights.h)
+    "smart_fair":    "--mode smart --init 10",                      # REPLIC, weights compiled in (src/neural_weights.h)
     "smart_nofair":  "--mode smart --init 10 --dfile %s" % os.path.join(ROOT, "results", "smart", "smart_nofair.txt"),   # ablation: same training, fairness weight 0
     "aimd":          "--mode aimd --init 10 --maxcwnd 128 --ssthresh 128",
     "cubic":         "--mode cubic --init 10 --maxcwnd 128 --ssthresh 128",
@@ -65,7 +65,7 @@ def build():
     cf = "-O2 -std=c11 -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE -w"
     os.makedirs(os.path.join(ROOT, "bin"), exist_ok=True)
     for cmd in (f"gcc {cf} -o bin/server src/server.c src/common.c",
-                f"gcc {cf} -o bin/smart_client src/smart_client.c src/poise_sender.c src/common.c -lm",
+                f"gcc {cf} -o bin/smart_client src/smart_client.c src/replic_sender.c src/common.c -lm",
                 f"gcc {cf} -o bin/impair src/impair.c -lm"):
         r = sh(cmd)
         if r.returncode: sys.exit("build failed: %s\n%s" % (cmd, r.stderr))
@@ -81,10 +81,10 @@ def run_proxy(subject, bg_arm, k, packets, seed, bn=BOTTLENECK, timeout=240):
     arms = [subject] + [bg_arm] * k
     n = len(arms)
     procs = []
-    env = dict(os.environ, POISE_QUIET="1")
+    env = dict(os.environ, REPLIC_QUIET="1")
     try:
         for i in range(n):
-            e = dict(env, POISE_PORT=str(BASE_PORT + i), POISE_OUT="/dev/null")
+            e = dict(env, REPLIC_PORT=str(BASE_PORT + i), REPLIC_OUT="/dev/null")
             procs.append(subprocess.Popen([os.path.join(ROOT, "bin/server")], cwd=ROOT, env=e,
                                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
         pairs = ["%d:%d" % (PROXY_PORT + i, BASE_PORT + i) for i in range(n)]
@@ -135,8 +135,8 @@ def netem_ready():
 
 
 def run_netem(subject, bg_arm, k, packets, seed, bn=BOTTLENECK, window=15.0):
-    """Subject = Poise over lo (netem delay/jitter/loss + tbf); background = k kernel TCP senders (cubic/bbr).
-    Shares = bytes moved in the common `window` seconds (Poise: bytes from the server's receive counter is not exposed,
+    """Subject = REPLIC over lo (netem delay/jitter/loss + tbf); background = k kernel TCP senders (cubic/bbr).
+    Shares = bytes moved in the common `window` seconds (REPLIC: bytes from the server's receive counter is not exposed,
     so we use packets*1200 reported by the sender; TCP: bytes accepted by send() minus nothing - approximation)."""
     why = netem_ready()
     if why: raise RuntimeError("netem backend unavailable: " + why)
@@ -177,10 +177,10 @@ def run_netem(subject, bg_arm, k, packets, seed, bn=BOTTLENECK, window=15.0):
 
 
 def run_proxy_netem_subject(subject, packets, seed, window):
-    """Run the Poise subject over lo (netem impairs it). Bytes moved = size of the server's output file at the end
+    """Run the REPLIC subject over lo (netem impairs it). Bytes moved = size of the server's output file at the end
     of the window (the server appends delivered payloads; it flushes in 4 kB blocks, so +-4 kB)."""
     outp = tempfile.mktemp()
-    env = dict(os.environ, POISE_QUIET="1", POISE_OUT=outp, POISE_PORT=str(BASE_PORT))
+    env = dict(os.environ, REPLIC_QUIET="1", REPLIC_OUT=outp, REPLIC_PORT=str(BASE_PORT))
     srv = subprocess.Popen([os.path.join(ROOT, "bin/server")], cwd=ROOT, env=env,
                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     time.sleep(0.3)

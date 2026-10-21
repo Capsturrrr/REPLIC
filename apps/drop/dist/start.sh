@@ -1,5 +1,5 @@
 #!/bin/bash
-# Start Poise Drop. Needs python3 and gcc. Usage: ./start.sh   (PORT=8801 ./start.sh to change the port)
+# Start REPLIC Drop. Needs python3 and gcc. Usage: ./start.sh   (PORT=8801 ./start.sh to change the port)
 cd "$(dirname "$0")"
 command -v python3 >/dev/null || { echo "python3 is required (sudo apt install python3)"; exit 1; }
 command -v gcc >/dev/null || { echo "gcc is required (sudo apt install build-essential)"; exit 1; }

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Poise Studio - backend.
+REPLIC Studio - backend.
 
 FastAPI app that wraps the real C core (src/*.c, built into studio/bin) and the impairment proxy. Nothing here is
 simulated in Python: every race starts real server / proxy / sender processes over UDP on 127.0.0.1, and the numbers
@@ -17,11 +17,11 @@ the browser shows are read from what those processes write.
                            and the newest dissected packets (seq, ack, flags, CRC-16, CRC check, length)
 
 Telemetry sources (all from the C processes):
-  cwnd, rtt     <- sender --trace file (POISE_LIVE=1 makes the sender flush each line)
+  cwnd, rtt     <- sender --trace file (REPLIC_LIVE=1 makes the sender flush each line)
   loss rate     <- share of TIMEOUT / FAST_RETX events among the last 1 s of trace events
   goodput       <- highest cumulative ACK seen in the sender's --pcap file, differentiated over 500 ms
-  packets       <- the same pcap file, parsed with the Poise header layout (13 bytes, big endian)
-  FEC state     <- fixed XOR parity group size K (POISE_FEC); parity packets counted in the pcap. K is NOT adaptive.
+  packets       <- the same pcap file, parsed with the REPLIC header layout (13 bytes, big endian)
+  FEC state     <- fixed XOR parity group size K (REPLIC_FEC); parity packets counted in the pcap. K is NOT adaptive.
 
 Run:  python3 studio/app.py [--port 8000]
 """
@@ -39,8 +39,8 @@ SRV0, PRX0 = 9960, 9980          # arm i: server 9960+i, proxy 9980+i
 
 SMART_TRUE = os.path.join(ROOT, "results", "smart", "smart_final.txt")
 ARMS = {
-    "smart_true": dict(label="Poise (PPO, fairness-trained)", flags="--mode smart --init 10 --dfile %s" % SMART_TRUE, fec=0, color="#22d3ee"),
-    "smart_true_fec": dict(label="Poise + FEC", flags="--mode smart --init 10 --dfile %s" % SMART_TRUE, fec=8, color="#34d399"),
+    "smart_true": dict(label="REPLIC (PPO, fairness-trained)", flags="--mode smart --init 10 --dfile %s" % SMART_TRUE, fec=0, color="#22d3ee"),
+    "smart_true_fec": dict(label="REPLIC + FEC", flags="--mode smart --init 10 --dfile %s" % SMART_TRUE, fec=8, color="#34d399"),
     "smart_fec": dict(label="Neural v1 (static DQN) + FEC", flags="--mode deep --init 10 --dfile %s" % WEIGHTS, fec=8, color="#2dd4bf"),
     "smart":     dict(label="Neural v1 (static DQN)", flags="--mode deep --init 10 --dfile %s" % WEIGHTS, fec=0, color="#60a5fa"),
     "smart_polite": dict(label="Neural v1 + --polite guard", flags="--mode deep --init 10 --polite 1.3 --dfile %s" % WEIGHTS, fec=0, color="#a78bfa"),
@@ -68,7 +68,7 @@ def crc16(data: bytes) -> int:
 
 
 def dissect(pl: bytes):
-    """Poise header: seq(4) ack(4) flags(1) crc(2) len(2) payload. CRC-16/CCITT-FALSE over seq,ack,flags,len,payload."""
+    """REPLIC header: seq(4) ack(4) flags(1) crc(2) len(2) payload. CRC-16/CCITT-FALSE over seq,ack,flags,len,payload."""
     if len(pl) < 13: return None
     seq, ack, fl, crc, ln = struct.unpack(">IIBHH", pl[:13])
     body = pl[13:13 + ln]
@@ -244,7 +244,7 @@ class Race:
     def launch(self, gid):
         p = self.params; g = self.groups[gid]; flows = [self.arms[k] for k in g["flows"]]
         for a in flows:
-            env = dict(os.environ, POISE_QUIET="1", POISE_OUT="/dev/null", POISE_PORT=str(a.sp))
+            env = dict(os.environ, REPLIC_QUIET="1", REPLIC_OUT="/dev/null", REPLIC_PORT=str(a.sp))
             a.procs.append(subprocess.Popen([os.path.join(BIN, "server")], env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL))
         g["impair"] = subprocess.Popen([os.path.join(BIN, "impair")] + ["%d:%d" % (f.pp, f.sp) for f in flows] + [
             "--delay", str(p["delay"]), "--jitter", str(p["jitter"]), "--loss", str(p["loss"]), "--rate", str(p["rate_pps"]),
@@ -252,8 +252,8 @@ class Race:
         self.impairs.append(g["impair"])
         time.sleep(0.4)
         for a in flows:
-            env = dict(os.environ, POISE_LIVE="1")
-            if a.cfg["fec"]: env["POISE_FEC"] = str(a.cfg["fec"])
+            env = dict(os.environ, REPLIC_LIVE="1")
+            if a.cfg["fec"]: env["REPLIC_FEC"] = str(a.cfg["fec"])
             out = open(a.result_file, "w")
             cmd = [os.path.join(BIN, "smart_client")] + a.cfg["flags"].split() + [
                 "--emu", "0", "--port", str(a.pp), "--file", self.data, "--seed", str(p.get("seed", 1) * 10 + a.idx),
@@ -344,7 +344,7 @@ class Race:
                     groups=self.group_view() if self.mode == "coexist" else None, elapsed=round(time.time() - self.t0, 2))
 
 
-app = FastAPI(title="Poise Studio")
+app = FastAPI(title="REPLIC Studio")
 CUR = {"race": None}
 HISTORY = collections.OrderedDict()
 
@@ -352,7 +352,7 @@ HISTORY = collections.OrderedDict()
 def ensure_built():
     os.makedirs(BIN, exist_ok=True)
     cf = "-O2 -std=c11 -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE -w"
-    jobs = [("smart_client", "src/smart_client.c src/poise_sender.c src/common.c -lm"),
+    jobs = [("smart_client", "src/smart_client.c src/replic_sender.c src/common.c -lm"),
             ("server", "src/server.c src/common.c"), ("impair", "src/impair.c -lm")]
     for name, srcs in jobs:
         out = os.path.join(BIN, name)

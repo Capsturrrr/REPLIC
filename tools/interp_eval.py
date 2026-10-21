@@ -5,15 +5,15 @@ from concurrent.futures import ThreadPoolExecutor
 N = 20; T = 2.093
 SC = {"5g":"--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60","lossy":"--delay 25 --jitter 10 --loss 2 --rate 800 --queue 50",
  "sat":"--delay 150 --jitter 10 --loss 0.3 --rate 400 --queue 100","fast":"--delay 60 --jitter 5 --loss 0.1 --rate 3000 --queue 300","bad":"--delay 40 --jitter 5 --loss 10 --rate 600 --queue 40"}
-ARMS = {"network":{}, "tree d8":{"POISE_TREE":"results/interp/tree_d8.txt"}, "tree d5":{"POISE_TREE":"results/interp/tree_d5.txt"},
-        "noise .02":{"POISE_NOISE":"0.02"}, "noise .05":{"POISE_NOISE":"0.05"}, "noise .1":{"POISE_NOISE":"0.1"}, "noise .2":{"POISE_NOISE":"0.2"}}
+ARMS = {"network":{}, "tree d8":{"REPLIC_TREE":"results/interp/tree_d8.txt"}, "tree d5":{"REPLIC_TREE":"results/interp/tree_d5.txt"},
+        "noise .02":{"REPLIC_NOISE":"0.02"}, "noise .05":{"REPLIC_NOISE":"0.05"}, "noise .1":{"REPLIC_NOISE":"0.1"}, "noise .2":{"REPLIC_NOISE":"0.2"}}
 def run(sc, env, seed):
     o = subprocess.run(f"./bin/smart_client --mode deep --dfile results/dqn_chat.txt --vt 1 {SC[sc]} --packets 3000 --seed {seed}", shell=True,
                        capture_output=True, text=True, env={**os.environ, **env}).stdout
     for l in o.splitlines():
         if l.startswith("RESULT"): return float(l.split(",")[3]) / 1000
     return 600.0
-L = [f"# {N} paired seeds; completion time in seconds, mean ±95% CI (POISE_TREE = distilled tree, POISE_NOISE = Gaussian noise on the 4 measured inputs)",
+L = [f"# {N} paired seeds; completion time in seconds, mean ±95% CI (REPLIC_TREE = distilled tree, REPLIC_NOISE = Gaussian noise on the 4 measured inputs)",
      "scenario  " + "  ".join(f"{a:>13s}" for a in ARMS)]
 print(L[1], flush=True)
 with ThreadPoolExecutor(2) as ex:

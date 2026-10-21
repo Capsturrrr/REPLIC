@@ -41,12 +41,12 @@ static const char *state_name(conn_state_t s) {
     }
 }
 
-static void send_packet(int sockfd, const poise_packet_t *pkt,
+static void send_packet(int sockfd, const replic_packet_t *pkt,
                          const struct sockaddr_in *addr, socklen_t addr_len) {
     uint8_t buf[BUFFER_SIZE];
-    int len = poise_pack(pkt, buf, sizeof(buf));
+    int len = replic_pack(pkt, buf, sizeof(buf));
     if (len < 0) {
-        fprintf(stderr, "poise_pack failed\n");
+        fprintf(stderr, "replic_pack failed\n");
         return;
     }
     if (sendto(sockfd, buf, (size_t)len, 0,
@@ -56,7 +56,7 @@ static void send_packet(int sockfd, const poise_packet_t *pkt,
 }
 
 #define MAXSESS 16
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
 enum { SRW = 256 };   /* receive window: 256 packets, reported as a 32-byte bitmap */
 #endif
 
@@ -65,7 +65,7 @@ typedef struct {
     int used; struct sockaddr_in addr; conn_state_t state; uint32_t server_seq, expected_seq, client_isn; int have_isn; double last_active;
     char reassembled[65536]; size_t reassembled_len;
     FILE *out_fp; uint64_t fnv; unsigned long long out_bytes;
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
     uint8_t have[SRW]; uint8_t buf[SRW][MAX_PAYLOAD]; uint16_t len[SRW];
 #endif
 } sess_t;
@@ -76,7 +76,7 @@ static sess_t sessions[MAXSESS];
 #define APPEND(S, ptr, n) do { if ((S)->reassembled_len + (n) < sizeof((S)->reassembled)) { memcpy((S)->reassembled + (S)->reassembled_len, (ptr), (n)); (S)->reassembled_len += (n); } } while (0)
 
 static int quiet = 0;
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
 /* v2 FEC receive state: ring of recently received payloads and the parity packets still waiting for a missing packet */
 enum { FR = 512, PG = 16 };
 static uint8_t fbuf[MAXSESS][FR][MAX_PAYLOAD]; static uint16_t flen[MAXSESS][FR]; static uint32_t fseq1[MAXSESS][FR];
@@ -158,13 +158,13 @@ int main(void) {
     sockfd = socket(AF_INET, SOCK_DGRAM, 0);
     if (sockfd < 0) { perror("socket creation failed"); exit(EXIT_FAILURE); }
     memset(&server_addr, 0, sizeof(server_addr));
-    server_addr.sin_family = AF_INET; server_addr.sin_addr.s_addr = INADDR_ANY; int listen_port = getenv("POISE_PORT") ? atoi(getenv("POISE_PORT")) : SERVER_PORT; server_addr.sin_port = htons(listen_port);
+    server_addr.sin_family = AF_INET; server_addr.sin_addr.s_addr = INADDR_ANY; int listen_port = getenv("REPLIC_PORT") ? atoi(getenv("REPLIC_PORT")) : SERVER_PORT; server_addr.sin_port = htons(listen_port);
     if (bind(sockfd, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) { perror("bind failed"); close(sockfd); exit(EXIT_FAILURE); }
-    printf("Poise server listening on port %d (up to %d clients at once)...\n", listen_port, MAXSESS);
+    printf("REPLIC server listening on port %d (up to %d clients at once)...\n", listen_port, MAXSESS);
 
-    /* file mode: POISE_OUT=path writes the delivered byte stream to a file (path.<clientport> when several clients are active);
-       POISE_QUIET=1 silences the per-packet log */
-    const char *out_path = getenv("POISE_OUT"); quiet = getenv("POISE_QUIET") != NULL;
+    /* file mode: REPLIC_OUT=path writes the delivered byte stream to a file (path.<clientport> when several clients are active);
+       REPLIC_QUIET=1 silences the per-packet log */
+    const char *out_path = getenv("REPLIC_OUT"); quiet = getenv("REPLIC_QUIET") != NULL;
     srand((unsigned int)time(NULL));
 
 
@@ -172,8 +172,8 @@ int main(void) {
         ssize_t n = recvfrom(sockfd, recv_buf, sizeof(recv_buf), 0, (struct sockaddr *)&client_addr, &client_len);
         if (n < 0) { perror("recvfrom failed"); continue; }
 
-        poise_packet_t pkt;
-        int result = poise_unpack(recv_buf, (size_t)n, &pkt);
+        replic_packet_t pkt;
+        int result = replic_unpack(recv_buf, (size_t)n, &pkt);
         if (result == -2) { printf("Dropped corrupted packet (checksum mismatch)\n"); continue; }
         else if (result != 0) { printf("Dropped malformed packet\n"); continue; }
 
@@ -194,7 +194,7 @@ int main(void) {
                connection we already accepted, not a new one: answer with the SAME SYN-ACK and keep all state (before this the session was
                reset, and its output went to out.bin.<port> while out.bin stayed empty). Netem drops return-path packets; the proxy never did. */
             if (S->state == STATE_SYN_RECEIVED && S->have_isn && S->client_isn == client_seq) {
-                poise_packet_t dup; memset(&dup, 0, sizeof(dup));
+                replic_packet_t dup; memset(&dup, 0, sizeof(dup));
                 dup.seq_num = S->server_seq; dup.ack_num = client_seq + 1; dup.flags = FLAG_SYN | FLAG_ACK;
                 send_packet(sockfd, &dup, &client_addr, client_len);
                 continue;
@@ -203,18 +203,18 @@ int main(void) {
             S->server_seq = (uint32_t)rand();
             S->expected_seq = client_seq + 1;
             S->reassembled_len = 0;
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
             memset(S->have, 0, sizeof S->have); memset(pvalid[(int)(S - sessions)], 0, sizeof pvalid[0]); memset(fseq1[(int)(S - sessions)], 0, sizeof fseq1[0]);
 #endif
             if (S->out_fp) { fclose(S->out_fp); S->out_fp = NULL; }
             if (out_path) {
                 char path[512];
                 if (count_active() - (S->state != STATE_LISTEN ? 1 : 0) > 0) snprintf(path, sizeof path, "%s.%u", out_path, ntohs(client_addr.sin_port)); else snprintf(path, sizeof path, "%s", out_path);
-                S->out_fp = fopen(path, "wb"); if (!S->out_fp) perror("POISE_OUT");
+                S->out_fp = fopen(path, "wb"); if (!S->out_fp) perror("REPLIC_OUT");
             }
             S->fnv = 1469598103934665603ULL; S->out_bytes = 0;
 
-            poise_packet_t reply;
+            replic_packet_t reply;
             memset(&reply, 0, sizeof(reply));
             reply.seq_num = S->server_seq; reply.ack_num = client_seq + 1; reply.flags = FLAG_SYN | FLAG_ACK;
             send_packet(sockfd, &reply, &client_addr, client_len);
@@ -226,27 +226,27 @@ int main(void) {
             printf("Handshake complete. State: %s (expecting seq=%u)\n\n", state_name(S->state), S->expected_seq);
 
         } else if ((pkt.flags & FLAG_FEC) && S->state == STATE_ESTABLISHED) {
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
             int si = (int)(S - sessions), g = (int)((pkt.seq_num / 8) % PG);
             for (int q = 0; q < PG; q++) if (!pvalid[si][q]) { g = q; break; }
             memset(pbuf[si][g], 0, MAX_PAYLOAD); memcpy(pbuf[si][g], pkt.payload, pkt.payload_len);
             pgs[si][g] = pkt.seq_num; pn[si][g] = (int)(pkt.ack_num >> 16); plx[si][g] = pkt.ack_num & 0xFFFF; pvalid[si][g] = 1;
             uint32_t before = S->expected_seq; fec_try(S);
             if (S->expected_seq != before || 1) {
-                poise_packet_t ack; memset(&ack, 0, sizeof ack);
+                replic_packet_t ack; memset(&ack, 0, sizeof ack);
                 ack.seq_num = S->server_seq; ack.ack_num = S->expected_seq; ack.flags = FLAG_ACK; ack.payload_len = SRW / 8;
                 for (int j = 1; j < SRW; j++) if (S->have[(S->expected_seq + (uint32_t)j) % SRW]) ack.payload[j / 8] |= (uint8_t)(1u << (j % 8));
                 send_packet(sockfd, &ack, &client_addr, client_len);
             }
 #endif
         } else if ((pkt.flags & FLAG_DATA) && S->state == STATE_ESTABLISHED) {
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
             /* Selective acknowledgment build: buffer out-of-order packets (256-packet window) and report them
                in a 32-byte bitmap carried in every ACK: bit j set means seq expected_seq+j was received. */
             sr_accept(S, pkt.seq_num, pkt.payload, pkt.payload_len);
             fec_try(S);
             {
-                poise_packet_t ack;
+                replic_packet_t ack;
                 memset(&ack, 0, sizeof(ack));
                 ack.seq_num = S->server_seq; ack.ack_num = S->expected_seq; ack.flags = FLAG_ACK;
                 ack.payload_len = SRW / 8;                       /* bit j set = packet expected_seq + j is held */
@@ -255,7 +255,7 @@ int main(void) {
                 if (!quiet) printf("  -> ACK %u + sack bitmap\n\n", S->expected_seq);
             }
 #else
-            poise_packet_t ack;
+            replic_packet_t ack;
             memset(&ack, 0, sizeof(ack));
             ack.seq_num = S->server_seq; ack.flags = FLAG_ACK;
             if (pkt.seq_num == S->expected_seq) {
@@ -275,7 +275,7 @@ int main(void) {
 #endif
 
         } else if ((pkt.flags & FLAG_FIN) && S->state == STATE_ESTABLISHED) {
-            poise_packet_t ack;
+            replic_packet_t ack;
             memset(&ack, 0, sizeof(ack));
             ack.seq_num = S->server_seq; ack.ack_num = pkt.seq_num + 1; ack.flags = FLAG_ACK;
             send_packet(sockfd, &ack, &client_addr, client_len);
@@ -290,7 +290,7 @@ int main(void) {
 
         } else if ((pkt.flags & FLAG_FIN) && S->state == STATE_LISTEN) {
             /* a retransmitted FIN after we already closed: acknowledge again so the client can finish */
-            poise_packet_t ack;
+            replic_packet_t ack;
             memset(&ack, 0, sizeof(ack));
             ack.seq_num = S->server_seq; ack.ack_num = pkt.seq_num + 1; ack.flags = FLAG_ACK;
             send_packet(sockfd, &ack, &client_addr, client_len);

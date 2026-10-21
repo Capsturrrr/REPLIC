@@ -1,14 +1,14 @@
 /*
- * libpoise: the Poise sender (reliability machinery plus a pluggable congestion controller). The public API is in poise.h; the command-line
+ * libreplic: the REPLIC sender (reliability machinery plus a pluggable congestion controller). The public API is in replic.h; the command-line
  * front end is smart_client.c. Original notes follow.
  *
- * Poise client: Poise sender with a pluggable congestion controller.
- *   --mode aimd : rule-based slow start + AIMD (the original Poise policy)
+ * REPLIC client: REPLIC sender with a pluggable congestion controller.
+ *   --mode aimd : rule-based slow start + AIMD (the original REPLIC policy)
  *   --mode rl   : Q-learning cwnd controller (rl_cc.h)
  *   --mode rl2  : the chat-style table agent (no-shrink rule, window cap 32, decisions every 100-500 ms)
  *   --mode deep : the neural agent (deep_cc.h), same decision loop as rl2
  *   --reorder 1 : let jitter reorder packets on the emulated forward path
- *   --sack 1    : Selective Repeat (default): resend only holes, using the bitmap in the ACKs; --gbn restores Go-Back-N (server built with -DPOISE_GBN)
+ *   --sack 1    : Selective Repeat (default): resend only holes, using the bitmap in the ACKs; --gbn restores Go-Back-N (server built with -DREPLIC_GBN)
  *   --init N    : initial window (default 1; the chat-style modes default to 10)
  * Both modes share the same reliability machinery (Go-Back-N, adaptive RTO,
  * dup-ACK fast retransmit that resends the window) so only the cwnd policy differs.
@@ -29,17 +29,17 @@
 #include "deep_cc.h"
 #if defined(__has_include)
 #if __has_include("neural_weights.h")
-#define SM_HAVE_BUILTIN        /* weights compiled into the binary (src/neural_weights.h, written by train_smart_poise.py --export) */
+#define SM_HAVE_BUILTIN        /* weights compiled into the binary (src/neural_weights.h, written by train_smart_replic.py --export) */
 #endif
 #endif
 #include "smart_cc.h"
-#include "poise.h"
+#include "replic.h"
 
 #define PKT_BYTES 40
 #define MAXN 65536   /* chunks in file mode */
 #define QCAP 8192
 
-typedef struct { double t; int len; uint8_t buf[POISE_HEADER_SIZE + MAX_PAYLOAD]; } pend_t;
+typedef struct { double t; int len; uint8_t buf[REPLIC_HEADER_SIZE + MAX_PAYLOAD]; } pend_t;
 typedef struct { pend_t *a; int head, tail; } ring_t;
 
 /* --vt 1: virtual time. The server is simulated in-process and the clock advances by a fixed step per loop
@@ -87,13 +87,13 @@ static void pcap_write(double t_ms, int to_server, int port, const uint8_t *pl, 
     memcpy(pk + 28, pl, (size_t)n);
     double ts = pcap_epoch + t_ms / 1000.0; uint32_t sec = (uint32_t)ts, us = (uint32_t)((ts - sec) * 1e6), l = (uint32_t)tot;
     fwrite(&sec,4,1,pcapf); fwrite(&us,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(&l,4,1,pcapf); fwrite(pk, 1, (size_t)tot, pcapf);
-    if (getenv("POISE_LIVE")) fflush(pcapf);
+    if (getenv("REPLIC_LIVE")) fflush(pcapf);
 }
 
 /* ---- interpretability hooks (environment variables, off by default) ----
-   POISE_STATELOG=file : append every neural decision "x0..x4,lo,act" for the distillation study
-   POISE_NOISE=sigma   : add Gaussian noise N(0,sigma) to the four measured inputs (robustness test)
-   POISE_TREE=file     : replace the network by a distilled decision tree ("S feat thr left right" / "L action" lines) */
+   REPLIC_STATELOG=file : append every neural decision "x0..x4,lo,act" for the distillation study
+   REPLIC_NOISE=sigma   : add Gaussian noise N(0,sigma) to the four measured inputs (robustness test)
+   REPLIC_TREE=file     : replace the network by a distilled decision tree ("S feat thr left right" / "L action" lines) */
 typedef struct { int feat, left, right, act; double thr; } tnode_t;
 static tnode_t tree[512]; static int tree_n = 0;
 static int tree_load(const char *path) {
@@ -212,17 +212,17 @@ static void cross_step(double now) {
    or Go-Back-N when use_sack is off) ---- */
 static uint32_t v_exp = 0; static uint8_t v_have[256]; static int v_sr = 1;
 static void vsrv_rx(ring_t *rev, double now, const uint8_t *b, int n) {
-    poise_packet_t p; if (poise_unpack(b, (size_t)n, &p) != 0 || !(p.flags & FLAG_DATA)) return;
+    replic_packet_t p; if (replic_unpack(b, (size_t)n, &p) != 0 || !(p.flags & FLAG_DATA)) return;
     if (p.seq_num == v_exp) { v_exp++; if (v_sr) while (v_have[v_exp % 256]) { v_have[v_exp % 256] = 0; v_exp++; } }
     else if (v_sr && p.seq_num > v_exp && p.seq_num - v_exp < 256) v_have[p.seq_num % 256] = 1;
-    poise_packet_t a; memset(&a, 0, sizeof a); a.ack_num = v_exp; a.flags = FLAG_ACK;
+    replic_packet_t a; memset(&a, 0, sizeof a); a.ack_num = v_exp; a.flags = FLAG_ACK;
     if (v_sr) { a.payload_len = 32; for (int j = 1; j < 256; j++) if (v_have[(v_exp + (uint32_t)j) % 256]) a.payload[j / 8] |= (uint8_t)(1u << (j % 8)); }
-    uint8_t ob[BUFFER_SIZE]; int l = poise_pack(&a, ob, sizeof ob);
+    uint8_t ob[BUFFER_SIZE]; int l = replic_pack(&a, ob, sizeof ob);
     double arr = rev_path(now); rpush(rev, arr, ob, l);
 }
 
 
-static int run_transfer(const poise_options_t *o, const char *fpath, const void *data, size_t datalen, poise_stats_t *res) {
+static int run_transfer(const replic_options_t *o, const char *fpath, const void *data, size_t datalen, replic_stats_t *res) {
     const char *mode = o->mode ? o->mode : "aimd", *scenario = o->scenario ? o->scenario : "custom", *qfile = o->qfile, *trace = o->trace_file, *pcapp = o->pcap_file, *dfile = o->weights_file;
     int port = o->port > 0 ? o->port : SERVER_PORT, npk = o->packets > 0 ? o->packets : 1500, train = o->train;
     unsigned seed = o->seed ? o->seed : 1;
@@ -244,26 +244,26 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
     int use_bbr = !strcmp(mode, "bbr");   /* simplified BBRv1 (Cardwell et al. 2016): model-based, ignores loss; see results/bbr_*.txt */
     int use_deep = !strcmp(mode, "deep"), use_rl2 = !strcmp(mode, "rl2"), use_smart = !strcmp(mode, "smart"), chat = use_deep || use_rl2 || use_smart;
     if (use_rl2 && !cap_set && maxcwnd > 32) maxcwnd = 32;   /* the table agent expects a cap of 32 */
-    int classic = getenv("POISE_CLASSIC") != NULL;               /* POISE_CLASSIC=1: the original agent settings (cap 32, no hand-over) used by the older evaluation scripts */
+    int classic = getenv("REPLIC_CLASSIC") != NULL;               /* REPLIC_CLASSIC=1: the original agent settings (cap 32, no hand-over) used by the older evaluation scripts */
     if ((use_deep || use_smart) && pace == 0 && !classic) pace = 2.0;   /* neural agent paces new packets at 2 x cwnd/srtt: 3% faster, 23% fewer retransmissions (vt sweep) */
     if (use_smart && ssdeep < 0) ssdeep = 64;
     if (use_deep && ssdeep < 0) ssdeep = classic ? 0 : 64;   /* slow start up to 64 packets before the policy takes over (see web/vt_random.py sweep) */
     if (use_smart && !cap_set) maxcwnd = 128;
     if (use_deep && !cap_set) maxcwnd = classic ? 32 : 128;                /* performance default for the neural agent (it was trained with a cap of 32 but generalises; see eval_perf2.sh) */
-    if (use_smart) hyb = 0;                      /* Poise: no external AIMD hand-over, no polite guard; the policy alone decides */
+    if (use_smart) hyb = 0;                      /* REPLIC: no external AIMD hand-over, no polite guard; the policy alone decides */
     if (use_deep && hyb < 0) hyb = classic ? 0.0 : 0.10;                     /* performance default: hand over to AIMD under heavy loss; --hybrid 0 turns it off */
     if (use_sack && maxcwnd > 250) maxcwnd = 250;   /* the receiver buffers a 256-packet window */
     if (init_cwnd < 0) init_cwnd = chat ? 10.0 : 1.0;
     sm_net_t smnet; sm_hist_t smh; sm_iv_t smiv; sm_hist_init(&smh); memset(&smiv, 0, sizeof smiv);
     if (use_smart) {
-        if (dfile) { int lr = sm_load(&smnet, dfile); if (lr) { fprintf(stderr, "cannot load smart weights %s (%d)\n", dfile, lr); return POISE_ERR_ARGS; } }
+        if (dfile) { int lr = sm_load(&smnet, dfile); if (lr) { fprintf(stderr, "cannot load smart weights %s (%d)\n", dfile, lr); return REPLIC_ERR_ARGS; } }
 #ifdef SM_HAVE_BUILTIN
         else sm_builtin(&smnet);
 #else
-        else { fprintf(stderr, "--mode smart needs --dfile smart_*.txt (no compiled-in weights)\n"); return POISE_ERR_ARGS; }
+        else { fprintf(stderr, "--mode smart needs --dfile smart_*.txt (no compiled-in weights)\n"); return REPLIC_ERR_ARGS; }
 #endif
     }
-    deep_net_t dnet; if (use_deep && (!dfile || deep_load(&dnet, dfile) != 0)) { fprintf(stderr, "need --dfile with the exported network\n"); return POISE_ERR_ARGS; }
+    deep_net_t dnet; if (use_deep && (!dfile || deep_load(&dnet, dfile) != 0)) { fprintf(stderr, "need --dfile with the exported network\n"); return REPLIC_ERR_ARGS; }
     if (npk > MAXN) npk = MAXN;
     if (queue_cap > QCAP / 2) queue_cap = QCAP / 2;
     if (ref <= 0) ref = rate_pps > 0 ? rate_pps : 1000;
@@ -277,46 +277,46 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
     ag.eps = train ? eps : 0.0;
 
     int sockfd = vt ? -1 : socket(AF_INET, SOCK_DGRAM, 0);
-    if (!vt && sockfd < 0) { perror("socket"); return POISE_ERR_IO; }
+    if (!vt && sockfd < 0) { perror("socket"); return REPLIC_ERR_IO; }
     struct sockaddr_in sa; memset(&sa, 0, sizeof sa);
     sa.sin_family = AF_INET; sa.sin_port = htons((uint16_t)port);
-    if (inet_pton(AF_INET, o->host ? o->host : SERVER_IP, &sa.sin_addr) != 1) { fprintf(stderr, "bad host address\n"); return POISE_ERR_ARGS; }
+    if (inet_pton(AF_INET, o->host ? o->host : SERVER_IP, &sa.sin_addr) != 1) { fprintf(stderr, "bad host address\n"); return REPLIC_ERR_ARGS; }
     struct timeval tv = {1, 0}; if (!vt) setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof tv);
 
     /* ---- handshake (direct, not emulated) ---- */
     uint32_t cseq = (uint32_t)rand(), sseq = 0; uint8_t buf[BUFFER_SIZE]; int ok = 0;
     if (vt) { cseq = 1000; ok = 1; }
     for (int at = 0; at < 8 && !ok; at++) {
-        poise_packet_t syn; memset(&syn, 0, sizeof syn); syn.seq_num = cseq; syn.flags = FLAG_SYN;
-        int l = poise_pack(&syn, buf, sizeof buf);
+        replic_packet_t syn; memset(&syn, 0, sizeof syn); syn.seq_num = cseq; syn.flags = FLAG_SYN;
+        int l = replic_pack(&syn, buf, sizeof buf);
         sendto(sockfd, buf, (size_t)l, 0, (struct sockaddr *)&sa, sizeof sa);
         ssize_t n = recvfrom(sockfd, buf, sizeof buf, 0, NULL, NULL);
-        poise_packet_t rp;
-        if (n > 0 && poise_unpack(buf, (size_t)n, &rp) == 0 && (rp.flags & FLAG_SYN) &&
+        replic_packet_t rp;
+        if (n > 0 && replic_unpack(buf, (size_t)n, &rp) == 0 && (rp.flags & FLAG_SYN) &&
             (rp.flags & FLAG_ACK) && rp.ack_num == cseq + 1) {
             sseq = rp.seq_num;
-            poise_packet_t ack; memset(&ack, 0, sizeof ack);
+            replic_packet_t ack; memset(&ack, 0, sizeof ack);
             ack.seq_num = cseq + 1; ack.ack_num = sseq + 1; ack.flags = FLAG_ACK;
-            l = poise_pack(&ack, buf, sizeof buf);
+            l = replic_pack(&ack, buf, sizeof buf);
             sendto(sockfd, buf, (size_t)l, 0, (struct sockaddr *)&sa, sizeof sa);
             ok = 1;
         }
     }
-    if (!ok) { fprintf(stderr, "handshake failed (port %d)\n", port); return POISE_ERR_IO; }
+    if (!ok) { fprintf(stderr, "handshake failed (port %d)\n", port); return REPLIC_ERR_IO; }
 
     /* ---- packets ---- */
-    static poise_packet_t pk[MAXN];
+    static replic_packet_t pk[MAXN];
     static double sent_at[MAXN]; static uint8_t retx_flag[MAXN], sacked[MAXN];
     memset(sent_at, 0, sizeof sent_at); memset(retx_flag, 0, sizeof retx_flag); memset(sacked, 0, sizeof sacked);
     uint32_t base_seq = cseq + 1; v_exp = base_seq;
     FILE *ff = NULL;
     if (fpath) {                                   /* file mode: send a real file in 512-byte chunks */
-        ff = fopen(fpath, "rb"); if (!ff) { perror(fpath); return POISE_ERR_IO; }
+        ff = fopen(fpath, "rb"); if (!ff) { perror(fpath); return REPLIC_ERR_IO; }
         fseek(ff, 0, SEEK_END); long sz = ftell(ff); fseek(ff, 0, SEEK_SET);
-        if (sz <= 0 || sz > (long)MAXN * MAX_PAYLOAD) { fprintf(stderr, "file must be 1 byte to %d MB\n", MAXN * MAX_PAYLOAD >> 20); fclose(ff); return POISE_ERR_ARGS; }
+        if (sz <= 0 || sz > (long)MAXN * MAX_PAYLOAD) { fprintf(stderr, "file must be 1 byte to %d MB\n", MAXN * MAX_PAYLOAD >> 20); fclose(ff); return REPLIC_ERR_ARGS; }
         npk = (int)((sz + MAX_PAYLOAD - 1) / MAX_PAYLOAD);
     } else if (data) {                             /* buffer mode (library): the bytes are cut into 512-byte chunks */
-        if (datalen == 0 || datalen > POISE_MAX_BYTES) { fprintf(stderr, "data must be 1 byte to %u MB\n", POISE_MAX_BYTES >> 20); return POISE_ERR_ARGS; }
+        if (datalen == 0 || datalen > REPLIC_MAX_BYTES) { fprintf(stderr, "data must be 1 byte to %u MB\n", REPLIC_MAX_BYTES >> 20); return REPLIC_ERR_ARGS; }
         npk = (int)((datalen + MAX_PAYLOAD - 1) / MAX_PAYLOAD);
     }
     for (int i = 0; i < npk; i++) {
@@ -338,20 +338,20 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
     ring_t fwd = { malloc(sizeof(pend_t) * QCAP), 0, 0 }, rev = { malloc(sizeof(pend_t) * QCAP), 0, 0 };
 
     FILE *tr = trace ? fopen(trace, "w") : NULL;
-    if (tr && getenv("POISE_LIVE")) setvbuf(tr, NULL, _IOLBF, 0);   /* Studio: flush every trace line so a browser can follow live */
+    if (tr && getenv("REPLIC_LIVE")) setvbuf(tr, NULL, _IOLBF, 0);   /* Studio: flush every trace line so a browser can follow live */
     if (tr) fprintf(tr, "time_ms,event,cwnd,rtt_ms\n");
 
     /* ---- sender state ---- */
     int base = 0, next = 0, dup = 0, recover = -1; uint32_t last_ack = 0;
     int ss_phase = 0;   /* deep agent: classic slow start until the first congestion signal, then the policy takes over */
-    double rto_mult = getenv("POISE_RTOMULT") ? atof(getenv("POISE_RTOMULT")) : 1.3; double wmax = 0, kcub = 0, epoch = -1; double cwnd = init_cwnd, ssthresh = ss0, srtt = -1, rttvar = 0, rto = 1000;
+    double rto_mult = getenv("REPLIC_RTOMULT") ? atof(getenv("REPLIC_RTOMULT")) : 1.3; double wmax = 0, kcub = 0, epoch = -1; double cwnd = init_cwnd, ssthresh = ss0, srtt = -1, rttvar = 0, rto = 1000;
     double min_rtt = 1e9, rtt_sum = 0, dev_floor = 1e9; long rtt_n = 0;
     /* BBR state: delivery-rate history, windowed max filter, STARTUP -> DRAIN -> PROBE_BW (ProbeRTT omitted: transfers are short) */
     double bb_t[64] = {0}; long bb_d[64] = {0}; int bb_n = 0; long bb_deliv = 0;
     double bw_t[32] = {0}, bw_v[32] = {0}; int bw_n = 0; double bbr_bw = 0, bbr_gain = 2.885, bbr_full_bw = 0; int bbr_state = 0, bbr_full_cnt = 0, bbr_phase = 0;
     long bbr_round_end = 0; double bbr_phase_start = 0, bbr_rt = 1e9, bbr_rt_t = 0;   /* bbr_rt: min RTT over the last 10 s (BBR's RTprop filter; ProbeRTT is replaced by this expiry) */
-    double last_prog = now_ms(); int tlp_sent = 0, rack_on = getenv("POISE_NORACK") ? 0 : 1;
-    long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0, fec_tx = 0; int fec_k = getenv("POISE_FEC") ? atoi(getenv("POISE_FEC")) : 0;
+    double last_prog = now_ms(); int tlp_sent = 0, rack_on = getenv("REPLIC_NORACK") ? 0 : 1;
+    long tx_total = 0, retx = 0, timeouts = 0, fast_retx = 0, fec_tx = 0; int fec_k = getenv("REPLIC_FEC") ? atoi(getenv("REPLIC_FEC")) : 0;
     double timer_start = 0; int timer_on = 0;
     /* RL interval stats */
     double iv_start = 0, iv_rtt_sum = 0; long iv_rtt_n = 0, iv_acked = 0, iv_sent = 0, iv_retx = 0;
@@ -363,16 +363,16 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
     if (tr) fprintf(tr, "0,START,%.2f,0\n", cwnd);
 
 #define TX(i, isretx) do { \
-        uint8_t b_[BUFFER_SIZE]; int l_ = poise_pack(&pk[i], b_, sizeof b_); \
+        uint8_t b_[BUFFER_SIZE]; int l_ = replic_pack(&pk[i], b_, sizeof b_); \
         double tn_ = now_ms(); double ar_ = fwd_path(tn_); \
         tx_total++; iv_sent++; if (!(isretx)) iv_new++; if (isretx) { retx++; iv_retx++; retx_flag[i] = 1; } \
         sent_at[i] = tn_; \
         if (ar_ >= 0) rpush(&fwd, ar_, b_, l_); \
         if (!(isretx) && fec_k > 0 && ((i) % fec_k == fec_k - 1 || (i) == npk - 1)) { \
-            int gs_ = (i) - (i) % fec_k, n_ = (i) - gs_ + 1; poise_packet_t fp_; memset(&fp_, 0, sizeof fp_); uint32_t lx_ = 0; \
+            int gs_ = (i) - (i) % fec_k, n_ = (i) - gs_ + 1; replic_packet_t fp_; memset(&fp_, 0, sizeof fp_); uint32_t lx_ = 0; \
             for (int j_ = gs_; j_ <= (i); j_++) { for (int k_ = 0; k_ < pk[j_].payload_len; k_++) fp_.payload[k_] ^= pk[j_].payload[k_]; lx_ ^= pk[j_].payload_len; } \
             fp_.seq_num = pk[gs_].seq_num; fp_.flags = FLAG_FEC; fp_.payload_len = MAX_PAYLOAD; fp_.ack_num = ((uint32_t)n_ << 16) | lx_; \
-            uint8_t fb_[BUFFER_SIZE]; int fl_ = poise_pack(&fp_, fb_, sizeof fb_); double fa_ = fwd_path(tn_); fec_tx++; \
+            uint8_t fb_[BUFFER_SIZE]; int fl_ = replic_pack(&fp_, fb_, sizeof fb_); double fa_ = fwd_path(tn_); fec_tx++; \
             if (fa_ >= 0 && fl_ > 0) rpush(&fwd, fa_, fb_, fl_); \
         } \
     } while (0)
@@ -398,7 +398,7 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
         }
         /* 3. process ACKs that have "arrived" */
         while ((p = rfront(&rev)) && p->t <= now) {
-            poise_packet_t ack; int okp = poise_unpack(p->buf, (size_t)p->len, &ack) == 0;
+            replic_packet_t ack; int okp = replic_unpack(p->buf, (size_t)p->len, &ack) == 0;
             pcap_write(now, 0, port, p->buf, p->len); rev.head++;
             if (!okp || !(ack.flags & FLAG_ACK)) continue;
             uint32_t a = ack.ack_num;
@@ -431,7 +431,7 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
                     }
                     if (cwnd > maxcwnd) cwnd = maxcwnd;
                     if (ss_phase && cwnd >= ssdeep) ss_phase = 0;
-                    if (ss_phase && rack_on && !getenv("POISE_NOHYSTART") && rtt_n >= 8 && srtt > 0 && min_rtt < 1e8 && srtt >= min_rtt * 1.25 + 4 * rttvar) ss_phase = 0;   /* HyStart-style: leave slow start when the queue starts to build, not at the next 100 ms control interval */
+                    if (ss_phase && rack_on && !getenv("REPLIC_NOHYSTART") && rtt_n >= 8 && srtt > 0 && min_rtt < 1e8 && srtt >= min_rtt * 1.25 + 4 * rttvar) ss_phase = 0;   /* HyStart-style: leave slow start when the queue starts to build, not at the next 100 ms control interval */
                 }
                 if (use_bbr) {
                     bb_deliv += newly; bb_t[bb_n % 64] = now; bb_d[bb_n % 64] = bb_deliv; bb_n++;
@@ -560,9 +560,9 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
                     else if (use_deep) {
                         double x[DN_IN] = { (ratio - 1.0 > 3.0 ? 3.0 : ratio - 1.0) / 3.0, (lossf > 0.3 ? 0.3 : lossf) / 0.3, cwnd / 32.0, thr, RL_MULT[last_act] - 1.0 }, q[DN_OUT];
                         { static double nz = -1; static int tr_ok = -1; static FILE *slog = NULL; static int slog_t = 0;
-                          if (nz < 0) { nz = getenv("POISE_NOISE") ? atof(getenv("POISE_NOISE")) : 0; }
-                          if (tr_ok < 0) { tr_ok = getenv("POISE_TREE") ? (tree_load(getenv("POISE_TREE")) == 0) : 0; }
-                          if (!slog_t) { slog_t = 1; if (getenv("POISE_STATELOG")) slog = fopen(getenv("POISE_STATELOG"), "a"); }
+                          if (nz < 0) { nz = getenv("REPLIC_NOISE") ? atof(getenv("REPLIC_NOISE")) : 0; }
+                          if (tr_ok < 0) { tr_ok = getenv("REPLIC_TREE") ? (tree_load(getenv("REPLIC_TREE")) == 0) : 0; }
+                          if (!slog_t) { slog_t = 1; if (getenv("REPLIC_STATELOG")) slog = fopen(getenv("REPLIC_STATELOG"), "a"); }
                           if (nz > 0) for (int k = 0; k < 4; k++) x[k] += nz * gauss();
                           if (tr_ok) { act = tree_predict(x); if (act < lo) act = lo; }
                           else { deep_forward(&dnet, x, q); act = lo; for (int k = lo + 1; k < RL_NA; k++) if (q[k] > q[act]) act = k; }
@@ -623,15 +623,15 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
         if (vt) vclock += vstep;
         else { struct pollfd pf = { sockfd, POLLIN, 0 }; poll(&pf, 1, 0);
         struct timespec ts = { 0, 300000 }; nanosleep(&ts, NULL); }
-        if (now_ms() - t0 > 600000) { fprintf(stderr, "abort: stuck\n"); return POISE_ERR_STUCK; }
+        if (now_ms() - t0 > 600000) { fprintf(stderr, "abort: stuck\n"); return REPLIC_ERR_STUCK; }
     }
     double done = now_ms() - t0;
     if (tr) fprintf(tr, "%.1f,DONE,%.2f,%.1f\n", done, cwnd, srtt);
 
     /* teardown */
-    poise_packet_t fin; memset(&fin, 0, sizeof fin);
+    replic_packet_t fin; memset(&fin, 0, sizeof fin);
     fin.seq_num = base_seq + (uint32_t)npk; fin.flags = FLAG_FIN;
-    int l = poise_pack(&fin, buf, sizeof buf);
+    int l = replic_pack(&fin, buf, sizeof buf);
     if (!vt) {
     /* v2 fix: the FIN used to be sent once; if it was lost the server never closed (and never flushed its output file).
        Retransmit it until the matching ACK arrives, at most 12 tries, 150 ms apart. */
@@ -643,7 +643,7 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
             struct pollfd pf = { sockfd, POLLIN, 0 };
             if (poll(&pf, 1, 20) <= 0) continue;
             uint8_t rb[BUFFER_SIZE]; ssize_t rn = recvfrom(sockfd, rb, sizeof rb, 0, NULL, NULL);
-            poise_packet_t rp; if (rn > 0 && poise_unpack(rb, (size_t)rn, &rp) == 0 && (rp.flags & FLAG_ACK) && rp.ack_num == fin.seq_num + 1) got = 1;
+            replic_packet_t rp; if (rn > 0 && replic_unpack(rb, (size_t)rn, &rp) == 0 && (rp.flags & FLAG_ACK) && rp.ack_num == fin.seq_num + 1) got = 1;
         }
         if (got) break;
     } }
@@ -661,25 +661,25 @@ static int run_transfer(const poise_options_t *o, const char *fpath, const void 
     if (pcapf) { fclose(pcapf); pcapf = NULL; }
     if (!vt) close(sockfd);
     free(fwd.a); free(rev.a);
-    return POISE_OK;
+    return REPLIC_OK;
 }
 
 /* ------------------------------------------------------------------ public API ------------------------------------------------------------------ */
-void poise_options_default(poise_options_t *o) {
+void replic_options_default(replic_options_t *o) {
     memset(o, 0, sizeof *o);
     o->host = "127.0.0.1"; o->port = SERVER_PORT; o->mode = "aimd"; o->init_cwnd = -1; o->ssthresh = 16;
     o->slow_start_to = -1; o->slow_start_ratio = 1.3; o->hybrid = -1; o->delay_ms = 10; o->queue_packets = 50;
     o->seed = 1; o->packets = 1500; o->scenario = "custom"; o->vstep_ms = 0.35;
 }
-int poise_send(const poise_options_t *o, const void *data, size_t len, poise_stats_t *stats) {
-    if (!o || !data) return POISE_ERR_ARGS;
+int replic_send(const replic_options_t *o, const void *data, size_t len, replic_stats_t *stats) {
+    if (!o || !data) return REPLIC_ERR_ARGS;
     return run_transfer(o, NULL, data, len, stats);
 }
-int poise_send_file(const poise_options_t *o, const char *path, poise_stats_t *stats) {
-    if (!o || !path) return POISE_ERR_ARGS;
+int replic_send_file(const replic_options_t *o, const char *path, replic_stats_t *stats) {
+    if (!o || !path) return REPLIC_ERR_ARGS;
     return run_transfer(o, path, NULL, 0, stats);
 }
-int poise_send_test_pattern(const poise_options_t *o, poise_stats_t *stats) { return o ? run_transfer(o, NULL, NULL, 0, stats) : POISE_ERR_ARGS; }
-const char *poise_strerror(int code) {
-    switch (code) { case POISE_OK: return "ok"; case POISE_ERR_IO: return "I/O error (socket, handshake or file)"; case POISE_ERR_ARGS: return "invalid arguments"; case POISE_ERR_STUCK: return "transfer stuck (no progress for 10 minutes)"; default: return "unknown error"; }
+int replic_send_test_pattern(const replic_options_t *o, replic_stats_t *stats) { return o ? run_transfer(o, NULL, NULL, 0, stats) : REPLIC_ERR_ARGS; }
+const char *replic_strerror(int code) {
+    switch (code) { case REPLIC_OK: return "ok"; case REPLIC_ERR_IO: return "I/O error (socket, handshake or file)"; case REPLIC_ERR_ARGS: return "invalid arguments"; case REPLIC_ERR_STUCK: return "transfer stuck (no progress for 10 minutes)"; default: return "unknown error"; }
 }

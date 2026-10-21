@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Behaviour tests for the Poise PPO controller, the counterpart of the Q-table checks in tests/test_sim.py.
+"""Behaviour tests for the REPLIC PPO controller, the counterpart of the Q-table checks in tests/test_sim.py.
    Needs results/smart/smart_final.npz (the trained weights) and src/neural_weights.h (the same weights compiled into C)."""
 import os, subprocess, sys
 import numpy as np
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(HERE)
 sys.path.insert(0, ROOT)
-import train_smart_poise as T
+import train_smart_replic as T
 NPZ = os.path.join(ROOT, "results", "smart", "smart_final.npz")
 fails = 0
 def check(c, msg):
@@ -26,9 +26,9 @@ check(float(A.std()) > 0.05, "the action depends on the input (not a constant)")
 # the policy in the simulator, alone on the 1000 pps / 44 ms / 60-packet link with 0.1% random loss
 alone = [T.eval_pair("policy", "cubic", 0, s, pol, dur=15000.0) for s in (1, 2)]
 aimd = [T.eval_pair("aimd", "cubic", 0, s, None, dur=15000.0) for s in (1, 2)]
-check(all(r["util"] > 0.6 for r in alone), "alone, Poise fills more than 60%% of the link (%s)" % ", ".join("%.2f" % r["util"] for r in alone))
-check(np.mean([r["util"] for r in alone]) >= np.mean([r["util"] for r in aimd]), "alone, Poise uses at least as much of the link as AIMD does")
-check(all(r["qd"] < 1.0 for r in alone), "alone, Poise does not keep a standing queue (mean queue delay under 1 s)")
+check(all(r["util"] > 0.6 for r in alone), "alone, REPLIC fills more than 60%% of the link (%s)" % ", ".join("%.2f" % r["util"] for r in alone))
+check(np.mean([r["util"] for r in alone]) >= np.mean([r["util"] for r in aimd]), "alone, REPLIC uses at least as much of the link as AIMD does")
+check(all(r["qd"] < 1.0 for r in alone), "alone, REPLIC does not keep a standing queue (mean queue delay under 1 s)")
 vs = [T.eval_pair("policy", "cubic", 1, s, pol, dur=15000.0) for s in (1, 2, 3)]
 check(all(r["J"] > 0.9 for r in vs), "against one CUBIC flow the Jain fairness index is above 0.9 (%s)" % ", ".join("%.2f" % r["J"] for r in vs))
 check(all(r["minrel"] > 0.6 for r in vs), "against one CUBIC flow nobody gets less than 60%% of a fair share (%s)" % ", ".join("%.2f" % r["minrel"] for r in vs))

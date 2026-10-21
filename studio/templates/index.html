@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Poise Studio</title>
+<title>REPLIC Studio</title>
 <style>
 :root{--bg:#0b1020;--panel:#121a30;--panel2:#18223f;--line:#27324f;--tx:#e6ebf7;--mut:#8b97b5;--acc:#34d399;--warn:#fbbf24;--bad:#f87171}
 *{box-sizing:border-box}
@@ -76,7 +76,7 @@ select{background:var(--panel2);color:var(--tx);border:1px solid var(--line);bor
 </head>
 <body>
 <header>
-  <div><h1>Poise Studio</h1><div class="sub">real C sender / receiver / impairment proxy, live from this machine</div></div>
+  <div><h1>REPLIC Studio</h1><div class="sub">REPLIC: Reinforcement-Learning-Engineered Protocol for Internet Congestion. Real C sender / receiver / impairment proxy, live from this machine</div></div>
   <div class="pill"><span class="dot" id="dot"></span><span id="conn">connecting…</span><span id="clock">0.0 s</span></div>
 </header>
 <main>
@@ -173,7 +173,7 @@ async function init(){
      arms.filter(([k])=>['cubic','bbr'].includes(k)).map(([k,a])=>`<label><input type="checkbox" value="${k}"><span class="sw" style="background:${a.color}"></span>${a.label}</label>`).join('');
   $('subjlist').innerHTML=['smart','smart_polite','smart_true'].map(k=>`<label class="subj"><input type="checkbox" value="${k}" ${CFG.coexist_defaults.subjects.includes(k)?'checked':''}><span class="sw" style="background:${CFG.arms[k].color}"></span>${CFG.arms[k].label}</label>`).join('');
   $('subjlist').querySelectorAll('label').forEach(l=>{l.style.cssText='display:flex;gap:8px;align-items:center;color:var(--tx);font-size:13px;margin:6px 0'});
-  if(!CFG.true_smart_ready) $('err').textContent='results/smart/smart_final.txt is missing: the Poise policy is unavailable until it is trained.';
+  if(!CFG.true_smart_ready) $('err').textContent='results/smart/smart_final.txt is missing: the REPLIC policy is unavailable until it is trained.';
   $('kk').oninput=()=>$('v_k').textContent=$('kk').value; $('v_k').textContent=$('kk').value;
   $('reps').oninput=()=>$('v_reps').textContent=$('reps').value; $('v_reps').textContent=$('reps').value;
   document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>{const p=PRE[b.dataset.p];for(const k in p)setv(k,p[k])});

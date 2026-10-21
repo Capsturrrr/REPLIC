@@ -1,7 +1,7 @@
 #!/bin/bash
-# Kernel-netem evaluation: TCP, plain UDP and Poise (AIMD, CUBIC, neural) on the same path.
-#   sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]   (TCP_ONLY=1 sudo -E ... skips Poise)
-# TCP/UDP use 512-byte payloads, the same as Poise, so every protocol moves the same bytes.      (build first: make smart)
+# Kernel-netem evaluation: TCP, plain UDP and REPLIC (AIMD, CUBIC, neural) on the same path.
+#   sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]   (TCP_ONLY=1 sudo -E ... skips REPLIC)
+# TCP/UDP use 512-byte payloads, the same as REPLIC, so every protocol moves the same bytes.      (build first: make smart)
 # Writes results/netem_<scenario>.txt (also printed). Removes the netem rule on exit.
 sc=${1:-lossy}; REPS=${2:-5}; PKTS=500
 case $sc in
@@ -16,8 +16,8 @@ cd "$(dirname "$0")"
 for f in bin/server bin/smart_client results/dqn_chat.txt web/real_baselines.py; do
   [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }
 done
-# Poise must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
-PL=/tmp/poise_payload_${PKTS}.bin; head -c 256000 /dev/urandom > $PL
+# REPLIC must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
+PL=/tmp/replic_payload_${PKTS}.bin; head -c 256000 /dev/urandom > $PL
 OUT=results/netem_$sc.txt; : > $OUT
 SP=""
 OLDMTU=$(cat /sys/class/net/lo/mtu 2>/dev/null || echo 65536)
@@ -32,12 +32,12 @@ ip link set dev lo mtu 1500 || { echo "could not set lo mtu"; exit 1; }
 tc qdisc add dev lo root handle 1: netem delay ${D}ms ${J}ms $X loss ${L}% limit 100000 || { echo "tc netem failed (WSL2 needs the netem kernel module)"; exit 1; }
 tc qdisc add dev lo parent 1:1 handle 10: tbf rate $R burst 16kb limit $((Q*600+16000)) || { echo "tc tbf failed"; exit 1; }
 log "scenario=$sc delay=${D}ms jitter=${J}ms loss=${L}% rate=$R queue=${Q}pkts (netem + tbf bottleneck) packets=$PKTS reps=$REPS"
-[ -n "$POISE_ONLY" ] || { log "== kernel TCP and plain UDP =="
+[ -n "$REPLIC_ONLY" ] || { log "== kernel TCP and plain UDP =="
 for i in $(seq $REPS); do python3 web/real_baselines.py $PKTS 512 2>&1 | tee -a $OUT; done; }
 [ -n "$TCP_ONLY" ] && { log "== done (TCP_ONLY) =="; exit 0; }
 ./bin/server >/dev/null 2>&1 & SP=$!
 sleep 0.5
-log "== Poise (RESULT: scenario,mode,ms,packets,sent,retx,timeouts,fast,avg_rtt,min_rtt,pps,cwnd,reward) =="
+log "== REPLIC (RESULT: scenario,mode,ms,packets,sent,retx,timeouts,fast,avg_rtt,min_rtt,pps,cwnd,reward) =="
 for i in $(seq $REPS); do
   # aimd0 = untuned AIMD (init 1, ssthresh 16); aimd = tuned AIMD used in the report (cap 128, ssthresh 128); aimd10 = tuned + initial window 10 (TCP-like)
   for m in aimd0 aimd aimd10 deep; do

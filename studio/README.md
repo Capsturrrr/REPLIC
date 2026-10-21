@@ -1,4 +1,4 @@
-# Poise Studio
+# REPLIC Studio
 
 A browser dashboard around the real C sender, receiver and impairment proxy.
 
@@ -11,7 +11,7 @@ A browser dashboard around the real C sender, receiver and impairment proxy.
 * REST: `GET /api/config`, `POST /api/race`, `GET /api/race/{id}`, `POST /api/stop`, `GET /api/fairness`.
 
 What is and is not real
-* cwnd/RTT come from the sender's `--trace` file, goodput and the dissector from its `--pcap` file (`POISE_LIVE=1` makes the sender flush each line).
+* cwnd/RTT come from the sender's `--trace` file, goodput and the dissector from its `--pcap` file (`REPLIC_LIVE=1` makes the sender flush each line).
 * "Loss rate" is the share of TIMEOUT/FAST_RETX events among trace events in the last second, not the link's configured loss.
 * FEC is a fixed XOR parity packet per 8 data packets. It is not adaptive.
 * One race is one sample; use `run_all_tests.py` and `run_fairness_test.py` for statistics.
@@ -21,5 +21,5 @@ What is and is not real
 `POST /api/coexist {subjects:[...], bg:"cubic"|"bbr", k:1..3, ...}` runs each selected policy on its own bottleneck shared with k background flows,
 one policy after the other (concurrent groups starve the busy-polling senders of CPU on a 2-core machine and hide the effect), and reports Jain's index live and,
 at the end, frozen at the moment the first flow finishes. The UI can repeat the test up to 5 times and shows mean ± sd.
-Toggle policies: "Neural v1 (static DQN)", "Neural v1 + --polite guard" and "Poise (PPO, fairness-trained)" (needs `results/smart/smart_final.txt`).
-In three back-to-back repeats on the development machine the static agent took 1.56 ± 0.15 of its fair share (Jain 0.86) and Poise 0.90 ± 0.05 (Jain 0.98) against two CUBIC flows.
+Toggle policies: "Neural v1 (static DQN)", "Neural v1 + --polite guard" and "REPLIC (PPO, fairness-trained)" (needs `results/smart/smart_final.txt`).
+In three back-to-back repeats on the development machine the static agent took 1.56 ± 0.15 of its fair share (Jain 0.86) and REPLIC 0.90 ± 0.05 (Jain 0.98) against two CUBIC flows.

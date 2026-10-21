@@ -1,4 +1,4 @@
-Stress test, 48 paths x 3 seeds, realistic fast-retransmit (POISE_RG=1)
+Stress test, 48 paths x 3 seeds, realistic fast-retransmit (REPLIC_RG=1)
 --- original neural agent (trained in the permissive simulator)
 48 random paths x 3 seeds
   mean time fixed :    7.16 s   median   3.03 s

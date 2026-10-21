@@ -20,7 +20,7 @@ def unpack(b):
 port = 9871
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 subprocess.run(["gcc", f"-DSERVER_PORT={port}", "-o", "/tmp/server_hs", os.path.join(root, "src/server.c"), os.path.join(root, "src/common.c")], check=True)
-srv = subprocess.Popen(["/tmp/server_hs"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=dict(os.environ, POISE_QUIET="1"))
+srv = subprocess.Popen(["/tmp/server_hs"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, env=dict(os.environ, REPLIC_QUIET="1"))
 time.sleep(0.4)
 try:
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM); s.settimeout(2)

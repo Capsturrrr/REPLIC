@@ -38,8 +38,8 @@ Runs that fail the byte-for-byte check are counted ($n_{ok}/n$) and excluded fro
 \subsection{Results: kernel TCP under Linux netem ($n=30$ per cell)}
 \label{sec:kerneltcp}
 This backend replaces the user-space proxy with \texttt{tc netem} and \texttt{tbf} on the loopback device and adds native kernel TCP (CUBIC and BBR) as
-baselines. Kernel TCP sends the same random payload, over the same bottleneck, with its timer started after \texttt{connect()} (the Poise timer starts after
-its handshake) and stopped when the receiver has all bytes and answers, which is the same end condition as the Poise client. Netem impairs both directions of
+baselines. Kernel TCP sends the same random payload, over the same bottleneck, with its timer started after \texttt{connect()} (the REPLIC timer starts after
+its handshake) and stopped when the receiver has all bytes and answers, which is the same end condition as the REPLIC client. Netem impairs both directions of
 \texttt{lo}, whereas the proxy impairs the forward path only, so \textbf{the two backends are never mixed in one table}. The synthetic cross-traffic bursts of the proxy have
 no netem counterpart; under netem \texttt{dc\_microburst} keeps only its shallow buffer, delay and rate.
 \inputif{\texpath/netem_scale_table.tex}
@@ -59,15 +59,15 @@ subject & background & $k$ & $n$ & $J$ & share & min\\\midrule
 \bottomrule\end{tabular}
 \end{table*}
 
-\paragraph{Reading Table~\ref{tab:fair30}.} With 30 runs per cell (Welch tests, unadjusted) the Poise agent has a higher Jain index than the static agent against CUBIC
+\paragraph{Reading Table~\ref{tab:fair30}.} With 30 runs per cell (Welch tests, unadjusted) the REPLIC agent has a higher Jain index than the static agent against CUBIC
 ($k=1$: 0.974 vs 0.942, $p=0.012$; $k=2$: 0.958 vs 0.881, $p<0.001$), and than the static agent with the \texttt{--polite} guard ($k=1$: $p=0.001$; $k=2$: 0.958 vs 0.919, $p=0.015$);
-at $n=5$ the guard comparison was not significant. Against BBR the picture is different: Poise's Jain index is not distinguishable from the static agent's
+at $n=5$ the guard comparison was not significant. Against BBR the picture is different: REPLIC's Jain index is not distinguishable from the static agent's
 ($k=1$: $p=0.34$; $k=2$: $p=0.33$), and it takes only about $0.74\times$ its equal share, i.e.\ it yields to the simplified BBR background flows rather than being unfair to them,
 at the cost of its own throughput. We make no fairness claim against BBR beyond ``not a bully''.
 
 \subsection{Threats to validity}
 (i) The path families are our own parameter ranges, not measurements of deployed networks. (ii) Intervals describe sampling error over our families, not any particular real path.
-(iii) On \texttt{dc\_microburst} a 1\,MB transfer ends within a few round-trips, so handshake and slow start, which are fixed rules shared by all Poise policies, dominate
+(iii) On \texttt{dc\_microburst} a 1\,MB transfer ends within a few round-trips, so handshake and slow start, which are fixed rules shared by all REPLIC policies, dominate
 the comparison. (iv) The learned policies were trained on a simulator with simplified CUBIC and BBR; no result here should be read as evidence about real BBR deployments.
 (v) A single machine with two cores runs sender, receiver and bottleneck emulation; the order randomisation limits, but does not remove, load-dependent timing noise.
 (vi) Kernel-TCP retransmission counts come from a system-wide counter and are only meaningful on an otherwise idle host.

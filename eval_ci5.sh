@@ -1,9 +1,9 @@
 #!/bin/bash
 # AIMD (cap 32) vs the neural agent with and without the timeout safety net (--tcut 0.25), plus a hostile 10%-loss scenario.
-# (Go-Back-N era: the transport was Go-Back-N when this was run; the script now pins it with -DPOISE_GBN and --gbn.)
+# (Go-Back-N era: the transport was Go-Back-N when this was run; the script now pins it with -DREPLIC_GBN and --gbn.)
 # usage: bash eval_ci5.sh [runs] -> results/eval_ci5_<scenario>.csv ; summarise with python3 ci_summary5.py
-export POISE_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
-export POISE_CLASSIC=1
+export REPLIC_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
+export REPLIC_CLASSIC=1
 cd "$(dirname "$0")"; RUNS=${1:-10}
 declare -A P
 P[5g]="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60"
@@ -12,7 +12,7 @@ P[sat]="--delay 150 --jitter 10 --loss 0.3 --rate 400 --queue 100"
 P[bad]="--delay 40 --jitter 5 --loss 10 --rate 600 --queue 40"
 port=9800
 for sc in 5g lossy sat bad; do
-  port=$((port+1)); gcc -DPOISE_GBN -DSERVER_PORT=$port -o bin/server_$port src/server.c src/common.c
+  port=$((port+1)); gcc -DREPLIC_GBN -DSERVER_PORT=$port -o bin/server_$port src/server.c src/common.c
   ( ./bin/server_$port >/dev/null 2>&1 & SP=$!; sleep 0.3; rm -f results/eval_ci5_$sc.csv
     for i in $(seq 1 $RUNS); do
       for arm in aimd32 deep deepcut; do

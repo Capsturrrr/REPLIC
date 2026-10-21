@@ -10,14 +10,14 @@ N = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 rng = random.Random(424242); paths = [vt_random.draw(rng) for _ in range(N)]
 VARIANTS = [   # name, arm, extra flags, env
     ("tuned AIMD (reference)", "aimd_128", "", None),
-    ("tuned AIMD, retransmission-timer floor off", "aimd_128", "", {"POISE_RTOMULT": "1.0"}),
+    ("tuned AIMD, retransmission-timer floor off", "aimd_128", "", {"REPLIC_RTOMULT": "1.0"}),
     ("neural agent, final configuration", "deep", "", None),
     ("  without slow start before the policy", "deep", "--ssdeep 0", None),
     ("  without pacing", "deep", "--pace -1", None),
     ("  without the AIMD hand-over", "deep", "--hybrid 0", None),
     ("  window cap 32 instead of 128", "deep", "--maxcwnd 32", None),
-    ("  without the timer floor", "deep", "", {"POISE_RTOMULT": "1.0"}),
-    ("  original settings (POISE_CLASSIC=1)", "deep", "", {"POISE_CLASSIC": "1"}),
+    ("  without the timer floor", "deep", "", {"REPLIC_RTOMULT": "1.0"}),
+    ("  original settings (REPLIC_CLASSIC=1)", "deep", "", {"REPLIC_CLASSIC": "1"}),
 ]
 def one(args):
     arm, extra, env, i = args; pa, n = paths[i]

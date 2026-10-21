@@ -40,12 +40,12 @@ static const char *state_name(conn_state_t s) {
     }
 }
 
-static void send_packet(int sockfd, const poise_packet_t *pkt,
+static void send_packet(int sockfd, const replic_packet_t *pkt,
                          const struct sockaddr_in *addr, socklen_t addr_len) {
     uint8_t buf[BUFFER_SIZE];
-    int len = poise_pack(pkt, buf, sizeof(buf));
+    int len = replic_pack(pkt, buf, sizeof(buf));
     if (len < 0) {
-        fprintf(stderr, "poise_pack failed\n");
+        fprintf(stderr, "replic_pack failed\n");
         return;
     }
     if (sendto(sockfd, buf, (size_t)len, 0,
@@ -59,7 +59,7 @@ int main(void) {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_len = sizeof(client_addr);
     uint8_t recv_buf[BUFFER_SIZE];
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
     enum { SRW = 256 };   /* receive window: 256 packets, reported as a 32-byte bitmap */
     static uint8_t sack_have[SRW]; static uint8_t sack_buf[SRW][MAX_PAYLOAD]; static uint16_t sack_len[SRW];
 #endif
@@ -81,15 +81,15 @@ int main(void) {
         exit(EXIT_FAILURE);
     }
 
-    printf("Poise server listening on port %d...\n", SERVER_PORT);
+    printf("REPLIC server listening on port %d...\n", SERVER_PORT);
 
     conn_state_t state = STATE_LISTEN;
     uint32_t server_seq = 0;
     uint32_t expected_seq = 0;   /* Go-Back-N: next in-order seq we want from client */
     char reassembled[65536];
     size_t reassembled_len = 0;
-    /* file mode: POISE_OUT=path writes the delivered byte stream to a file; POISE_QUIET=1 silences the per-packet log */
-    FILE *out_fp = NULL; const char *out_path = getenv("POISE_OUT"); int quiet = getenv("POISE_QUIET") != NULL;
+    /* file mode: REPLIC_OUT=path writes the delivered byte stream to a file; REPLIC_QUIET=1 silences the per-packet log */
+    FILE *out_fp = NULL; const char *out_path = getenv("REPLIC_OUT"); int quiet = getenv("REPLIC_QUIET") != NULL;
     uint64_t fnv = 1469598103934665603ULL; unsigned long long out_bytes = 0;
     (void)quiet;
 #define DELIVER(ptr, n) do { if (out_fp) { fwrite((ptr), 1, (n), out_fp); } \
@@ -106,8 +106,8 @@ int main(void) {
             continue;
         }
 
-        poise_packet_t pkt;
-        int result = poise_unpack(recv_buf, (size_t)n, &pkt);
+        replic_packet_t pkt;
+        int result = replic_unpack(recv_buf, (size_t)n, &pkt);
         if (result == -2) {
             printf("Dropped corrupted packet (checksum mismatch)\n");
             continue;
@@ -119,7 +119,7 @@ int main(void) {
         /* If the client's final handshake ACK was lost, its first DATA packet proves the connection is up (as in TCP). */
         if (state == STATE_SYN_RECEIVED && (pkt.flags & FLAG_DATA) && !(pkt.flags & FLAG_SYN)) {
             state = STATE_ESTABLISHED;
-            if (!getenv("POISE_QUIET")) printf("Handshake ACK was lost; DATA arrived, treating the connection as established\n");
+            if (!getenv("REPLIC_QUIET")) printf("Handshake ACK was lost; DATA arrived, treating the connection as established\n");
         }
 
         if (pkt.flags & FLAG_SYN) {
@@ -132,9 +132,9 @@ int main(void) {
             server_seq = (uint32_t)rand();
             expected_seq = client_seq + 1; /* first DATA packet will carry this seq */
             reassembled_len = 0;
-            if (out_path && !out_fp) { out_fp = fopen(out_path, "wb"); if (!out_fp) perror("POISE_OUT"); fnv = 1469598103934665603ULL; out_bytes = 0; }
+            if (out_path && !out_fp) { out_fp = fopen(out_path, "wb"); if (!out_fp) perror("REPLIC_OUT"); fnv = 1469598103934665603ULL; out_bytes = 0; }
 
-            poise_packet_t reply;
+            replic_packet_t reply;
             memset(&reply, 0, sizeof(reply));
             reply.seq_num = server_seq;
             reply.ack_num = client_seq + 1;
@@ -151,7 +151,7 @@ int main(void) {
                    state_name(state), expected_seq);
 
         } else if ((pkt.flags & FLAG_DATA) && state == STATE_ESTABLISHED) {
-#ifndef POISE_GBN
+#ifndef REPLIC_GBN
             /* Selective acknowledgment build: buffer out-of-order packets (64-packet window) and report them
                in an 8-byte bitmap carried in every ACK: bit j set means seq expected_seq+j was received. */
             if (pkt.seq_num == expected_seq) {
@@ -182,7 +182,7 @@ int main(void) {
                 if (!quiet) printf("DUPLICATE seq=%u (expected %u)\n", pkt.seq_num, expected_seq);
             }
             {
-                poise_packet_t ack;
+                replic_packet_t ack;
                 memset(&ack, 0, sizeof(ack));
                 ack.seq_num = server_seq;
                 ack.ack_num = expected_seq;
@@ -204,7 +204,7 @@ int main(void) {
                 DELIVER(pkt.payload, pkt.payload_len);
                 expected_seq++;
 
-                poise_packet_t ack;
+                replic_packet_t ack;
                 memset(&ack, 0, sizeof(ack));
                 ack.seq_num = server_seq;
                 ack.ack_num = expected_seq;
@@ -217,7 +217,7 @@ int main(void) {
                 printf("DISCARDED seq=%u (expected %u) — out of order/duplicate\n",
                        pkt.seq_num, expected_seq);
 
-                poise_packet_t ack;
+                replic_packet_t ack;
                 memset(&ack, 0, sizeof(ack));
                 ack.seq_num = server_seq;
                 ack.ack_num = expected_seq;
@@ -228,7 +228,7 @@ int main(void) {
 #endif
 
         } else if ((pkt.flags & FLAG_FIN) && state == STATE_ESTABLISHED) {
-            poise_packet_t ack;
+            replic_packet_t ack;
             memset(&ack, 0, sizeof(ack));
             ack.seq_num = server_seq;
             ack.ack_num = pkt.seq_num + 1;

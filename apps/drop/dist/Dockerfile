@@ -1,4 +1,4 @@
-# docker build -t poise-drop . && docker run --rm -p 8800:8800 poise-drop     then open http://localhost:8800
+# docker build -t replic-drop . && docker run --rm -p 8800:8800 replic-drop     then open http://localhost:8800
 FROM python:3.12-slim
 RUN apt-get update && apt-get install -y --no-install-recommends gcc libc6-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /app

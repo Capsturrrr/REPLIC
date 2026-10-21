@@ -1,6 +1,6 @@
 # Slide updates (v2): paste into the deck
 
-Only two slides change. Keep the v1 results slides as they are: the FEC numbers belong to the v2 sandbox (`poise_v2_sandbox.zip`), not to the submitted v1 repo, so label them "v2 extension" on the slide.
+Only two slides change. Keep the v1 results slides as they are: the FEC numbers belong to the v2 sandbox (`replic_v2_sandbox.zip`), not to the submitted v1 repo, so label them "v2 extension" on the slide.
 
 ---
 ## Slide A (Results): "Forward error correction: a safety net under heavy loss"

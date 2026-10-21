@@ -2,8 +2,8 @@
 # Selective Repeat (the default transport): AIMD (cap 32) vs the neural agent vs the neural agent with the AIMD hand-over.
 # 
 # usage: bash eval_ci7.sh [runs] [badruns] -> results/eval_ci7_<scenario>.csv ; summarise with python3 ci_summary7.py
-export POISE_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
-export POISE_CLASSIC=1
+export REPLIC_CLASSIC=1   # keep the original agent settings (cap 32, no hand-over) so these results stay reproducible
+export REPLIC_CLASSIC=1
 cd "$(dirname "$0")"; RUNS=${1:-10}; BADRUNS=${2:-5}
 declare -A P
 P[5g]="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60 --packets 1200"

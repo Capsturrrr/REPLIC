@@ -1,5 +1,5 @@
 #!/bin/bash
-# Poise Phase 7 — quick benchmark sweep across loss percentages
+# REPLIC Phase 7 — quick benchmark sweep across loss percentages
 # Usage: ./benchmark.sh
 # Requires: server already running in another terminal (./bin/server)
 

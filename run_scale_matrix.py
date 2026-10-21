@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_scale_matrix.py -- high-sample (default n = 30 seeds per cell) multi-path evaluation for Poise / Poise.
+run_scale_matrix.py -- high-sample (default n = 30 seeds per cell) multi-path evaluation for REPLIC / REPLIC.
 
     python3 run_scale_matrix.py                         # proxy backend, 3 path families x 6 policies x 30 seeds (1 MB each), resumable
     python3 run_scale_matrix.py --n 3 --families dc_microburst --policies cubic,smart --out /tmp/x      # smoke test
@@ -184,14 +184,14 @@ def write_tables(cells, pairs, out_dir, backend_note, n_seeds, tag=''):
         for ref in REFS:
             sel = [b for b in pairs if b["ref"] == ref and b["policy"] in ("smart", "smart+fec", "neural")]
             if not sel: continue
-            label = {"cubic": "CUBIC running over Poise", "tcp_cubic": "kernel TCP CUBIC"}[ref]
+            label = {"cubic": "CUBIC running over REPLIC", "tcp_cubic": "kernel TCP CUBIC"}[ref]
             f.write(f"\\paragraph{{Versus {label}.}} ")
             parts = []
             for b in sel:
                 if b["policy"] != "smart": continue
                 ph = b.get("p_holm", float("nan"))
                 verdict = ("faster" if b["ratio_hi"] < 1 else "slower" if b["ratio_lo"] > 1 else "not distinguishable from the reference")
-                parts.append(f"on \\texttt{{{esc(b['family'])}}} Poise's completion time is {b['ratio']:.2f}$\\times$ that of the reference (95\\% CI {b['ratio_lo']:.2f}--{b['ratio_hi']:.2f}, "
+                parts.append(f"on \\texttt{{{esc(b['family'])}}} REPLIC's completion time is {b['ratio']:.2f}$\\times$ that of the reference (95\\% CI {b['ratio_lo']:.2f}--{b['ratio_hi']:.2f}, "
                              f"{b['faster_in']} of {b['n_pairs']} paired seeds faster; Holm $p$ {'n/a' if ph != ph else ('$<0.001$' if ph < 0.001 else f'= {ph:.3f}')}): {verdict}")
             f.write("; ".join(parts) + ".\n\n")
 

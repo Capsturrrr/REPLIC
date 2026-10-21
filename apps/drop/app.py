@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Poise Drop: send a file over Poise across an emulated network and watch the congestion-control policies race.
+"""REPLIC Drop: send a file over REPLIC across an emulated network and watch the congestion-control policies race.
 
 Everything runs locally with the real C code: bin/server (receiver), bin/impair (delay / jitter / loss / bottleneck proxy)
-and bin/smart_client (sender, linked against libpoise). Python only starts the processes and serves the page.
+and bin/smart_client (sender, linked against libreplic). Python only starts the processes and serves the page.
 
     python3 apps/drop/app.py          then open http://localhost:8800   (needs python3 and gcc; nothing else)
 """
@@ -13,7 +13,7 @@ ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRV_PORT, PX_PORT, WEB_PORT = 9961, 9962, int(os.environ.get("PORT", "8800"))
 MAX_BYTES = 12 * 1000 * 1000
-WORK = tempfile.mkdtemp(prefix="poisedrop_")
+WORK = tempfile.mkdtemp(prefix="replicdrop_")
 
 PROFILES = {
     "5g":    dict(label="5G",            note="10 ms one way, light loss, fast link",        args="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60"),
@@ -26,13 +26,13 @@ ARMS = {
     "aimd32":  dict(label="AIMD, window 32",    args="--mode aimd --init 10 --maxcwnd 32"),
     "aimd128": dict(label="Tuned AIMD, 128",    args="--mode aimd --init 10 --maxcwnd 128 --ssthresh 128"),
     "deep":    dict(label="Neural agent (v1)",  args="--mode deep --init 10 --dfile results/dqn_chat.txt"),
-    "smart":   dict(label="Poise (PPO)",   args="--mode smart --init 10"),     # weights compiled in from src/neural_weights.h
+    "smart":   dict(label="REPLIC (PPO)",   args="--mode smart --init 10"),     # weights compiled in from src/neural_weights.h
 }
 EXPLAIN = {
     "aimd32":  "Classic additive-increase, multiplicative-decrease. The window grows by one packet per round trip and halves on loss. Capped at 32 packets, so on a long fat link it can never fill the pipe.",
     "aimd128": "The same AIMD rule with the cap raised to 128 packets. Fairer to AIMD: it can use big pipes, but it still halves its window on every loss, even random loss that is not congestion.",
     "deep":    "Our first learned agent (DQN, Neural v1). It looks at recent loss and delay and picks from a few fixed window changes. Good on some links, brittle on others.",
-    "smart":   "Poise, a small PPO-trained neural network (8 inputs, two layers of 32). Every 100 ms or so it reads RTT, loss and delivery rate, then scales the window by a factor between 0.5 and 2. A fairness term in training stops it from crowding out other flows.",
+    "smart":   "REPLIC, a small PPO-trained neural network (8 inputs, two layers of 32). Every 100 ms or so it reads RTT, loss and delivery rate, then scales the window by a factor between 0.5 and 2. A fairness term in training stops it from crowding out other flows.",
 }
 jobs, lock, busy = {}, threading.Lock(), [False]
 
@@ -43,12 +43,12 @@ def build():
     cflags = ["-O2", "-std=c11", "-D_POSIX_C_SOURCE=200809L", "-D_GNU_SOURCE", "-w"]
     targets = {
         "server_drop":  (src("server.c", "common.c"), ["-DSERVER_PORT=%d" % SRV_PORT], []),
-        "smart_client": (src("smart_client.c", "poise_sender.c", "common.c"), [], ["-lm"]),
+        "smart_client": (src("smart_client.c", "replic_sender.c", "common.c"), [], ["-lm"]),
         "impair":       (src("impair.c"), [], ["-lm"]),
     }
     for name, (files, defs, libs) in targets.items():
         out = os.path.join(bindir, name)
-        deps = files + src("common.h", "poise.h", "rl_cc.h", "deep_cc.h", "smart_cc.h", "neural_weights.h")
+        deps = files + src("common.h", "replic.h", "rl_cc.h", "deep_cc.h", "smart_cc.h", "neural_weights.h")
         if os.path.exists(out) and all(os.path.getmtime(out) >= os.path.getmtime(f) for f in deps if os.path.exists(f)): continue
         print("compiling", name, flush=True)
         try: subprocess.check_call(["gcc"] + cflags + defs + ["-o", out] + files + libs, cwd=ROOT)
@@ -109,7 +109,7 @@ def run_job(job):
             st = job["state"][arm]; st["status"] = "running"; st["t0"] = time.time()
             d = os.path.join(WORK, job["id"]); out = os.path.join(d, arm + ".out"); trace = os.path.join(d, arm + ".trace")
             log = open(os.path.join(d, arm + ".srv.log"), "w")
-            env = dict(os.environ, POISE_OUT=out, POISE_QUIET="1")
+            env = dict(os.environ, REPLIC_OUT=out, REPLIC_QUIET="1")
             srv = subprocess.Popen([os.path.join(ROOT, "bin/server_drop")], env=env, stdout=log, stderr=subprocess.STDOUT, cwd=ROOT)
             px = subprocess.Popen([os.path.join(ROOT, "bin/impair"), str(PX_PORT), str(SRV_PORT)] + PROFILES[job["profile"]]["args"].split(),
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, cwd=ROOT)
@@ -195,7 +195,7 @@ class H(BaseHTTPRequestHandler):
 
 if __name__ == "__main__":
     build()
-    print("Poise Drop on http://localhost:%d  (work dir %s)" % (WEB_PORT, WORK))
+    print("REPLIC Drop on http://localhost:%d  (work dir %s)" % (WEB_PORT, WORK))
     host = os.environ.get("HOST", "127.0.0.1")
     if host != "127.0.0.1": print("WARNING: listening on %s; anyone who can reach this port can upload files and start transfers" % host)
     try: ThreadingHTTPServer((host, WEB_PORT), H).serve_forever()

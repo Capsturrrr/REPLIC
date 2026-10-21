@@ -6,7 +6,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from cc import Controller, load_q
 from sim import run
 from dqn import DQN
-DEEP = os.environ.get("POISE_DEEP") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results", "dqn_chat.json")
+DEEP = os.environ.get("REPLIC_DEEP") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "results", "dqn_chat.json")
 MODES = ("fixed", "aimd", "smart", "deep")
 
 def sample_path(rng):

@@ -4,10 +4,10 @@ Discrete-event simulator of the chat transport (Go-Back-N, cumulative ACKs, 3-du
 Used to train and evaluate the window controllers on many paths quickly.
 """
 import heapq, os, random
-INORDER_DEFAULT = os.environ.get("POISE_INORDER") == "1"   # POISE_INORDER=1: jitter delays packets but never reorders them (like the C emulated path without --reorder)
-ARTO_DEFAULT = os.environ.get("POISE_ARTO") == "1"       # POISE_ARTO=1: RFC 6298 adaptive retransmission timeout (as in the C smart client) instead of fixed 300 ms
-SR_DEFAULT = os.environ.get("POISE_SR") == "1"       # POISE_SR=1: Selective Repeat (selective acknowledgments) instead of Go-Back-N in every run() call
-RG_DEFAULT = os.environ.get("POISE_RG") == "1"   # POISE_RG=1: realistic fast-retransmit (no re-trigger within one recovery), as in the C smart client
+INORDER_DEFAULT = os.environ.get("REPLIC_INORDER") == "1"   # REPLIC_INORDER=1: jitter delays packets but never reorders them (like the C emulated path without --reorder)
+ARTO_DEFAULT = os.environ.get("REPLIC_ARTO") == "1"       # REPLIC_ARTO=1: RFC 6298 adaptive retransmission timeout (as in the C smart client) instead of fixed 300 ms
+SR_DEFAULT = os.environ.get("REPLIC_SR") == "1"       # REPLIC_SR=1: Selective Repeat (selective acknowledgments) instead of Go-Back-N in every run() call
+RG_DEFAULT = os.environ.get("REPLIC_RG") == "1"   # REPLIC_RG=1: realistic fast-retransmit (no re-trigger within one recovery), as in the C smart client
 from cc import Controller
 
 TIMEOUT = 0.3

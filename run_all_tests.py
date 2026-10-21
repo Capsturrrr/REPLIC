@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_all_tests.py -- one-command experimental matrix for Poise / Poise (v2).
+run_all_tests.py -- one-command experimental matrix for REPLIC / REPLIC (v2).
 
     python3 run_all_tests.py --quick            # about 2 minutes: 3 scenarios, 6 policies, 2 reps, 256 kB
     python3 run_all_tests.py                    # full matrix (see MATRIX below), 5 reps, 100 kB / 1 MB / 8 MB
@@ -18,7 +18,7 @@ Backends
 
 Honest limits (also printed in the report header)
   * jitter is uniform in [-J, +J], not Gaussian, and the proxy never reorders (arrivals are clamped to be monotone);
-  * one Poise transfer is limited to MAXN*MAX_PAYLOAD bytes (about 78 MB), so 1 GB is refused, not faked;
+  * one REPLIC transfer is limited to MAXN*MAX_PAYLOAD bytes (about 78 MB), so 1 GB is refused, not faked;
   * the neural agent in the matrix is the weights in results/dqn_chat.txt (trained on 512 B-packet simulator paths).
 """
 import argparse, csv, hashlib, itertools, math, os, shutil, statistics, subprocess, sys, time
@@ -64,7 +64,7 @@ POLICIES = {
     "bbr":       ("--mode bbr", 0),
     "qtable":    ("--mode rl --qfile results/q_lossy.txt", 0),
     "neural":    ("--mode deep --init 10 --dfile results/dqn_chat.txt", 0),
-    "smart":     ("--mode smart --init 10", 0),            # Poise (PPO, weights compiled in from src/neural_weights.h)
+    "smart":     ("--mode smart --init 10", 0),            # REPLIC (PPO, weights compiled in from src/neural_weights.h)
     "smart+fec": ("--mode smart --init 10", 8),
     "aimd+fec":  ("--mode aimd --maxcwnd 128 --ssthresh 128 --init 10", 8),
     "neural+fec": ("--mode deep --init 10 --dfile results/dqn_chat.txt", 8),
@@ -79,7 +79,7 @@ def build():
     cf = "-O2 -std=c11 -D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE -w"
     os.makedirs(os.path.join(ROOT, "bin"), exist_ok=True)
     for cmd in (f"gcc {cf} -DSERVER_PORT={SRV_PORT} -o bin/server_drop src/server.c src/common.c",
-                f"gcc {cf} -o bin/smart_client src/smart_client.c src/poise_sender.c src/common.c -lm",
+                f"gcc {cf} -o bin/smart_client src/smart_client.c src/replic_sender.c src/common.c -lm",
                 f"gcc {cf} -o bin/impair src/impair.c -lm"):
         if sh(cmd).returncode:
             sys.exit("build failed: " + cmd)
@@ -146,7 +146,7 @@ def tcp_retrans():
 
 
 def run_tcp(sc, size, rep, pol=KERNEL_TCP):
-    """Kernel TCP baseline: same bytes, same bottleneck. Timer starts after connect() (Poise's timer also starts after its handshake) and stops when
+    """Kernel TCP baseline: same bytes, same bottleneck. Timer starts after connect() (REPLIC's timer also starts after its handshake) and stops when
     the receiver has all bytes and says so. Retransmissions = system-wide Tcp RetransSegs delta (only meaningful on an otherwise idle machine)."""
     import socket, threading
     work = os.path.join(OUT, "work"); os.makedirs(work, exist_ok=True)
@@ -154,7 +154,7 @@ def run_tcp(sc, size, rep, pol=KERNEL_TCP):
     if not os.path.exists(src):
         with open(src, "wb") as f: f.write(os.urandom(size))
     data = open(src, "rb").read(); want = hashlib.sha256(data).hexdigest(); got = {}
-    cc = TCP_VARIANTS.get(pol); tmo = max(60, size / 5000.0)           # same give-up time as the Poise client
+    cc = TCP_VARIANTS.get(pol); tmo = max(60, size / 5000.0)           # same give-up time as the REPLIC client
     row = dict(scenario=sc["name"], policy=pol, size=size, rep=rep, ok=0, fail="", ms="", goodput_MBps="", sent="", retx="", timeouts="")
     if cc and cc not in tcp_cc_available():
         row["fail"] = f"kernel has no tcp_{cc} (modprobe tcp_{cc})"; return row
@@ -199,7 +199,7 @@ def run_cell(sc, pol, size, rep, backend, tag):
     dst = os.path.join(work, "out.bin")
     if os.path.exists(dst): os.remove(dst)
     trace = os.path.join(OUT, "traces", f"{tag}.csv"); os.makedirs(os.path.dirname(trace), exist_ok=True)
-    env = dict(os.environ, POISE_OUT=dst, POISE_QUIET="1", POISE_FEC=str(fec))
+    env = dict(os.environ, REPLIC_OUT=dst, REPLIC_QUIET="1", REPLIC_FEC=str(fec))
     slog = os.path.join(work, "srv.log")
     srv = subprocess.Popen([os.path.join(ROOT, "bin/server_drop")], env=env, cwd=ROOT, stdout=open(slog, "w"), stderr=subprocess.STDOUT)
     px = None

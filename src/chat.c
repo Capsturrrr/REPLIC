@@ -1,5 +1,5 @@
 /*
- * chat.c -- Poise Chat: a two-way messenger built on the Poise packet format.
+ * chat.c -- REPLIC Chat: a two-way messenger built on the REPLIC packet format.
  *
  * A demo of what the protocol does for an application. Each message is a
  * DATA packet with a sequence number. The receiver delivers messages strictly
@@ -54,7 +54,7 @@ static long recover = -1;   /* highest seq outstanding at the last retransmit; n
 /* receiver state */
 static uint32_t expected = 0;
 
-/* Selective Repeat (default; POISE_GBN=1 restores Go-Back-N): the receiver buffers a 256-message window of out-of-order
+/* Selective Repeat (default; REPLIC_GBN=1 restores Go-Back-N): the receiver buffers a 256-message window of out-of-order
    messages and reports them in a 32-byte bitmap (bit j of byte j/8 = message ack+j received, as in server.c) inside every ACK; the sender keeps one timer per message. */
 static int gbn = 0;
 static uint8_t sacked[MAX_MSGS];
@@ -69,7 +69,7 @@ static long long now_ms(void) {
 }
 
 static void tx_bytes(uint8_t flags, uint32_t seq, uint32_t ack, const uint8_t *data, int dlen, int is_retx) {
-    poise_packet_t p;
+    replic_packet_t p;
     memset(&p, 0, sizeof(p));
     p.seq_num = seq;
     p.ack_num = ack;
@@ -79,7 +79,7 @@ static void tx_bytes(uint8_t flags, uint32_t seq, uint32_t ack, const uint8_t *d
         memcpy(p.payload, data, p.payload_len);
     }
     uint8_t buf[BUFFER_SIZE + MAX_PAYLOAD];
-    int len = poise_pack(&p, buf, sizeof(buf));
+    int len = replic_pack(&p, buf, sizeof(buf));
     if (len < 0) return;
     n_sent++;
     if (is_retx) n_retx++;
@@ -114,8 +114,8 @@ static void resend_holes(void) {
 }
 
 static void handle_packet(const uint8_t *buf, ssize_t n) {
-    poise_packet_t p;
-    int r = poise_unpack(buf, (size_t)n, &p);
+    replic_packet_t p;
+    int r = replic_unpack(buf, (size_t)n, &p);
     if (r != 0) { printf("      [dropped corrupted packet]\n"); return; }
 
     /* acknowledgment part (cumulative: ack_num = next message the peer expects) */
@@ -171,7 +171,7 @@ int main(int argc, char **argv) {
         fprintf(stderr, "usage: %s <my_port> <peer_port> <name> [loss_percent]\n", argv[0]);
         return 1;
     }
-    gbn = getenv("POISE_GBN") != NULL;
+    gbn = getenv("REPLIC_GBN") != NULL;
     int my_port = atoi(argv[1]), peer_port;
     char peer_ip[64] = "127.0.0.1";
     const char *colon = strrchr(argv[2], ':');
@@ -200,7 +200,7 @@ int main(int argc, char **argv) {
     if (peer_addr.sin_addr.s_addr == INADDR_NONE) { fprintf(stderr, "bad peer ip %s\n", peer_ip); return 1; }
     peer_addr.sin_port = htons((uint16_t)peer_port);
 
-    printf("Poise Chat as %s on port %d -> peer %s:%d, simulated loss %d%%\n", my_name, my_port, peer_ip, peer_port, loss_percent);
+    printf("REPLIC Chat as %s on port %d -> peer %s:%d, simulated loss %d%%\n", my_name, my_port, peer_ip, peer_port, loss_percent);
     if (remote) printf("Connecting (hole punching) ... waiting for the other side.\n");
     printf("Type a message and press Enter. Ctrl+D to quit.\n\n");
 
@@ -224,8 +224,8 @@ int main(int argc, char **argv) {
             struct sockaddr_in src; socklen_t sl = sizeof(src);
             ssize_t n = recvfrom(sockfd, buf, sizeof(buf), 0, (struct sockaddr *)&src, &sl);
             if (n > 0) {
-                poise_packet_t chk;
-                if (remote && poise_unpack(buf, (size_t)n, &chk) == 0) {
+                replic_packet_t chk;
+                if (remote && replic_unpack(buf, (size_t)n, &chk) == 0) {
                     peer_addr = src;   /* follow the peer's real (NAT-mapped) address */
                     if (!heard) { heard = 1; printf("Connected to %s:%d. Type a message.\n\n", inet_ntoa(src.sin_addr), ntohs(src.sin_port)); }
                 }

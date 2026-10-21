@@ -1,4 +1,4 @@
-% Draft sections III-V for the Poise paper (v2). Everything marked [measured] comes from results/ in this repository;
+% Draft sections III-V for the REPLIC paper (v2). Everything marked [measured] comes from results/ in this repository;
 % everything marked [formulated] is a design that has NOT been implemented or trained, and is labelled as such in the text.
 
 \section{Neural Congestion Control Formulation}
@@ -77,9 +77,9 @@ The orchestrator's byte-for-byte check exposed a defect in the original sender: 
 
 \subsection{Kernel TCP baseline (to be populated)}
 \label{sec:tcp}
-Kernel TCP under Linux \texttt{tc netem} has not been measured for the v2 changes in the environment where this draft was produced. The benchmark scripts (\texttt{setup\_netem\_benchmarks.sh} and the \texttt{netem} backend of \texttt{run\_all\_tests.py}) write the TCP rows in the same CSV schema as the Poise policies and generate the comparison table automatically; Table~\ref{tab:tcp} is a placeholder for that output and contains no numbers.
+Kernel TCP under Linux \texttt{tc netem} has not been measured for the v2 changes in the environment where this draft was produced. The benchmark scripts (\texttt{setup\_netem\_benchmarks.sh} and the \texttt{netem} backend of \texttt{run\_all\_tests.py}) write the TCP rows in the same CSV schema as the REPLIC policies and generate the comparison table automatically; Table~\ref{tab:tcp} is a placeholder for that output and contains no numbers.
 \begin{table*}[t]\centering\small
-\caption{Completion time (ms) for kernel TCP and Poise policies under netem; generated file, mean/median/p95/p99. Not yet populated.}
+\caption{Completion time (ms) for kernel TCP and REPLIC policies under netem; generated file, mean/median/p95/p99. Not yet populated.}
 \label{tab:tcp}
 % \input{results/orch/tables.tex}   % uncomment after running: sudo bash setup_netem_benchmarks.sh all
 \end{table*}

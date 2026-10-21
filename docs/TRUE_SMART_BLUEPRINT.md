@@ -1,13 +1,13 @@
-# Poise: natively multi-objective, PPO-trained congestion control
+# REPLIC: natively multi-objective, PPO-trained congestion control
 
 ## Pipeline
 
-    train_smart_poise.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
+    train_smart_replic.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
             │                              │ both call the SAME feature code
             │                              ▼
             │                       src/smart_cc.h   state features + tanh-MLP forward pass
             ▼                              ▲
-    results/smart/smart_final.{npz,txt} ──export──> src/neural_weights.h ──compiled into──> src/poise_sender.c  (--mode smart)
+    results/smart/smart_final.{npz,txt} ──export──> src/neural_weights.h ──compiled into──> src/replic_sender.c  (--mode smart)
 
 * **State (8)**: SRTT gradient, queue-delay derivative, queue-delay level, loss ratio (last window), in-flight/BDP,
   competing-traffic pressure (Fano factor of ACK counts in 10 ms bins), previous action, log2(cwnd).
@@ -21,11 +21,11 @@
 
 ## Reproduce
 
-    python3 train_smart_poise.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
-    python3 train_smart_poise.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
-    python3 train_smart_poise.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
+    python3 train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
+    python3 train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
+    python3 train_smart_replic.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
     cp results/smart/smart_fa_best.npz results/smart/smart_final.npz
-    python3 train_smart_poise.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
+    python3 train_smart_replic.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
     python3 tests/check_smart_export.py                                                    # C forward == numpy forward
     python3 run_fairness_test.py --subjects smart_fair,smart_nofair --reps 5               # real UDP stack, shared bottleneck
     python3 studio/app.py                                                                  # live dashboard, Coexistence arena tab
@@ -34,7 +34,7 @@ Training is seeded but not bit-reproducible across machines; expect the same beh
 
 ## Measured results (real UDP stack through the impairment proxy, 5 runs per cell, seeds 1-5)
 
-| background | k | Static agent J / share | Static + guard J / share | Poise J / share | no-fairness ablation J / share |
+| background | k | Static agent J / share | Static + guard J / share | REPLIC J / share | no-fairness ablation J / share |
 |---|---|---|---|---|---|
 | CUBIC | 1 | 0.957 / 1.20 | 0.911 / 0.72 | **0.982 / 0.88** | 0.879 / 1.37 |
 | CUBIC | 2 | 0.853 / 1.58 | 0.940 / 0.80 | **0.969 / 1.09** | 0.788 / 1.72 |
@@ -43,14 +43,14 @@ Training is seeded but not bit-reproducible across machines; expect the same beh
 | BBR-style | 2 | 0.879 / 0.92 | 0.830 / 0.62 | 0.818 / 0.64 | 0.713 / 0.99 |
 | BBR-style | 3 | 0.787 / 1.33 | 0.865 / 0.66 | 0.779 / 0.67 | 0.840 / 1.16 |
 
-Significant (Welch): Poise vs static, J at CUBIC k=2,3 (p=0.001, <0.001); share at all CUBIC k (p<=0.001); Poise vs ablation, J at all CUBIC k (p<=0.014).
-Not significant: Poise vs the guard on J (p=0.11-0.30); all BBR comparisons.
+Significant (Welch): REPLIC vs static, J at CUBIC k=2,3 (p=0.001, <0.001); share at all CUBIC k (p<=0.001); REPLIC vs ablation, J at all CUBIC k (p<=0.014).
+Not significant: REPLIC vs the guard on J (p=0.11-0.30); all BBR comparisons.
 
 ## What does not work, and what is not done
 * **BBR-style competitors**: no improvement; the agent yields to them (0.64-0.78x share). The simulator predicted better, so the real BBR-style sender is harsher
   than the simulated one. A retrain against randomised aggressive simulated BBR was worse in validation and was dropped.
 * A first version without log2(cwnd) in the state could not learn fairness (a multiplicative policy cannot realise additive increase); kept as an ablation
   (`results/smart/ablation_nocwnd_*.csv`).
-* Competitors are user-space CUBIC/BBR inside Poise; the kernel-TCP backend of `run_fairness_test.py` has not been executed (no `tc`/`ip` here).
+* Competitors are user-space CUBIC/BBR inside REPLIC; the kernel-TCP backend of `run_fairness_test.py` has not been executed (no `tc`/`ip` here).
 * Slow start, pacing, retransmission timers and window bounds are fixed rules, not learned.
 * Single-flow cost (256 kB, n=8): faster than tuned AIMD on a clean path (527 vs 599 ms, p<0.001), equal at 2% and 10% loss; static agent + FEC is still best at 10% loss.

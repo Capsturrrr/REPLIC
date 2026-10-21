@@ -5,7 +5,7 @@ import os, subprocess, sys, tempfile
 import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
-import train_smart_poise as T
+import train_smart_replic as T
 npz = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "results", "smart", "smart_final.npz")
 rng = np.random.default_rng(7)
 X = np.concatenate([rng.uniform(-1, 1, (200, T.SM_IN)), rng.uniform(0, 1, (200, T.SM_IN))])

@@ -1,21 +1,21 @@
-Wireshark steps for the Poise / Poise trace
+Wireshark steps for the REPLIC / REPLIC trace
 ================================================
 A. Open the supplied traces (no setup needed besides the dissector)
-   1. Copy poise.lua to Wireshark's personal plugin folder (Help > About Wireshark > Folders > Personal Lua Plugins) and restart Wireshark.
-      Or run:  wireshark -X lua_script:poise.lua smart_lossy_aimd.pcap
+   1. Copy replic.lua to Wireshark's personal plugin folder (Help > About Wireshark > Folders > Personal Lua Plugins) and restart Wireshark.
+      Or run:  wireshark -X lua_script:replic.lua smart_lossy_aimd.pcap
    2. File > Open smart_lossy_aimd.pcap  (and smart_lossy_rl.pcap).
-   3. If packets show as plain UDP: Analyze > Decode As... > UDP port 8888 -> Poise.
-   4. Filters:  smartpoise.flags.data == 1      (data segments)
-                smartpoise.flags.ack == 1       (acknowledgments)
-                smartpoise.seq == <number>      (every copy of one packet = retransmissions)
+   3. If packets show as plain UDP: Analyze > Decode As... > UDP port 8888 -> REPLIC.
+   4. Filters:  replic.flags.data == 1      (data segments)
+                replic.flags.ack == 1       (acknowledgments)
+                replic.seq == <number>      (every copy of one packet = retransmissions)
    5. Statistics > I/O Graphs for rate over time.
    NOTE: these .pcap files are written by smart_client --pcap. They are a receiver-side record of the packets that
    survived the emulated path, wrapped in synthetic IP/UDP headers (192.168.10.10 <-> 192.168.30.10). The 3-way handshake is not included.
 
 B. Capture your own on WSL (real packets on the loopback interface)
-   sudo tshark -i lo -f "udp port 8888" -w poise_real.pcap      # terminal 1
+   sudo tshark -i lo -f "udp port 8888" -w replic_real.pcap      # terminal 1
    ./bin/server   and   ./bin/client 20                          # terminals 2 and 3
-   Copy poise_real.pcap to Windows and open it in Wireshark (Windows Wireshark cannot see the WSL loopback).
+   Copy replic_real.pcap to Windows and open it in Wireshark (Windows Wireshark cannot see the WSL loopback).
 
 C. In Cisco Packet Tracer (Simulation mode)
    Event List Filters: OSPF, DHCP, ICMP, UDP. Add Complex PDU: PC-Student -> 192.168.30.10, UDP, source/dest port 8888.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Train the neural agent in 'simulator v2': in-order jitter, realistic fast-retransmit, adaptive RTO, and a mix of
-transfer lengths (60 to 600 packets), so training looks like the C experiments. Run with POISE_RG=1 POISE_INORDER=1 POISE_ARTO=1.
-   POISE_RG=1 POISE_INORDER=1 POISE_ARTO=1 python3 web/train_v2.py [episodes] -> results/dqn_v2.json"""
+transfer lengths (60 to 600 packets), so training looks like the C experiments. Run with REPLIC_RG=1 REPLIC_INORDER=1 REPLIC_ARTO=1.
+   REPLIC_RG=1 REPLIC_INORDER=1 REPLIC_ARTO=1 python3 web/train_v2.py [episodes] -> results/dqn_v2.json"""
 import os, random, sys, time, statistics as st
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from multiprocessing import Pool
@@ -9,7 +9,7 @@ from cc import Controller
 from dqn import DQN
 from sim import run
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.environ.get("POISE_OUT") or os.path.join(HERE, "..", "results", "dqn_v2.json")
+OUT = os.environ.get("REPLIC_OUT") or os.path.join(HERE, "..", "results", "dqn_v2.json")
 LOSS = [0, 0.002, 0.005, 0.01, 0.02, 0.04, 0.07, 0.1, 0.15, 0.2, 0.3]
 DELAY = [0.01, 0.025, 0.05, 0.08, 0.12, 0.15, 0.2, 0.3]
 RATE = [None, 100, 250, 500, 800, 1500]

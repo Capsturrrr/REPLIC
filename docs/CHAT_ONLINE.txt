@@ -1,4 +1,4 @@
-Poise CHAT OVER THE INTERNET (two people, two machines)
+REPLIC CHAT OVER THE INTERNET (two people, two machines)
 
 Build once:   git pull && make chat
 
@@ -22,21 +22,21 @@ Same machine, two terminals still works:
    ./bin/chat 9001 9002 Alice 30     ./bin/chat 9002 9001 Bob 30
 
 WEB VERSION (browser UI, same protocol, talks to ./bin/chat or another web copy)
-   python3 web/poise_web.py --udp 9001 --peer FRIEND_IP:9001 --name Harsh --http 8080
+   python3 web/replic_web.py --udp 9001 --peer FRIEND_IP:9001 --name Harsh --http 8080
    open http://localhost:8080
    Right panel: live packet-loss slider, sent/lost/resent counters, in-flight window, protocol log.
 
 WINDOW CONTROLLER (browser version only)
-   Dropdown: Fixed window (8) / AIMD / Poise (Q-learning, loads results/q_lossy.txt, keeps learning).
+   Dropdown: Fixed window (8) / AIMD / REPLIC (Q-learning, loads results/q_lossy.txt, keeps learning).
    "Send 60 test messages" times delivery. For a slow lossy path add:  --loss 10 --delay 40
-   (Poise did not beat the simple controllers in our tests, same as the report.)
+   (REPLIC did not beat the simple controllers in our tests, same as the report.)
 
 RETRAIN / EVALUATE THE CHAT AGENT
    python3 web/train.py   (about 5 s; writes results/q_chat.txt and prints the held-out comparison table)
 
 Deep (neural network) controller
    python3 web/train_deep.py        trains 4 seeds, keeps the best on validation paths, writes results/dqn_chat.json
-   Pick "Poise (deep, neural net)" in the controller dropdown. Needs numpy only (no torch).
+   Pick "REPLIC (deep, neural net)" in the controller dropdown. Needs numpy only (no torch).
    Training is seed-sensitive (1 of 4 seeds was worse than AIMD), hence the validation pick.
    Stress test with all controllers: python3 web/stress.py
 
@@ -49,7 +49,7 @@ Live dashboard and adaptive timeout (web chat)
    The gateway now uses an RFC 6298 retransmission timer with backoff by default (--rto adaptive);
    --rto fixed restores the old fixed 300 ms timeout.
 
-Selective Repeat is the default in the web chat and in ./bin/chat. Add --gbn (gateway) or set POISE_GBN=1 (./bin/chat)
+Selective Repeat is the default in the web chat and in ./bin/chat. Add --gbn (gateway) or set REPLIC_GBN=1 (./bin/chat)
 to get the old Go-Back-N behaviour. Both ends should use the same mode.
 
 Window and agent settings (gateway): the receive window and ACK bitmap are 256 packets / 32 bytes, the same as the C transport and ./bin/chat, so
