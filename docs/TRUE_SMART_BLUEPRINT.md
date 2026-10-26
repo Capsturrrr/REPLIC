@@ -2,7 +2,7 @@
 
 ## Pipeline
 
-    train_smart_replic.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
+    scripts/train_smart_replic.py ──ctypes──> sim/libnetsim.so (sim/netsim.c)   packet-level multi-flow training simulator
             │                              │ both call the SAME feature code
             │                              ▼
             │                       src/smart_cc.h   state features + tanh-MLP forward pass
@@ -21,13 +21,13 @@
 
 ## Reproduce
 
-    python3 train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
-    python3 train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
-    python3 train_smart_replic.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
+    python3 scripts/train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 1.5 --tag fa       # fairness-trained
+    python3 scripts/train_smart_replic.py --iters 300 --episodes 32 --w2 0.2 --w4 0   --tag nofa     # ablation
+    python3 scripts/train_smart_replic.py --eval results/smart/smart_fa_best.npz results/smart/smart_nofa_best.npz   # simulator table
     cp results/smart/smart_fa_best.npz results/smart/smart_final.npz
-    python3 train_smart_replic.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
+    python3 scripts/train_smart_replic.py --export results/smart/smart_final.npz                     # writes src/neural_weights.h
     python3 tests/check_smart_export.py                                                    # C forward == numpy forward
-    python3 run_fairness_test.py --subjects smart_fair,smart_nofair --reps 5               # real UDP stack, shared bottleneck
+    python3 scripts/run_fairness_test.py --subjects smart_fair,smart_nofair --reps 5               # real UDP stack, shared bottleneck
     python3 studio/app.py                                                                  # live dashboard, Coexistence arena tab
 
 Training is seeded but not bit-reproducible across machines; expect the same behaviour, not the same weights.
@@ -51,6 +51,6 @@ Not significant: REPLIC vs the guard on J (p=0.11-0.30); all BBR comparisons.
   than the simulated one. A retrain against randomised aggressive simulated BBR was worse in validation and was dropped.
 * A first version without log2(cwnd) in the state could not learn fairness (a multiplicative policy cannot realise additive increase); kept as an ablation
   (`results/smart/ablation_nocwnd_*.csv`).
-* Competitors are user-space CUBIC/BBR inside REPLIC; the kernel-TCP backend of `run_fairness_test.py` has not been executed (no `tc`/`ip` here).
+* Competitors are user-space CUBIC/BBR inside REPLIC; the kernel-TCP backend of `scripts/run_fairness_test.py` has not been executed (no `tc`/`ip` here).
 * Slow start, pacing, retransmission timers and window bounds are fixed rules, not learned.
 * Single-flow cost (256 kB, n=8): faster than tuned AIMD on a clean path (527 vs 599 ms, p<0.001), equal at 2% and 10% loss; static agent + FEC is still best at 10% loss.

@@ -3,7 +3,7 @@
  - plain UDP : send everything once, no ACKs, no retransmission (reports delivered fraction)
  - TCP model : cwnd with slow start, congestion avoidance, fast retransmit/recovery with selective ACKs,
                retransmission timer per RFC 6298 (min 200 ms, exponential backoff), initial window 10, cap 32.
-               This is a MODEL of TCP, not the kernel stack. Real kernel TCP needs tc/netem: see netem_baselines.sh.
+               This is a MODEL of TCP, not the kernel stack. Real kernel TCP needs tc/netem: see scripts/netem_baselines.sh.
  python3 web/baselines.py"""
 import heapq, os, random, statistics as st, sys
 from multiprocessing import Pool

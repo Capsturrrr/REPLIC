@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run on YOUR WSL/Linux (needs sudo + iproute2). Real kernel TCP vs plain UDP vs REPLIC on the same netem path.
-#   sudo bash netem_baselines.sh lossy        (or 5g, sat, reorder)   -- build first: make smart
+#   sudo bash scripts/netem_baselines.sh lossy        (or 5g, sat, reorder)   -- build first: make smart
+cd "$(dirname "$0")/.."   # run from the repo root
 sc=${1:-lossy}
 case $sc in
   5g)    D=10;  J=3;  L=0.2; R=12mbit ;;

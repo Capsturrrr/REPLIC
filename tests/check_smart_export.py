@@ -4,7 +4,7 @@
 import os, subprocess, sys, tempfile
 import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
 import train_smart_replic as T
 npz = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "results", "smart", "smart_final.npz")
 rng = np.random.default_rng(7)

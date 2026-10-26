@@ -3,7 +3,7 @@
 Final project report
 
 Harshavardhan Mallela (24BAI0274), Rohit Arya (24BCE0819), Shloak Sinha (24BDS0378). Computer Networks, VIT Vellore. Faculty: Anuradha G.
-Report date: 13 October 2026. Every number below is regenerated from the raw CSVs by `make_report_figures.py`; figures are in `docs/figures_v2/`.
+Report date: 13 October 2026. Every number below is regenerated from the raw CSVs by `scripts/make_report_figures.py`; figures are in `docs/figures_v2/`.
 
 ## 1. Summary
 
@@ -89,9 +89,9 @@ Tuning helps AIMD by about 17% (ratio 0.83, faster on 23 of 30 paths); REPLIC is
 
 ```
 make                                   # builds bin/
-python3 run_scale_matrix.py --families cellular_highlat --policies aimd,aimd32,cubic,bbr,smart,smart+fec --n 30 --out results/scale/proxy_v2a
-python3 make_report_figures.py         # rebuilds docs/figures_v2/*.png from the raw CSVs
-sudo python3 run_scale_matrix.py --backend netem   # WSL/Linux with netem: adds kernel TCP rows
+python3 scripts/run_scale_matrix.py --families cellular_highlat --policies aimd,aimd32,cubic,bbr,smart,smart+fec --n 30 --out results/scale/proxy_v2a
+python3 scripts/make_report_figures.py         # rebuilds docs/figures_v2/*.png from the raw CSVs
+sudo python3 scripts/run_scale_matrix.py --backend netem   # WSL/Linux with netem: adds kernel TCP rows
 bash tests/test_synack_loss.sh         # regression test for the lost SYN-ACK bug
 ```
 

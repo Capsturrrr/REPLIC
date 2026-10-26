@@ -5,7 +5,7 @@ import matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
-R = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results"); O = os.path.join(os.path.dirname(os.path.abspath(__file__)), "docs", "figures_v2")
+R = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "results"); O = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "docs", "figures_v2")
 os.makedirs(O, exist_ok=True)
 INK, MUTE, TEAL, GREY, AMB, RED, BG = "#161b20", "#6b737a", "#1f9d85", "#aab1b8", "#d9822b", "#c2453b", "#fbfaf6"
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 12, "axes.edgecolor": MUTE, "axes.labelcolor": INK, "xtick.color": INK, "ytick.color": INK,

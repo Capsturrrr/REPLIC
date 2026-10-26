@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 REPLIC Phase 7 — plot congestion window over time from logs/cwnd_log.csv
-Usage: python3 plot_cwnd.py [csv_path] [output_png]
+Usage: python3 scripts/plot_cwnd.py [csv_path] [output_png]
 """
 import csv
 import sys
@@ -10,7 +10,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 csv_path = sys.argv[1] if len(sys.argv) > 1 else "logs/cwnd_log.csv"
-out_path = sys.argv[2] if len(sys.argv) > 2 else "cwnd_graph.png"
+out_path = sys.argv[2] if len(sys.argv) > 2 else "figures/cwnd_graph.png"
 
 times, cwnds, ssthreshs, events = [], [], [], []
 with open(csv_path) as f:

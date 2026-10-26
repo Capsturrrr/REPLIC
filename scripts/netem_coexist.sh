@@ -1,6 +1,6 @@
 #!/bin/bash
 # Coexistence with kernel TCP: a bulk TCP flow and one REPLIC transfer share the SAME netem + tbf bottleneck at the same time.
-#   sudo bash netem_coexist.sh 5g|lossy|sat [REPS]          (build first: make smart)
+#   sudo bash scripts/netem_coexist.sh 5g|lossy|sat [REPS]          (build first: make smart)
 # For every REPLIC arm the script reports goodput of each flow over the window in which both were running
 # (TCP bytes counted by its receiver; REPLIC = packets*512 B / completion time), and the REPLIC share of the sum.
 # Controls: TCP+TCP (a second kernel TCP flow instead of REPLIC) and TCP alone / REPLIC alone. NO_TC=1 skips tc (script self-test, no bottleneck).
@@ -12,7 +12,7 @@ case $sc in
   *) echo "scenario must be 5g|lossy|sat"; exit 1 ;;
 esac
 [ -n "$NO_TC" ] || [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 for f in bin/server bin/smart_client results/dqn_chat.txt web/tcp_bulk.py; do [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }; done
 # REPLIC must send REAL 512-byte payloads like TCP and UDP (without --file the sender uses synthetic 40-byte packets)
 PL=/tmp/replic_payload_${PKTS}.bin; head -c $((PKTS*512)) /dev/urandom > $PL

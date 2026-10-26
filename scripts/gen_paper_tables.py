@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-gen_paper_tables.py -- turn raw.csv files into the LaTeX files that paper/section_V_scale_insert.tex \\input{}s.
+scripts/gen_paper_tables.py -- turn raw.csv files into the LaTeX files that paper/section_V_scale_insert.tex \\input{}s.
 
-    python3 gen_paper_tables.py                                   # proxy n=30 results only; the kernel-TCP files are written as visible "pending" stubs
-    python3 gen_paper_tables.py --netem-scale results/wsl_netem/scale/raw.csv --netem-matrix results/wsl_netem/matrix/raw.csv
+    python3 scripts/gen_paper_tables.py                                   # proxy n=30 results only; the kernel-TCP files are written as visible "pending" stubs
+    python3 scripts/gen_paper_tables.py --netem-scale results/wsl_netem/scale/raw.csv --netem-matrix results/wsl_netem/matrix/raw.csv
 
 Output (default results/paper_tex/):  proxy_scale_table.tex  proxy_scale_paired.tex  proxy_scale_text.tex
                                       netem_scale_table.tex  netem_scale_paired.tex  netem_scale_text.tex   netem_matrix.tex
@@ -12,6 +12,7 @@ Every number in these files is computed from the raw CSVs. When a netem file is 
 """
 import argparse, os, shutil, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
+ROOT = os.path.dirname(HERE)  # repo root; this file lives in scripts/
 import run_all_tests as R
 import run_scale_matrix as S
 
@@ -33,10 +34,10 @@ def scale_files(raw, tag, out_dir, note_prefix):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--proxy-scale", default=os.path.join(HERE, "results", "scale", "proxy", "raw.csv"))
+    ap.add_argument("--proxy-scale", default=os.path.join(ROOT, "results", "scale", "proxy", "raw.csv"))
     ap.add_argument("--netem-scale"); ap.add_argument("--netem-matrix")
-    ap.add_argument("--fairness-raw", default=os.path.join(HERE, "results", "fairness_n30", "raw.csv"))
-    ap.add_argument("--out-dir", default=os.path.join(HERE, "results", "paper_tex"))
+    ap.add_argument("--fairness-raw", default=os.path.join(ROOT, "results", "fairness_n30", "raw.csv"))
+    ap.add_argument("--out-dir", default=os.path.join(ROOT, "results", "paper_tex"))
     a = ap.parse_args(); os.makedirs(a.out_dir, exist_ok=True)
     if os.path.exists(a.proxy_scale):
         print("proxy scale: %d rows, n=%d seeds" % scale_files(a.proxy_scale, "proxy", a.out_dir, "proxy"))

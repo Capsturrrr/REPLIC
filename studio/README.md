@@ -14,7 +14,7 @@ What is and is not real
 * cwnd/RTT come from the sender's `--trace` file, goodput and the dissector from its `--pcap` file (`REPLIC_LIVE=1` makes the sender flush each line).
 * "Loss rate" is the share of TIMEOUT/FAST_RETX events among trace events in the last second, not the link's configured loss.
 * FEC is a fixed XOR parity packet per 8 data packets. It is not adaptive.
-* One race is one sample; use `run_all_tests.py` and `run_fairness_test.py` for statistics.
+* One race is one sample; use `scripts/run_all_tests.py` and `scripts/run_fairness_test.py` for statistics.
 * Local use only: no authentication, one race at a time.
 
 ## Coexistence arena (bandwidth-bully test)

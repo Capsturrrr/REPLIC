@@ -1,7 +1,8 @@
 #!/bin/bash
 # REPLIC Phase 7 — quick benchmark sweep across loss percentages
-# Usage: ./benchmark.sh
+# Usage: ./scripts/benchmark.sh
 # Requires: server already running in another terminal (./bin/server)
+cd "$(dirname "$0")/.."   # run from the repo root
 
 OUT="logs/benchmark_results.csv"
 mkdir -p logs

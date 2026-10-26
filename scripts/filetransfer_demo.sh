@@ -1,9 +1,9 @@
 #!/bin/bash
 # File transfer over REPLIC through an impaired network (real UDP sockets, independent impairment process).
-#   ./filetransfer_demo.sh [size_MB] [profile]      profiles: 5g lossy sat fast bad   (default: 2 MB over "lossy")
+#   ./scripts/filetransfer_demo.sh [size_MB] [profile]      profiles: 5g lossy sat fast bad   (default: 2 MB over "lossy")
 # Sends a random file with AIMD (cap 32), tuned AIMD (cap 128) and the neural agent, then checks that the received
 # file is byte-identical (FNV-1a hash of sender and receiver) and prints the goodput.
-cd "$(dirname "$0")"; MB=${1:-2}; PROF=${2:-lossy}
+cd "$(dirname "$0")/.."; MB=${1:-2}; PROF=${2:-lossy}
 declare -A P=( [5g]="--delay 10 --jitter 3 --loss 0.2 --rate 1500 --queue 60" [lossy]="--delay 25 --jitter 10 --loss 2 --rate 800 --queue 50" \
   [sat]="--delay 150 --jitter 10 --loss 0.3 --rate 400 --queue 100" [fast]="--delay 60 --jitter 5 --loss 0.1 --rate 3000 --queue 300" [bad]="--delay 40 --jitter 5 --loss 10 --rate 600 --queue 40" )
 [ -z "${P[$PROF]}" ] && { echo "unknown profile $PROF (5g lossy sat fast bad)"; exit 1; }

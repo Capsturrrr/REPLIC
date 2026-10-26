@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Real kernel TCP and plain UDP on loopback, for use with tc/netem (see netem_baselines.sh).
+"""Real kernel TCP and plain UDP on loopback, for use with tc/netem (see scripts/netem_baselines.sh).
    python3 web/real_baselines.py [packets] [payload_bytes]
    TCP: sends N payloads over one connection, time until the receiver has them all.
    UDP: sends N datagrams once, waits 1 s after the last, reports how many arrived (no retransmission)."""

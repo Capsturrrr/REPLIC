@@ -29,7 +29,7 @@
 #include "deep_cc.h"
 #if defined(__has_include)
 #if __has_include("neural_weights.h")
-#define SM_HAVE_BUILTIN        /* weights compiled into the binary (src/neural_weights.h, written by train_smart_replic.py --export) */
+#define SM_HAVE_BUILTIN        /* weights compiled into the binary (src/neural_weights.h, written by scripts/train_smart_replic.py --export) */
 #endif
 #endif
 #include "smart_cc.h"

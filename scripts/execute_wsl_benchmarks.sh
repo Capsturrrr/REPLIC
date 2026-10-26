@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# execute_wsl_benchmarks.sh -- run the REPLIC / REPLIC kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
+# scripts/execute_wsl_benchmarks.sh -- run the REPLIC / REPLIC kernel-netem + native kernel-TCP (CUBIC, BBR) benchmarks on WSL2 or any Linux.
 #
-#   sudo bash execute_wsl_benchmarks.sh --check            # preflight only, changes nothing permanent
-#   sudo bash execute_wsl_benchmarks.sh --quick            # ~10 min smoke run: 3 profiles, 2 reps, 100 kB + scale matrix with n=3
-#   sudo bash execute_wsl_benchmarks.sh                    # default: matrix (10 profiles, 10 reps, 1 MB) + scale matrix (3 path families, n=30)
-#   sudo bash execute_wsl_benchmarks.sh --reps 30 --n 30 --with-fairness     # everything, long (hours)
+#   sudo bash scripts/execute_wsl_benchmarks.sh --check            # preflight only, changes nothing permanent
+#   sudo bash scripts/execute_wsl_benchmarks.sh --quick            # ~10 min smoke run: 3 profiles, 2 reps, 100 kB + scale matrix with n=3
+#   sudo bash scripts/execute_wsl_benchmarks.sh                    # default: matrix (10 profiles, 10 reps, 1 MB) + scale matrix (3 path families, n=30)
+#   sudo bash scripts/execute_wsl_benchmarks.sh --reps 30 --n 30 --with-fairness     # everything, long (hours)
 #
 # Options
 #   --check              preflight only
@@ -14,7 +14,7 @@
 #   --n N                seeds per cell of the scale matrix                     (default 30)
 #   --skip-matrix        do not run the 10-profile matrix
 #   --skip-scale         do not run the multi-path scale matrix
-#   --with-fairness      also run run_fairness_test.py --backend netem (kernel TCP background flows; untested before your run)
+#   --with-fairness      also run scripts/run_fairness_test.py --backend netem (kernel TCP background flows; untested before your run)
 #   --fairness-reps N    repetitions per fairness cell                          (default 30)
 #   --out DIR            output directory                                       (default results/wsl_netem)
 #   --force              continue even if lo already has a non-default qdisc (it will be REPLACED and then removed)
@@ -25,12 +25,12 @@
 # Why `lo` and not eth0: both endpoints run on this machine, so their packets only ever cross lo; shaping eth0 would not affect them.
 #
 # Kernel TCP uses the same payload bytes (random, sha256-checked), the same netem+tbf bottleneck, the same timer start (after connect/handshake)
-# and the same end condition (receiver has every byte and answers) as the REPLIC client; see run_all_tests.py:run_tcp.
+# and the same end condition (receiver has every byte and answers) as the REPLIC client; see scripts/run_all_tests.py:run_tcp.
 #
 # STATUS: written in a sandbox without tc/ip. Verified there with `bash -n` and with a stub-`tc` dry run of the control flow (see tests/test_wsl_script.sh);
 # the first real kernel run is yours -- start with --check, then --quick.
 set -u -o pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; cd "$HERE"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$HERE"
 
 REPS=10; SIZES=1000000; NSEEDS=30; OUT="results/wsl_netem"; QUICK=0; CHECK=0; SKIP_MATRIX=0; SKIP_SCALE=0; FAIR=0; FREPS=30; FORCE=0
 while [ $# -gt 0 ]; do
@@ -150,25 +150,25 @@ STATUS=0
 if [ "$SKIP_MATRIX" != 1 ]; then
   SC=""; [ "$QUICK" = 1 ] && SC="--scenarios clean,loss2_j10,loss10_j35"
   step "Profile matrix on lo (netem + tbf): kernel TCP CUBIC/BBR vs REPLIC policies, $REPS reps, sizes $SIZES" \
-    "$PYTHON" run_all_tests.py --backend netem --out "$OUT/matrix" --reps "$REPS" --sizes "$SIZES" --policies "$KPOL" $SC || STATUS=1
+    "$PYTHON" scripts/run_all_tests.py --backend netem --out "$OUT/matrix" --reps "$REPS" --sizes "$SIZES" --policies "$KPOL" $SC || STATUS=1
 fi
 
 # ------------------------------------------------------------------------------------------------ 2. multi-path, multi-seed scale matrix
 if [ "$SKIP_SCALE" != 1 ]; then
   step "Scale matrix on lo (netem + tbf): 3 path families x $NSEEDS seeds, kernel TCP + REPLIC" \
-    "$PYTHON" run_scale_matrix.py --backend netem --n "$NSEEDS" --out "$OUT/scale" || STATUS=1
+    "$PYTHON" scripts/run_scale_matrix.py --backend netem --n "$NSEEDS" --out "$OUT/scale" || STATUS=1
 fi
 
 # ------------------------------------------------------------------------------------------------ 3. optional: coexistence against kernel-TCP background flows
 if [ "$FAIR" = 1 ]; then
   step "Fairness vs kernel TCP background flows (cubic, bbr), $FREPS reps" \
-    "$PYTHON" run_fairness_test.py --backend netem --out "$OUT/fairness" --reps "$FREPS" --subjects neural,neural_polite,smart_fair --background cubic,bbr --nbg 1,2 || STATUS=1
+    "$PYTHON" scripts/run_fairness_test.py --backend netem --out "$OUT/fairness" --reps "$FREPS" --subjects neural,neural_polite,smart_fair --background cubic,bbr --nbg 1,2 || STATUS=1
 fi
 
 # ------------------------------------------------------------------------------------------------ 4. harmonise + package
 say "Package results"
 GA=(--out-dir "$OUT/tex"); [ -f "$OUT/scale/raw.csv" ] && GA+=(--netem-scale "$OUT/scale/raw.csv"); [ -f "$OUT/matrix/raw.csv" ] && GA+=(--netem-matrix "$OUT/matrix/raw.csv")
-"$PYTHON" gen_paper_tables.py "${GA[@]}" || STATUS=1
+"$PYTHON" scripts/gen_paper_tables.py "${GA[@]}" || STATUS=1
 [ -n "${SUDO_UID:-}" ] && chown -R "$SUDO_UID:${SUDO_GID:-$SUDO_UID}" "$OUT" 2>/dev/null
 TAR="$(dirname "$OUT")/$(basename "$OUT")_$(hostname)_$(date +%Y%m%d_%H%M).tar.gz"
 tar czf "$TAR" -C "$(dirname "$OUT")" "$(basename "$OUT")" --exclude='work' --exclude='work_dir' --exclude='traces' 2>/dev/null && echo "bundle: $TAR"
@@ -177,7 +177,7 @@ cat <<TXT
 
 Next
   1. Copy $TAR back to the project (WSL: it is already visible from Windows under \\\\wsl\$\\...).
-  2. tar xzf it in the project root, then:  python3 gen_paper_tables.py --netem-scale $OUT/scale/raw.csv --netem-matrix $OUT/matrix/raw.csv   (already run once inside $OUT/tex)
+  2. tar xzf it in the project root, then:  python3 scripts/gen_paper_tables.py --netem-scale $OUT/scale/raw.csv --netem-matrix $OUT/matrix/raw.csv   (already run once inside $OUT/tex)
   3. \input{} the generated results/paper_tex/*.tex files in the paper (see paper/section_V_scale_insert.tex).
 Exit status: $STATUS (non-zero means at least one step failed -- read $LOG before using any numbers)
 TXT

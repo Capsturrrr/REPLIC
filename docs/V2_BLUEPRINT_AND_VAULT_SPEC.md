@@ -9,8 +9,8 @@ Status key: **BUILT** (code exists and was run), **FORMULATED** (math written, n
 | 1,200-byte payloads (BUFFER_SIZE 2048) | BUILT, measured | `src/common.h` |
 | XOR forward error correction, group size `REPLIC_FEC=K` (sender), always-on receiver recovery | BUILT, measured | `src/replic_sender.c` (TX macro), `src/server.c` (`fec_try`) |
 | FIN retransmission fix (found by the orchestrator) | BUILT, also applied to v1 | `src/replic_sender.c` |
-| One-command test orchestrator | BUILT, proxy backend run; netem backend NOT run | `run_all_tests.py` |
-| Time-aligned multi-panel telemetry figure (cwnd, RTT/SRTT/RTO bound, loss events, goodput), PDF+SVG | BUILT, from client traces | `run_all_tests.py: telemetry_figure` |
+| One-command test orchestrator | BUILT, proxy backend run; netem backend NOT run | `scripts/run_all_tests.py` |
+| Time-aligned multi-panel telemetry figure (cwnd, RTT/SRTT/RTO bound, loss events, goodput), PDF+SVG | BUILT, from client traces | `scripts/run_all_tests.py: telemetry_figure` |
 | LaTeX tables and completion-time figure from raw logs | BUILT | `results/orch/tables.tex`, `fig_completion.pdf` |
 | Paper sections III, IV, V | DRAFTED, compiles; extended MDP and Lyapunov parts labelled as not implemented | `paper/sections_v2.tex` |
 | Extended MDP (BDP estimate, RTT gradient, queue derivative, continuous action) | FORMULATED only | paper section III-B |
@@ -23,9 +23,9 @@ Status key: **BUILT** (code exists and was run), **FORMULATED** (math written, n
 
 ## 2. How to run the matrix
 
-    python3 run_all_tests.py --quick                     # ~3 min: 3 scenarios x 7 policies x 2 reps, 256 kB
-    python3 run_all_tests.py --scenarios loss10_j35 --policies aimd,aimd+fec --reps 20
-    python3 run_all_tests.py                             # full matrix, 5 reps, 100 kB / 1 MB / 8 MB (long)
+    python3 scripts/run_all_tests.py --quick                     # ~3 min: 3 scenarios x 7 policies x 2 reps, 256 kB
+    python3 scripts/run_all_tests.py --scenarios loss10_j35 --policies aimd,aimd+fec --reps 20
+    python3 scripts/run_all_tests.py                             # full matrix, 5 reps, 100 kB / 1 MB / 8 MB (long)
 
 Outputs go to `results/orch/`: `raw.csv`, `summary.csv` (mean, median, p95, p99), `tables.tex`, `fig_completion.*`, `telemetry_*.pdf/svg`, per-run traces and, on any integrity failure, the server log.
 Every run's delivered file is compared byte for byte; a failure is recorded, never dropped.

@@ -10,13 +10,13 @@ Both need Linux or WSL with `git`, `gcc`, `make`, `python3`. If they are not on 
 
 ## On the SERVER machine
     git clone https://github.com/Capsturrrr/replic && cd replic      # or: git pull
-    bash multihost_server.sh
+    bash scripts/multihost_server.sh
 Leave it running. If there is a firewall, allow UDP 8888 and TCP 9871.
 (WSL2 note: WSL is behind NAT, so a WSL server is not reachable from outside. Use Tailscale inside WSL, or make the Windows machine the client and a Linux box or VM the server.)
 
 ## On the CLIENT machine
     git clone https://github.com/Capsturrrr/replic && cd replic      # or: git pull
-    bash multihost_client.sh SERVER_IP 5 mylabel
+    bash scripts/multihost_client.sh SERVER_IP 5 mylabel
 SERVER_IP is the server's address (Tailscale 100.x.y.z, public IP of the VM, or LAN IP). `5` is the number of repetitions, `mylabel` names the output,
 for example `hotspot_to_homewifi`. It takes about a minute per repetition on a decent path, longer on a slow one.
 Send back `results/multihost_mylabel.txt` (or a screenshot). Note in one line what the two machines and links were (for example "laptop on Jio hotspot to Rohit's laptop on ACT broadband via Tailscale").

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Raw-speed check on the loopback interface (no emulated path): how many packets/s and MB/s the C sender sustains
 # and that all data is delivered. 4,096 packets per run; reports the median of N runs per policy.
-cd "$(dirname "$0")"; N=${1:-9}; port=9971
+cd "$(dirname "$0")/.."; N=${1:-9}; port=9971
 gcc -O2 -DSERVER_PORT=$port -o bin/server_bench src/server.c src/common.c || exit 1
 make smart >/dev/null 2>&1
 ./bin/server_bench >/dev/null 2>&1 & SP=$!; sleep 0.3

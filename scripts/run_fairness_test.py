@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-run_fairness_test.py - multi-flow coexistence test for REPLIC.
+scripts/run_fairness_test.py - multi-flow coexistence test for REPLIC.
 
 One subject flow (REPLIC neural agent, optionally with the courtesy guard --polite) shares ONE bottleneck with
 k = 1..3 background flows (CUBIC or BBR). Output: Jain's fairness index, the subject's share relative to its fair
@@ -17,13 +17,13 @@ Backends
 Jain's index:  J = (sum x)^2 / (n * sum x^2),   1/n <= J <= 1 (1 = perfectly even).
 
 Usage
-  python3 run_fairness_test.py --quick
-  python3 run_fairness_test.py --reps 5 --background cubic,bbr --nbg 1,2,3 --subjects neural,neural_polite,aimd
-  python3 run_fairness_test.py --backend netem --reps 5          (on a netem-capable machine)
+  python3 scripts/run_fairness_test.py --quick
+  python3 scripts/run_fairness_test.py --reps 5 --background cubic,bbr --nbg 1,2,3 --subjects neural,neural_polite,aimd
+  python3 scripts/run_fairness_test.py --backend netem --reps 5          (on a netem-capable machine)
 """
 import argparse, csv, itertools, os, re, signal, socket, statistics as st, subprocess, sys, tempfile, threading, time
 
-ROOT = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # repo root; this file lives in scripts/
 OUT = os.path.join(ROOT, "results", "fairness")
 BASE_PORT = 9930          # servers 9930+i ; proxy listens 9940+i
 PROXY_PORT = 9940

@@ -192,7 +192,7 @@ def jain(x):
 class Race:
     """mode 'race': every arm gets its own identical bottleneck.
        mode 'coexist': for every subject policy one bottleneck shared by the subject and k background flows (CUBIC or BBR-style);
-       the group's result is frozen when its first flow finishes (the same rule as run_fairness_test.py)."""
+       the group's result is frozen when its first flow finishes (the same rule as scripts/run_fairness_test.py)."""
     def __init__(self, params):
         self.id = uuid.uuid4().hex[:8]
         self.params = params
@@ -432,7 +432,7 @@ def stop():
 @app.get("/api/fairness")
 def fairness():
     p = os.path.join(ROOT, "results", "fairness", "summary.csv")
-    if not os.path.exists(p): return dict(rows=[], note="run run_fairness_test.py first")
+    if not os.path.exists(p): return dict(rows=[], note="run scripts/run_fairness_test.py first")
     rows = [l for l in open(p).read().splitlines() if l and not l.startswith("#")]
     head = rows[0].split(",")
     out = []

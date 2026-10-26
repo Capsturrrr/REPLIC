@@ -66,7 +66,7 @@ Spoken lines are meant to be said aloud: change the wording to suit your voice, 
 
 ## 11. Live demo (Harshavardhan drives, 12:45 to 13:45), slide 20
 
-Run, in this order: `./bin/server` and `./bin/client 20` (loss recovery), then `./filetransfer_demo.sh 2 lossy` (three policies, identical hashes), then show the chat in two terminals with `./bin/chat 9001 9002 Alice 30` and `./bin/chat 9002 9001 Bob 30`. Check `tc qdisc show dev lo` first so no leftover netem rule is active.
+Run, in this order: `./bin/server` and `./bin/client 20` (loss recovery), then `./scripts/filetransfer_demo.sh 2 lossy` (three policies, identical hashes), then show the chat in two terminals with `./bin/chat 9001 9002 Alice 30` and `./bin/chat 9002 9001 Bob 30`. Check `tc qdisc show dev lo` first so no leftover netem rule is active.
 
 **Harshavardhan:** On the left the server reassembles the message despite twenty percent loss. Now the file transfer: three policies, same file, same hash, and the neural agent finishes in about half the time.
 

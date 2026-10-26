@@ -31,5 +31,5 @@ __pycache__/
 *:Zone.Identifier
 *.bak
 
-# Built from sim/netsim.c on demand by train_smart_replic.py
+# Built from sim/netsim.c on demand by scripts/train_smart_replic.py
 *.so

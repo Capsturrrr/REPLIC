@@ -1,6 +1,6 @@
 #!/bin/bash
 # Kernel-netem evaluation: TCP, plain UDP and REPLIC (AIMD, CUBIC, neural) on the same path.
-#   sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]   (TCP_ONLY=1 sudo -E ... skips REPLIC)
+#   sudo bash scripts/netem_full.sh lossy|5g|sat|reorder [REPS]   (TCP_ONLY=1 sudo -E ... skips REPLIC)
 # TCP/UDP use 512-byte payloads, the same as REPLIC, so every protocol moves the same bytes.      (build first: make smart)
 # Writes results/netem_<scenario>.txt (also printed). Removes the netem rule on exit.
 sc=${1:-lossy}; REPS=${2:-5}; PKTS=500
@@ -12,7 +12,7 @@ case $sc in
   *) echo "scenario must be lossy|5g|sat|reorder"; exit 1 ;;
 esac
 [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 for f in bin/server bin/smart_client results/dqn_chat.txt web/real_baselines.py; do
   [ -e $f ] || { echo "missing $f (run: make smart)"; exit 1; }
 done

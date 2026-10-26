@@ -326,7 +326,7 @@ function drawChart(cv,key){
 function draw(){drawChart($('c_cwnd'),'cwnd');drawChart($('c_rtt'),'rtt');drawChart($('c_gp'),'gp')}
 async function loadFair(){
   try{const r=await (await fetch('/api/fairness')).json();
-   if(!r.rows.length){$('fair').textContent='No fairness results yet. Run: python3 run_fairness_test.py';return}
+   if(!r.rows.length){$('fair').textContent='No fairness results yet. Run: python3 scripts/run_fairness_test.py';return}
    $('fair').innerHTML='<div class="scroll"><table><tr><th>subject</th><th>background</th><th>bg flows</th><th>runs</th><th>Jain J</th><th>subject share (1.0 = fair)</th><th>smallest flow (1.0 = fair)</th></tr>'+
     r.rows.map(x=>`<tr><td>${x.subject}</td><td>${x.background}</td><td>${x.k}</td><td>${x.n}</td><td>${x.J_mean} ± ${x.J_sd}</td><td>${x.subj_mean} ± ${x.subj_sd}</td><td>${x.min_mean} ± ${x.min_sd}</td></tr>`).join('')+'</table></div>'}catch(e){$('fair').textContent='unavailable'}
 }

@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
-# setup_netem_benchmarks.sh -- WSL2 / Linux helper for the kernel-netem and kernel-TCP benchmarks of REPLIC v2.
+# scripts/setup_netem_benchmarks.sh -- WSL2 / Linux helper for the kernel-netem and kernel-TCP benchmarks of REPLIC v2.
 #
-#   sudo bash setup_netem_benchmarks.sh check              # is tc/netem/iperf3 usable here? (changes nothing permanent)
-#   sudo bash setup_netem_benchmarks.sh install            # apt install iproute2 iperf3 (needs network)
-#   sudo bash setup_netem_benchmarks.sh list               # profiles from netem_profiles.tsv
-#   sudo bash setup_netem_benchmarks.sh apply loss10_j35   # install that profile on lo (both directions) until you run 'clear'
-#   sudo bash setup_netem_benchmarks.sh clear              # remove netem/tbf and restore lo's MTU
-#   sudo bash setup_netem_benchmarks.sh tcp loss10_j35 [BYTES] [REPS]   # kernel TCP only, one profile, prints CSV rows (policy=tcp)
-#   sudo bash setup_netem_benchmarks.sh all [--quick]      # the whole matrix incl. kernel TCP via run_all_tests.py --backend netem
+#   sudo bash scripts/setup_netem_benchmarks.sh check              # is tc/netem/iperf3 usable here? (changes nothing permanent)
+#   sudo bash scripts/setup_netem_benchmarks.sh install            # apt install iproute2 iperf3 (needs network)
+#   sudo bash scripts/setup_netem_benchmarks.sh list               # profiles from scripts/netem_profiles.tsv
+#   sudo bash scripts/setup_netem_benchmarks.sh apply loss10_j35   # install that profile on lo (both directions) until you run 'clear'
+#   sudo bash scripts/setup_netem_benchmarks.sh clear              # remove netem/tbf and restore lo's MTU
+#   sudo bash scripts/setup_netem_benchmarks.sh tcp loss10_j35 [BYTES] [REPS]   # kernel TCP only, one profile, prints CSV rows (policy=tcp)
+#   sudo bash scripts/setup_netem_benchmarks.sh all [--quick]      # the whole matrix incl. kernel TCP via scripts/run_all_tests.py --backend netem
 #
 # Needs root and a kernel with sch_netem. On WSL2 the stock Microsoft kernel has it; if 'check' says "netem not usable" see the end of this file.
 # Everything is applied to the loopback device and reverted by 'clear' or on exit from 'tcp'/'all'. No other interface is touched.
-# Profiles are read from netem_profiles.tsv, the same file run_all_tests.py uses (single source of truth).
+# Profiles are read from scripts/netem_profiles.tsv, the same file scripts/run_all_tests.py uses (single source of truth).
 # STATUS: written without access to tc in the authoring sandbox, so it is verified only with 'bash -n' and the dry-run printing of the
-# commands (python3 run_all_tests.py --netem-dry-run); the first real run is on your machine. Run 'check' first.
+# commands (python3 scripts/run_all_tests.py --netem-dry-run); the first real run is on your machine. Run 'check' first.
 set -u
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; cd "$HERE"
-PROFILES="$HERE/netem_profiles.tsv"; PORT=9971
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"; cd "$HERE"
+PROFILES="$HERE/scripts/netem_profiles.tsv"; PORT=9971
 need_root() { [ "$(id -u)" = 0 ] || { echo "run with sudo"; exit 1; }; }
 mtu_file=/tmp/replic_lo_mtu.orig
 
@@ -87,13 +87,13 @@ case "${1:-}" in
   apply)   apply_profile "${2:?profile name}" ;;
   clear)   need_root; clear_all ;;
   tcp)     need_root; tcp_only "${2:?profile name}" "${3:-}" "${4:-}" ;;
-  all)     need_root; shift; python3 run_all_tests.py --backend netem "$@" ;;
+  all)     need_root; shift; python3 scripts/run_all_tests.py --backend netem "$@" ;;
   *)       sed -n '2,13p' "$0"; exit 1 ;;
 esac
 
 # Notes
 #  * netem on lo impairs BOTH directions, so a 25 ms profile has a 50 ms RTT and ACKs can be lost; the proxy backend impairs forward packets only.
-#    Do not mix the two backends in one comparison table without saying so (run_all_tests.py writes the backend into tables.tex and BACKEND.txt).
+#    Do not mix the two backends in one comparison table without saying so (scripts/run_all_tests.py writes the backend into tables.tex and BACKEND.txt).
 #  * WSL2 without sch_netem: build a kernel with CONFIG_NET_SCH_NETEM=m (and CONFIG_NET_SCH_TBF=m), or run this on a normal Linux VM / cloud instance.
 #  * Kernel TCP retransmissions come from the system-wide Tcp RetransSegs counter: close other network-heavy programs while the benchmark runs.
 #  * iperf3 is optional. Its numbers are not used because the collector times the same bytes and the same end condition as REPLIC.

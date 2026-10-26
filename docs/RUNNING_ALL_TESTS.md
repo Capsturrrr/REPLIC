@@ -36,8 +36,8 @@ make all smart chat impair
 | Two flows, fairness | `bash experiments/eval_fair.sh 5` | `results/` |
 | Two flows, unequal RTT | `bash experiments/eval_fair_rtt.sh 6` | `results/eval_fair_rtt_summary.txt` |
 | Bursty cross traffic | `bash experiments/eval_cross.sh 8` | `results/eval_cross_summary.txt` |
-| Send a 2 MB file over an impaired path, verify identical bytes | `bash filetransfer_demo.sh 2 lossy` | printed |
-| Raw sender speed on loopback | `bash bench_loopback.sh` | printed |
+| Send a 2 MB file over an impaired path, verify identical bytes | `bash scripts/filetransfer_demo.sh 2 lossy` | printed |
+| Raw sender speed on loopback | `bash scripts/bench_loopback.sh` | printed |
 
 ## 4. Research-gap tests (virtual time, paired seeds, 95% intervals)
 | Question | Command | Output |
@@ -51,14 +51,14 @@ Note: `interpret.py` overwrites `results/interp/*`. Re-generated logs give numbe
 
 ## 5. Real Linux kernel (needs root and tc; WSL is fine)
 ```
-sudo bash netem_full.sh lossy 5       # also: 5g, sat, reorder.  TCP, plain UDP, REPLIC (AIMD, CUBIC, neural), REPS runs each
-sudo bash netem_coexist.sh 5g 3       # also: lossy, sat.  Kernel TCP and one REPLIC flow share the bottleneck
+sudo bash scripts/netem_full.sh lossy 5       # also: 5g, sat, reorder.  TCP, plain UDP, REPLIC (AIMD, CUBIC, neural), REPS runs each
+sudo bash scripts/netem_coexist.sh 5g 3       # also: lossy, sat.  Kernel TCP and one REPLIC flow share the bottleneck
 ```
 Each takes several minutes per path. If a run is interrupted: `sudo pkill -f tcp_bulk.py; sudo pkill server; sudo pkill smart_client; sudo tc qdisc del dev lo root`.
 Results are in `results/netem_corrected.txt` and `results/netem_coexist_summary.txt`.
 
 ## 6. Two machines (see `docs/MULTIHOST.md`)
-Server machine: `bash multihost_server.sh` (leave running). Client machine: `bash multihost_client.sh SERVER_IP 5 mylabel`.
+Server machine: `bash scripts/multihost_server.sh` (leave running). Client machine: `bash scripts/multihost_client.sh SERVER_IP 5 mylabel`.
 Use the server's real address (Tailscale `100.x.x.x` or LAN IP, never a WSL `172.x`). Output: `results/multihost_mylabel.txt`, about 10 to 35 minutes.
 
 ## 7. Chat, Wireshark, network

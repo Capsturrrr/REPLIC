@@ -16,7 +16,7 @@ tooling to test all of it honestly.
 ## Final report and figures (v2)
 
 * `docs/FINAL_REPORT.md`: the final report (results first, then problems found, then honest limits).
-* `docs/figures_v2/`: 12 figures regenerated from the raw CSVs by `python3 make_report_figures.py`.
+* `docs/figures_v2/`: 12 figures regenerated from the raw CSVs by `python3 scripts/make_report_figures.py`.
 * REPLIC vs AIMD on 30 high-latency cellular paths (paired): 0.41x the time of original AIMD (window 32) and 0.50x that of tuned AIMD (window 128), faster on 30 of 30 paths. Kernel TCP is still faster than REPLIC on Linux netem; see the report's section 6.
 
 ## Headline results
@@ -52,8 +52,8 @@ make fuzz                      # packet parser under AddressSanitizer + UBSan
 make figures                   # regenerate figures/headline.png, random_paths.png, cwnd_traces.png
 make repro                     # reproduce the headline table in virtual time, about 30 seconds (SEEDS=100 paired seeds)
 
-./filetransfer_demo.sh 2 lossy # send a 2 MB random file over an impaired path with three policies, verify byte-identical
-./bench_loopback.sh            # raw sender speed on loopback
+./scripts/filetransfer_demo.sh 2 lossy # send a 2 MB random file over an impaired path with three policies, verify byte-identical
+./scripts/bench_loopback.sh            # raw sender speed on loopback
 
 # a transfer by hand
 REPLIC_OUT=/tmp/out.bin ./bin/server &                     # receiver writes the file, prints length and hash
@@ -108,7 +108,7 @@ See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the design.
 | `network/` | Packet Tracer configs, Wireshark dissector and captures |
 | `paper/`, `figures/`, `docs/` | Paper source, figures, and the report, slides and guides |
 | `repro.sh` | Reproduces the headline result in virtual time (run in CI) |
-| `run_all_tests.py`, `run_scale_matrix.py`, `run_fairness_test.py`, `execute_wsl_benchmarks.sh` | Kernel-netem and scale benchmark harnesses |
+| `scripts/` | Benchmark and demo scripts, run from anywhere (they find the repo root themselves): the kernel-netem and scale harnesses (`run_all_tests.py`, `run_scale_matrix.py`, `run_fairness_test.py`, `execute_wsl_benchmarks.sh`), PPO training (`train_smart_replic.py`), netem helpers, multi-host and file-transfer demos, and figure and table generators |
 
 The final report, slides and case study are in [`docs/final/`](docs/final) and [`docs/case_study/`](docs/case_study); [`docs/FINAL_REPORT.md`](docs/FINAL_REPORT.md) has the same results in Markdown.
 
@@ -230,14 +230,14 @@ Then open it in Wireshark on Windows via File → Open. Filter with `udp.port ==
 ## Generating graphs (Phase 7)
 
 ```bash
-python3 plot_cwnd.py logs/cwnd_log.csv cwnd_graph.png
+python3 scripts/plot_cwnd.py logs/cwnd_log.csv figures/cwnd_graph.png
 ```
 Produces a congestion-window-over-time graph with timeout/fast-retransmit events marked —
 generated automatically after every client run (logged to `logs/cwnd_log.csv`).
 
 ```bash
-chmod +x benchmark.sh
-./benchmark.sh   # requires server running separately; sweeps loss 0–40%, ~1 min
+chmod +x scripts/benchmark.sh
+./scripts/benchmark.sh   # requires server running separately; sweeps loss 0–40%, ~1 min
 ```
 Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss level.
 
@@ -258,7 +258,7 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 
 > **Correction (12 Oct 2026):** the first kernel runs sent REPLIC's *synthetic 40-byte* packets while TCP and UDP sent 512-byte payloads. The scripts now send a real 512-byte-per-packet file and every kernel run was repeated; the text below uses the corrected numbers (`results/netem_corrected.txt`, `results/netem_coexist_summary.txt`).
 
-`sudo bash netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and REPLIC (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 71% faster (lossy), 65% (5G-like) and 83% (satellite), all significant, and 60% faster with reordering (not significant, p=0.09). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 1.7x.** `sudo bash netem_coexist.sh 5g|lossy|sat` puts a kernel TCP flow and one REPLIC transfer on the same bottleneck: **the neural agent does not starve TCP** (it takes 24% to 34% of the link; tuned AIMD only 5% to 17%), 3 runs per cell. Raw numbers, and an account of four mistakes in the first runs, are in `results/netem_summary.txt`.
+`sudo bash scripts/netem_full.sh lossy|5g|sat|reorder [REPS]` repeats the comparison on the Linux kernel: kernel TCP, plain UDP and REPLIC (untuned AIMD, tuned AIMD, AIMD with a 10-packet start, neural) over a netem delay/loss stage and a token-bucket bottleneck. Against tuned AIMD the neural agent was 71% faster (lossy), 65% (5G-like) and 83% (satellite), all significant, and 60% faster with reordering (not significant, p=0.09). **Kernel TCP was faster than the neural agent on every path, by 1.5x to 1.7x.** `sudo bash scripts/netem_coexist.sh 5g|lossy|sat` puts a kernel TCP flow and one REPLIC transfer on the same bottleneck: **the neural agent does not starve TCP** (it takes 24% to 34% of the link; tuned AIMD only 5% to 17%), 3 runs per cell. Raw numbers, and an account of four mistakes in the first runs, are in `results/netem_summary.txt`.
 
 ## Research-gap tests (all in virtual time unless noted; paired seeds, 95% intervals)
 
@@ -268,7 +268,7 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 | Against a model-based baseline? | `python3 tools/bbr_eval.py 20` (`--mode bbr`, a simplified BBR) | BBR-style beats tuned AIMD on 4 of 5 paths and is **fastest on the 2% lossy path** (8.2 s vs 9.8 s); the neural agent wins on satellite-like and fast paths (`results/bbr_compare.txt`) |
 | Fair between two neural flows with different RTTs? | `./experiments/eval_fair_rtt.sh 6` (real sockets) | Jain 0.84 at +150 ms RTT, against 0.64 for AIMD; still favours the short-RTT flow (`results/eval_fair_rtt_summary.txt`) |
 | What does the network do? Can it be trusted? | `python3 tools/interpret.py`, `python3 tools/interp_eval.py` | Depth-5 tree agrees on 79% of decisions yet matches the transfer time on 4 of 5 paths; input noise 0.2 costs at most 12%; formal interval-bound certification only works at +-0.001 (43% of states) and fails at +-0.03 (`results/interp/`) |
-| Does it starve kernel TCP? | `sudo bash netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | No: neural takes 24-34% of the link, AIMD 5-17% (3 runs per cell, `results/netem_coexist_summary.txt`) |
+| Does it starve kernel TCP? | `sudo bash scripts/netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | No: neural takes 24-34% of the link, AIMD 5-17% (3 runs per cell, `results/netem_coexist_summary.txt`) |
 
 The BBR-style policy is a simplification (no ProbeRTT, no BBRv3 loss response), so no claim is made about the Linux BBR. Earlier versions of it stalled at 10% loss and took 163 s after a delay jump; both defects are fixed and described in the report (Section 8.19).
 
