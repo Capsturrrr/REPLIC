@@ -2,7 +2,7 @@
 # Full test run: wire format, end-to-end delivery over real UDP (clean and lossy), REPLIC modes, Selective Repeat (default) and Go-Back-N, simulator.
 cd "$(dirname "$0")/.."; fail=0
 step() { echo; echo "== $1"; }
-step "build"; make all smart gbn chat >/dev/null 2>&1 && echo ok || { echo "build FAILED"; exit 1; }
+step "build"; make all smart gbn chat impair >/dev/null 2>&1 && echo ok || { echo "build FAILED"; exit 1; }
 step "wire format"; gcc -Wall -o bin/test_replic tests/test_replic.c src/common.c && ./bin/test_replic || fail=1
 step "end to end: client and server, 0% and 20% simulated loss"
 for L in 0 20; do
