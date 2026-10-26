@@ -249,7 +249,7 @@ static int run_transfer(const replic_options_t *o, const char *fpath, const void
     if (use_smart && ssdeep < 0) ssdeep = 64;
     if (use_deep && ssdeep < 0) ssdeep = classic ? 0 : 64;   /* slow start up to 64 packets before the policy takes over (see web/vt_random.py sweep) */
     if (use_smart && !cap_set) maxcwnd = 128;
-    if (use_deep && !cap_set) maxcwnd = classic ? 32 : 128;                /* performance default for the neural agent (it was trained with a cap of 32 but generalises; see eval_perf2.sh) */
+    if (use_deep && !cap_set) maxcwnd = classic ? 32 : 128;                /* performance default for the neural agent (it was trained with a cap of 32 but generalises; see experiments/archive/eval_perf2.sh) */
     if (use_smart) hyb = 0;                      /* REPLIC: no external AIMD hand-over, no polite guard; the policy alone decides */
     if (use_deep && hyb < 0) hyb = classic ? 0.0 : 0.10;                     /* performance default: hand over to AIMD under heavy loss; --hybrid 0 turns it off */
     if (use_sack && maxcwnd > 250) maxcwnd = 250;   /* the receiver buffers a 256-packet window */

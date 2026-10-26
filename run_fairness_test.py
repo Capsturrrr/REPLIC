@@ -29,7 +29,7 @@ BASE_PORT = 9930          # servers 9930+i ; proxy listens 9940+i
 PROXY_PORT = 9940
 WEIGHTS = os.path.join(ROOT, "results", "dqn_chat.txt")
 
-# Bottleneck used in the earlier two-flow study (eval_fair.sh): 1000 pps, 60-packet queue, 30 ms one-way, light noise.
+# Bottleneck used in the earlier two-flow study (experiments/eval_fair.sh): 1000 pps, 60-packet queue, 30 ms one-way, light noise.
 BOTTLENECK = dict(delay=30, jitter=3, loss=0.1, rate=1000, queue=60)
 
 # Arm definitions: command-line flags for smart_client

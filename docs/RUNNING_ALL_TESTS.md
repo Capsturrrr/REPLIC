@@ -31,11 +31,11 @@ make all smart chat impair
 ## 3. Real clock and real sockets (minutes each)
 | What | Command | Output |
 |---|---|---|
-| Final comparison: original AIMD, tuned AIMD, tuned CUBIC, neural | `bash eval_final.sh` | `results/` |
-| Same paths through the separate impairment proxy | `bash eval_proxy.sh` | `results/` |
-| Two flows, fairness | `bash eval_fair.sh 5` | `results/` |
-| Two flows, unequal RTT | `bash eval_fair_rtt.sh 6` | `results/eval_fair_rtt_summary.txt` |
-| Bursty cross traffic | `bash eval_cross.sh 8` | `results/eval_cross_summary.txt` |
+| Final comparison: original AIMD, tuned AIMD, tuned CUBIC, neural | `bash experiments/eval_final.sh` | `results/` |
+| Same paths through the separate impairment proxy | `bash experiments/eval_proxy.sh` | `results/` |
+| Two flows, fairness | `bash experiments/eval_fair.sh 5` | `results/` |
+| Two flows, unequal RTT | `bash experiments/eval_fair_rtt.sh 6` | `results/eval_fair_rtt_summary.txt` |
+| Bursty cross traffic | `bash experiments/eval_cross.sh 8` | `results/eval_cross_summary.txt` |
 | Send a 2 MB file over an impaired path, verify identical bytes | `bash filetransfer_demo.sh 2 lossy` | printed |
 | Raw sender speed on loopback | `bash bench_loopback.sh` | printed |
 

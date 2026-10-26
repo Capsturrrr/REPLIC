@@ -3,7 +3,7 @@
 REPLIC stands for Reinforcement-Learning-Engineered Protocol for Internet Congestion.
 
 REPLIC is a reliable, congestion-controlled transport over UDP, written in C, with a learned congestion controller and the tooling
-to evaluate it honestly. This page is the map; `README.md` has the commands and `docs/REPLIC_Final_Project_Report.pdf` the full evidence.
+to evaluate it honestly. This page is the map; `README.md` has the commands and the [final report](final/REPLIC_Final_Project_Report.docx) the full evidence.
 
 ## Layers
 

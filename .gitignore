@@ -30,3 +30,6 @@ __pycache__/
 # Windows download metadata and editor backups
 *:Zone.Identifier
 *.bak
+
+# Built from sim/netsim.c on demand by train_smart_replic.py
+*.so

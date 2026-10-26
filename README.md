@@ -22,7 +22,7 @@ tooling to test all of it honestly.
 ## Headline results
 
 Completion time of a transfer, neural agent against **tuned** baselines (AIMD with window cap 128, CUBIC with cap 128), same transport,
-same timers, paired seeds, 95% intervals. Details and caveats in `docs/REPLIC_Final_Project_Report.pdf`, Section 8.11 to 8.13.
+same timers, paired seeds, 95% intervals. Details and caveats in the [final report](docs/final/REPLIC_Final_Project_Report.docx), Sections 8.11 to 8.13.
 
 | Path | AIMD tuned | CUBIC tuned | Neural agent | vs AIMD |
 |---|---|---|---|---|
@@ -32,11 +32,11 @@ same timers, paired seeds, 95% intervals. Details and caveats in `docs/REPLIC_Fi
 | Fast, high delay (3,000 packets) | 8.20 s | 6.52 s | **3.92 s** | -52% |
 | Hostile, 10% loss | 8.34 s | 12.32 s | 8.93 s | tie (n.s.) |
 
-* The same ordering holds on **real UDP sockets** through an impairment proxy (`eval_proxy.sh`) and in a **virtual-time build of the same
+* The same ordering holds on **real UDP sockets** through an impairment proxy (`experiments/eval_proxy.sh`) and in a **virtual-time build of the same
   sender** (`--vt 1`, calibrated against the real-clock runs in 15 of 15 cells).
 * On **100 random held-out paths** the agent needs 0.53x the time of tuned AIMD, is faster on 89 and never more than 20% slower (`web/vt_random.py`).
 * Fairness knob: `--polite 1.3` makes the agent back off when a standing queue builds. Against tuned AIMD its share of a shared link falls from 69% to about 45-50%; the cost is an average of 0.58x instead of 0.53x of AIMD's time, with a worst path 2.95x slower (`results/polite_summary.txt`). Off by default. With 8 runs: share 70% to 52%, Jain 0.86 to 0.94 (`results/polite_summary.txt`).
-* Bursty cross traffic (`eval_cross.sh`, proxy option `--cross ON:OFF:PPS`): the agent is 15% faster than tuned AIMD but level with CUBIC, and retransmits about 3x as much as AIMD (`results/eval_cross_summary.txt`).
+* Bursty cross traffic (`experiments/eval_cross.sh`, proxy option `--cross ON:OFF:PPS`): the agent is 15% faster than tuned AIMD but level with CUBIC, and retransmits about 3x as much as AIMD (`results/eval_cross_summary.txt`).
 * An alternative weight file trained with cross traffic in the loop (`results/dqn_cross.txt`, `--dfile`): small consistent gain in simulation, not significant on real sockets, so not the default (`results/es_fair/SUMMARY_cross.txt`). Virtual-time options: `--vcross ON:OFF:PPS` (bursty cross traffic) and `--vcomp 1` (an AIMD competitor).
 * The server handles up to 16 clients at once (`tests/test_multiclient.sh`).
 * Honest limits: on a shared bottleneck it takes 68% of the link against tuned AIMD (not a polite neighbour); no gain on the 10% loss path;
@@ -92,19 +92,33 @@ sudo make install                 # libreplic.a, replic.h, replic-server, replic
 Limits: one transfer per call (connect, send, close), up to 32 MB, not thread-safe (process-global state), IPv4 only. The refactor from the old
 single program was checked by comparing 34 deterministic virtual-time results before and after: byte-for-byte identical (`tests/test_api.sh` covers the API).
 
-## Layout
+## Repository map
 
-See `docs/ARCHITECTURE.md` for the design. In short: `src/` (C: wire format, server, senders, agents, impairment proxy, chat), `web/` (Python:
-gateway, training, virtual-time harness, studies), `tests/`, `network/` (Packet Tracer configs, Wireshark dissector and traces), `results/`
-(raw data and summaries behind every table), `docs/` (report, slides, guides), `eval_*.sh` + `ci_summary_*.py` (experiments and their summaries).
+See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the design.
+
+| Path | What's there |
+|---|---|
+| `src/` | The transport in C: wire format, server, senders, congestion controllers, impairment proxy, chat |
+| `tests/` | Unit, end-to-end, handshake and fuzz tests (`make test`, `make fuzz`) |
+| `experiments/` | The evaluations cited in this README and the report, each with its summary script |
+| `experiments/archive/` | Earlier evaluation rounds, kept so older numbers in `results/` stay traceable |
+| `results/` | Raw CSVs and summaries behind every table and figure |
+| `web/`, `sim/`, `tools/` | Training, virtual-time simulator, studies and analysis helpers |
+| `apps/drop/`, `studio/` | REPLIC Drop (file sharing on the library) and the Studio dashboard |
+| `network/` | Packet Tracer configs, Wireshark dissector and captures |
+| `paper/`, `figures/`, `docs/` | Paper source, figures, and the report, slides and guides |
+| `repro.sh` | Reproduces the headline result in virtual time (run in CI) |
+| `run_all_tests.py`, `run_scale_matrix.py`, `run_fairness_test.py`, `execute_wsl_benchmarks.sh` | Kernel-netem and scale benchmark harnesses |
+
+The final report, slides and case study are in [`docs/final/`](docs/final) and [`docs/case_study/`](docs/case_study); [`docs/FINAL_REPORT.md`](docs/FINAL_REPORT.md) has the same results in Markdown.
 
 ## How the evidence was produced
 
 | Question | Script | Output |
 |---|---|---|
-| Final comparison, real clock | `eval_final.sh`, `ci_summary_final.py` | `results/eval_final_*.csv` |
-| Same on real UDP sockets | `eval_proxy.sh`, `ci_summary_proxy.py` | `results/eval_proxy_*.csv` |
-| Two flows on one bottleneck | `eval_fair.sh`, `ci_summary_fair.py` | `results/eval_fair_summary.txt` |
+| Final comparison, real clock | `experiments/eval_final.sh`, `experiments/ci_summary_final.py` | `results/eval_final_*.csv` |
+| Same on real UDP sockets | `experiments/eval_proxy.sh`, `experiments/ci_summary_proxy.py` | `results/eval_proxy_*.csv` |
+| Two flows on one bottleneck | `experiments/eval_fair.sh`, `experiments/ci_summary_fair.py` | `results/eval_fair_summary.txt` |
 | Generalisation and ablation | `web/vt_random.py`, `web/vt_ablate.py`, `web/vt_named.py` | `results/vt_*.txt` |
 | Evolution-strategy training in C | `web/es_train.py` | `results/es/` |
 | History: Go-Back-N era, tuning steps | `eval_ci*.sh`, `eval_perf*.sh` | `results/` |
@@ -252,7 +266,7 @@ Produces `logs/benchmark_results.csv` — duration and final cwnd at each loss l
 |---|---|---|
 | Does it cope when bandwidth or delay changes mid-transfer? | `python3 tools/dyn_eval.py 20 aimd,cubic,bbr,deep` (`--dyn "T_MS:RATE_PPS:DELAY_MS;..."`) | Neural fastest in 4 of 4 cases (bandwidth drop 12.7 s vs 13.6 s AIMD; rise 4.3 s vs 9.2 s; delay jump 19.8 s vs 33.3 s; hand-over pattern 8.2 s vs 12.8 s), but with 1% to 6% retransmissions (`results/dynamic_path.txt`) |
 | Against a model-based baseline? | `python3 tools/bbr_eval.py 20` (`--mode bbr`, a simplified BBR) | BBR-style beats tuned AIMD on 4 of 5 paths and is **fastest on the 2% lossy path** (8.2 s vs 9.8 s); the neural agent wins on satellite-like and fast paths (`results/bbr_compare.txt`) |
-| Fair between two neural flows with different RTTs? | `./eval_fair_rtt.sh 6` (real sockets) | Jain 0.84 at +150 ms RTT, against 0.64 for AIMD; still favours the short-RTT flow (`results/eval_fair_rtt_summary.txt`) |
+| Fair between two neural flows with different RTTs? | `./experiments/eval_fair_rtt.sh 6` (real sockets) | Jain 0.84 at +150 ms RTT, against 0.64 for AIMD; still favours the short-RTT flow (`results/eval_fair_rtt_summary.txt`) |
 | What does the network do? Can it be trusted? | `python3 tools/interpret.py`, `python3 tools/interp_eval.py` | Depth-5 tree agrees on 79% of decisions yet matches the transfer time on 4 of 5 paths; input noise 0.2 costs at most 12%; formal interval-bound certification only works at +-0.001 (43% of states) and fails at +-0.03 (`results/interp/`) |
 | Does it starve kernel TCP? | `sudo bash netem_coexist.sh 5g\|lossy\|sat` (WSL or Linux with tc) | No: neural takes 24-34% of the link, AIMD 5-17% (3 runs per cell, `results/netem_coexist_summary.txt`) |
 
