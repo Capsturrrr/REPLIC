@@ -4,7 +4,7 @@
 
 REPLIC is a reliable UDP transport written in C with a learned (PPO) congestion controller.
 
-[![ci](https://github.com/Capsturrrr/replic/actions/workflows/ci.yml/badge.svg)](https://github.com/Capsturrrr/replic/actions/workflows/ci.yml)
+[![ci](https://github.com/Capsturrrr/rudp/actions/workflows/ci.yml/badge.svg)](https://github.com/Capsturrrr/rudp/actions/workflows/ci.yml)
 
 A reliable, congestion-controlled transport over UDP, written in C: handshake, Selective Repeat with a 256-packet window,
 CRC-16, adaptive retransmission timer, pluggable congestion control (AIMD, CUBIC, tabular Q-learning, a small neural network),

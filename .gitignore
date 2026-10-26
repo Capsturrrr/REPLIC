@@ -26,3 +26,7 @@ results/**/work/
 results/**/work_dir/
 *.pyc
 __pycache__/
+
+# Windows download metadata and editor backups
+*:Zone.Identifier
+*.bak
